@@ -1,10 +1,24 @@
-.hero-section {
-    padding: 4rem 1.5rem;
-    min-height: 90vh;
-    background-image: url('/static/images/home_bg.jpg');
-    background-size: cover; 
-    background-position: center;
-    box-shadow: 0.5rem 0.5rem 0.5rem 0.5rem rgba(0, 0, 0, 0.25);
-    border-radius: 3rem;
-    color: #fff;
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
+
+.devnest-landing-page {
+    font-family: 'Manrope', sans-serif;
+}
+
+.devnest-landing-page > div.container-fluid.sticky-top {
+    display: none !important;
+}
+
+.devnest-landing-page > div.container:last-of-type {
+    display: none !important;
+}
+
+.devnest-landing-page main.container {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin-top: 0 !important;
+}
+
+.devnest-landing footer {
+    border-top: 1px solid #e2e8f0;
 }
