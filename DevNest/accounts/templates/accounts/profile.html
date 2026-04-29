@@ -1,0 +1,56 @@
+{% extends 'main/base.html'%}
+
+
+{% block title %} profile for {{user.username}}  {% endblock %}
+
+{% block content %}
+
+
+<div class="row gap-3">
+
+    <div class="col-2">
+
+        <img src="{{user.profile.avatar.url}}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;" />
+        <h5>@{{user.username}}</h5>
+        <a href="{{user.profile.social_link}}" target="_blank"><i class="bi bi-back"></i></a>
+        {% if request.user == user %}
+        <a href="{% url 'accounts:update_user_profile' %}"><i class="bi bi-pencil-square"></i></a>
+        {% endif %}
+    </div>
+
+
+    <div class="col">
+
+        <div class="d-flex flex-column gap-3">
+            <h5> About </h5>
+            <p>{{user.profile.about}}</p>
+
+
+            <hr />
+
+            <h3>{{user.first_name}} Comments</h3>
+
+            {% for c in user.user_comments.all %}
+            <div class="d-flex flex-column p-3 shadow">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4>{{c.user.first_name}} {{c.user.last_name}}</h4>
+                </div>
+                
+                <p>{{ c.comment }}</p>
+                <a href="{% url 'plants:plant_detail_view' c.plant.id %}"><h5>On Plant: {{ c.plant.name }}</h5></a>
+                <p class="text-muted">{{ c.created_at }}</p>
+            </div>
+            {% endfor %}
+ 
+
+        </div>
+        
+    </div>
+
+</div>
+
+
+
+
+
+{% endblock %}

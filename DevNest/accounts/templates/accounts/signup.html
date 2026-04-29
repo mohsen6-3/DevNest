@@ -1,0 +1,50 @@
+{% extends 'main/base.html'%}
+
+
+{% block title %} Sign Up new user {% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column justify-content-center align-items-center">
+
+    <h2 class="mb-4">Sign Up</h2>
+    <form class="d-flex flex-column gap-3 w-50" action="{% url 'accounts:sign_up' %}" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+    
+        <div class="form-floating">
+          <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com" name="email" required>
+          <label for="floatingInput">Email address</label>
+        </div>
+
+        <div class="form-floating">
+            <input type="text" class="form-control" id="floatingInput" placeholder="username" name="username" required>
+            <label for="floatingInput">User name</label>
+        </div>
+
+        <div class="form-floating">
+            <input type="text" class="form-control" id="floatingInput" placeholder="First name" name="first_name" required>
+            <label for="floatingInput">First name</label>
+        </div>
+
+        <div class="form-floating">
+            <input type="text" class="form-control" id="floatingInput" placeholder="Last name" name="last_name" required>
+            <label for="floatingInput">Last name</label>
+        </div>
+        <div class="form-floating">
+          <input type="url" class="form-control" id="floatingSocial" placeholder="Social Link" name="social_link" >
+          <label for="floatingSocial">Social Link</label>
+        </div>
+        <textarea class="form-control" placeholder="About" name="about"></textarea>
+        <h5>Choose Avatar:</h5>
+        <input type="file" name="avatar" accept="images/*" class="form-control" />
+
+        <div class="form-floating">
+          <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password" required>
+          <label for="floatingPassword">Password</label>
+        </div>
+
+        <button class="btn btn-primary w-100 py-2" type="submit">Sign up</button>
+      </form>
+</div>
+
+{% endblock %}

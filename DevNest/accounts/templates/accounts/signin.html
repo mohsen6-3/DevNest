@@ -1,0 +1,30 @@
+{% extends 'main/base.html'%}
+
+
+{% block title %} Sign In{% endblock %}
+
+{% block content %}
+<div class="container d-flex flex-column justify-content-center align-items-center mt-5 mb-5">
+
+    <h2>Sign In</h2>
+    <form class="d-flex flex-column gap-3 w-50" action="{% url 'accounts:sign_in' %}{% if 'next' in request.GET %}?next={{request.GET.next}}{% endif %}" method="POST">
+        {% csrf_token %}
+        
+
+        <div class="form-floating">
+            <input type="text" class="form-control" id="floatingInput" placeholder="username" name="username">
+            <label for="floatingInput">User name</label>
+        </div>
+
+
+        <div class="form-floating">
+          <input type="password" class="form-control" id="floatingPassword" placeholder="Password" name="password">
+          <label for="floatingPassword">Password</label>
+        </div>
+    
+
+        <button class="btn btn-primary w-100 py-2" type="submit">Sign In</button>
+      </form>
+    </div>
+
+{% endblock %}
