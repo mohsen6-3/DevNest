@@ -4,8 +4,5 @@
 {% block title %} Planteer {% endblock %}
 
 {% block content %}
-<div class="hero-section d-flex flex-column justify-content-center align-items-center px-3 px-md-5 gap-3">
-    <h1 class="text-center">DevNest</h1>
-    <h3 class="text-center">Join a Nest for a better learning experience</h3>
-</div>
+    {% include 'main/components/hero.html' with message='hi' another='value' %}
 {% endblock %}
