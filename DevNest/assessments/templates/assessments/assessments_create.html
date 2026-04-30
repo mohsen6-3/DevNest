@@ -1,0 +1,13 @@
+{% extends 'posts/base.html' %}
+{% load static %}
+<!-- create -->
+{% block title %}Create Assessment{% endblock %}
+
+{% block content %}
+    <h1>Create Assessment</h1>
+    <form method="post" action="{% url 'assessments:assessment_create_view' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Create Assessment</button>
+    </form>
+{% endblock %}

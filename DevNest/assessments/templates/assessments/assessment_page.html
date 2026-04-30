@@ -1,0 +1,32 @@
+{% extends 'posts/base.html' %}
+{% load static %}
+
+{% block title %}Assessment Page{% endblock %}
+
+{% block content %}
+    <h1>Assessment Page</h1>
+    <p>Welcome to the assessment page. Here you can view and manage your assessments.</p>
+    <a href="{% url 'assessments:assessment_create_view' %}">Create New Assessment</a>
+    <hr>
+    <div class="assessments-list">
+        {% if assessments %}
+        <div class="row g-3">
+            {% for assessment in assessments %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ assessment.title }}</h5>
+                        <p class="card-text">Description: {{ assessment.description }}</p>
+                        <p class="card-text">Type: {{ assessment.assessment_type }}</p>
+                        <p class="card-text">Points: {{ assessment.points }}</p>
+                        <p class="card-text">Due Date: {{ assessment.due_date }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>No assessments available.</p>
+        {% endif %}
+    </div>
+{% endblock %}
