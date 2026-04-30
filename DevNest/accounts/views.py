@@ -71,14 +71,13 @@ def user_profile_view(request:HttpRequest, user_name):
         if not Profile.objects.filter(user=user).first():
             new_profile = Profile(user=user)
             new_profile.save()
-        #profile:Profile = user.profile  
-        #profile = Profile.objects.get(user=user)
+        
     except Exception as e:
         print(e)
         return render(request,'404.html')
     
 
-    return render(request, 'accounts/profile.html', {"user" : user})
+    return render(request, 'accounts/profile.html', {"user" : user, "nests": user.nest_set.all()})
 
 def update_user_profile(request:HttpRequest):
 
