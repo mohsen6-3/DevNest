@@ -1,0 +1,450 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}DevNest | Content{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'content/css/style.css' %}">
+
+        <!-- TOP BAR -->
+        <div class="c-topbar">
+            <div class="c-topbar__breadcrumb">
+                Courses / <span>CS 301 — Data Structures</span> / Content
+            </div>
+            <div class="c-topbar__actions">
+                <button class="c-btn">Settings</button>
+                <button class="c-btn">Export</button>
+                <button class="c-btn c-btn--primary">+ New Title</button>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="c-content">
+
+            <!-- COURSE HEADER -->
+            <div class="course-header">
+                <h1 class="course-header__title">CS 301 — Data Structures</h1>
+                <p class="course-header__desc">Organize your course content into Titles, Units and Topics.</p>
+                <div class="course-header__meta">
+                    <div class="meta-chip">2 Titles</div>
+                    <div class="meta-chip">5 Units</div>
+                    <div class="meta-chip">12 Topics</div>
+                    <div class="meta-chip">86 Students</div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--  TITLE 1                                                      -->
+            <!-- ============================================================ -->
+            <div class="title-block">
+                <div class="title-block__header">
+                    <div class="title-block__left">
+                        <div class="title-block__icon" style="background:#ede9fe;color:#5b21b6;">01</div>
+                        <div>
+                            <div class="title-block__name">Fundamentals</div>
+                            <div class="title-block__count">3 units</div>
+                        </div>
+                    </div>
+                    <div class="title-block__actions">
+                        <button class="c-icon-btn">✎</button>
+                        <button class="c-icon-btn">⋯</button>
+                    </div>
+                </div>
+
+                <!-- UNIT 1.1 -->
+                <div class="unit unit--open">
+                    <div class="unit__header" onclick="this.parentElement.classList.toggle('unit--open')">
+                        <div class="unit__left">
+                            <span class="unit__toggle">▶</span>
+                            <div class="unit__icon" style="background:#ede9fe;color:#5b21b6;">U1</div>
+                            <div>
+                                <div class="unit__name">Introduction & Arrays</div>
+                                <div class="unit__meta">4 topics · 65% completed</div>
+                            </div>
+                        </div>
+                        <div class="unit__actions">
+                            <button class="c-icon-btn">✎</button>
+                            <button class="c-icon-btn">↕</button>
+                            <button class="c-icon-btn">⋯</button>
+                        </div>
+                    </div>
+                    <div class="unit__body">
+                        <div class="c-progress"><div class="c-progress__fill" style="width:65%;background:#2563eb;"></div></div>
+
+                        <!-- TOPIC: Video -->
+                        <div class="topic topic--open">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                                    <span class="topic__title">Lecture 1 — What are Data Structures?</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fee2e2;color:#ef4444;">Video</span>
+                                        <span class="c-badge" style="background:#dcfce7;color:#16a34a;">Published</span>
+                                    </div>
+                                </div>
+                                <div class="topic__actions">
+                                    <button class="c-icon-btn">✎</button>
+                                    <button class="c-icon-btn">⋯</button>
+                                </div>
+                            </div>
+                            <div class="topic__body">
+                                <div class="video-preview">
+                                    <div class="video-preview__play">▶</div>
+                                    <div class="video-preview__duration">45:30</div>
+                                </div>
+                                <div class="content-list">
+                                    <div class="content-item">
+                                        <div class="content-item__icon" style="background:#fee2e2;color:#ef4444;">📹</div>
+                                        <div class="content-item__info">
+                                            <div class="content-item__name">Lecture_01_Intro.mp4</div>
+                                            <div class="content-item__meta">
+                                                <span>Video · 245 MB</span>
+                                                <span>Uploaded 2d ago</span>
+                                            </div>
+                                        </div>
+                                        <div class="content-item__right">
+                                            <div class="content-item__status" style="background:#16a34a;"></div>
+                                            <button class="c-btn c-btn--sm">Preview</button>
+                                        </div>
+                                    </div>
+                                    <div class="content-item">
+                                        <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                                        <div class="content-item__info">
+                                            <div class="content-item__name">Lecture_01_Slides.pdf</div>
+                                            <div class="content-item__meta">
+                                                <span>PDF · 4.2 MB</span>
+                                                <span>32 pages</span>
+                                            </div>
+                                        </div>
+                                        <div class="content-item__right">
+                                            <button class="c-btn c-btn--sm">Download</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="add-toolbar">
+                                    <button class="add-btn">📹 Video</button>
+                                    <button class="add-btn">📄 File</button>
+                                    <button class="add-btn">🖼 Image</button>
+                                    <button class="add-btn">📝 Text</button>
+                                    <button class="add-btn">🔗 Link</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOPIC: Images + Text -->
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fce7f3;color:#db2777;">🖼</div>
+                                    <span class="topic__title">Array Memory Layout — Visual Guide</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fce7f3;color:#db2777;">Images</span>
+                                        <span class="c-badge" style="background:#fef3c7;color:#d97706;">Text</span>
+                                    </div>
+                                </div>
+                                <div class="topic__actions">
+                                    <button class="c-icon-btn">✎</button>
+                                    <button class="c-icon-btn">⋯</button>
+                                </div>
+                            </div>
+                            <div class="topic__body">
+                                <div class="text-preview">
+                                    Arrays store elements in contiguous memory locations. Each element can be accessed directly using its index, making arrays one of the most efficient data structures for random access with O(1) time complexity.
+                                </div>
+                                <div class="image-grid">
+                                    <div class="image-thumb">🖼<span class="image-thumb__label">array_layout.png</span></div>
+                                    <div class="image-thumb">🖼<span class="image-thumb__label">memory_map.png</span></div>
+                                    <div class="image-thumb">🖼<span class="image-thumb__label">index_diagram.png</span></div>
+                                </div>
+                                <div class="add-toolbar">
+                                    <button class="add-btn">📹 Video</button>
+                                    <button class="add-btn">📄 File</button>
+                                    <button class="add-btn">🖼 Image</button>
+                                    <button class="add-btn">📝 Text</button>
+                                    <button class="add-btn">🔗 Link</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOPIC: Files -->
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#e0f2fe;color:#0284c7;">📁</div>
+                                    <span class="topic__title">Assignment 1 — Array Operations</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#e0f2fe;color:#0284c7;">Files</span>
+                                        <span class="c-badge" style="background:#dcfce7;color:#16a34a;">Due Oct 15</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topic__body">
+                                <div class="content-list">
+                                    <div class="content-item">
+                                        <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                                        <div class="content-item__info">
+                                            <div class="content-item__name">HW1_Instructions.pdf</div>
+                                            <div class="content-item__meta"><span>PDF · 1.8 MB</span></div>
+                                        </div>
+                                        <div class="content-item__right">
+                                            <button class="c-btn c-btn--sm">Download</button>
+                                        </div>
+                                    </div>
+                                    <div class="content-item">
+                                        <div class="content-item__icon" style="background:#ede9fe;color:#5b21b6;">💻</div>
+                                        <div class="content-item__info">
+                                            <div class="content-item__name">starter_code.zip</div>
+                                            <div class="content-item__meta"><span>ZIP · 12 KB</span></div>
+                                        </div>
+                                        <div class="content-item__right">
+                                            <button class="c-btn c-btn--sm">Download</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="add-toolbar">
+                                    <button class="add-btn">📹 Video</button>
+                                    <button class="add-btn">📄 File</button>
+                                    <button class="add-btn">🖼 Image</button>
+                                    <button class="add-btn">📝 Text</button>
+                                    <button class="add-btn">🔗 Link</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TOPIC: Text -->
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fef3c7;color:#d97706;">📝</div>
+                                    <span class="topic__title">Big O Notation — Cheat Sheet</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fef3c7;color:#d97706;">Text</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topic__body">
+                                <div class="text-preview">
+                                    O(1) — Constant: Array access by index<br>
+                                    O(log n) — Logarithmic: Binary search<br>
+                                    O(n) — Linear: Simple search<br>
+                                    O(n log n) — Merge sort, Quick sort<br>
+                                    O(n²) — Bubble sort, Selection sort
+                                </div>
+                                <div class="add-toolbar">
+                                    <button class="add-btn">📹 Video</button>
+                                    <button class="add-btn">📄 File</button>
+                                    <button class="add-btn">🖼 Image</button>
+                                    <button class="add-btn">📝 Text</button>
+                                    <button class="add-btn">🔗 Link</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="add-topic">+ Add Topic</div>
+                    </div>
+                </div>
+
+                <!-- UNIT 1.2 -->
+                <div class="unit">
+                    <div class="unit__header" onclick="this.parentElement.classList.toggle('unit--open')">
+                        <div class="unit__left">
+                            <span class="unit__toggle">▶</span>
+                            <div class="unit__icon" style="background:#ccfbf1;color:#0f766e;">U2</div>
+                            <div>
+                                <div class="unit__name">Linked Lists</div>
+                                <div class="unit__meta">3 topics · 30% completed</div>
+                            </div>
+                        </div>
+                        <div class="unit__actions">
+                            <button class="c-icon-btn">✎</button>
+                            <button class="c-icon-btn">↕</button>
+                            <button class="c-icon-btn">⋯</button>
+                        </div>
+                    </div>
+                    <div class="unit__body">
+                        <div class="c-progress"><div class="c-progress__fill" style="width:30%;background:#0f766e;"></div></div>
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                                    <span class="topic__title">Lecture 3 — Singly Linked Lists</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fee2e2;color:#ef4444;">Video</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                                    <span class="topic__title">Lecture 4 — Doubly Linked Lists</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fee2e2;color:#ef4444;">Video</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#e0f2fe;color:#0284c7;">📁</div>
+                                    <span class="topic__title">Lab 2 — Linked List Implementation</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#e0f2fe;color:#0284c7;">Files</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-topic">+ Add Topic</div>
+                    </div>
+                </div>
+
+                <!-- UNIT 1.3 -->
+                <div class="unit">
+                    <div class="unit__header" onclick="this.parentElement.classList.toggle('unit--open')">
+                        <div class="unit__left">
+                            <span class="unit__toggle">▶</span>
+                            <div class="unit__icon" style="background:#fef3c7;color:#d97706;">U3</div>
+                            <div>
+                                <div class="unit__name">Stacks & Queues</div>
+                                <div class="unit__meta">2 topics · Not started</div>
+                            </div>
+                        </div>
+                        <div class="unit__actions">
+                            <button class="c-icon-btn">✎</button>
+                            <button class="c-icon-btn">↕</button>
+                            <button class="c-icon-btn">⋯</button>
+                        </div>
+                    </div>
+                    <div class="unit__body">
+                        <div class="c-progress"><div class="c-progress__fill" style="width:0%;background:#d97706;"></div></div>
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                                    <span class="topic__title">Lecture 5 — Stack Operations</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fee2e2;color:#ef4444;">Video</span>
+                                        <span class="c-badge" style="background:#f1f5f9;color:#94a3b8;">Draft</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-topic">+ Add Topic</div>
+                    </div>
+                </div>
+
+                <div class="add-unit">+ Add Unit</div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!--  TITLE 2                                                      -->
+            <!-- ============================================================ -->
+            <div class="title-block">
+                <div class="title-block__header" style="border-color:#0f766e;">
+                    <div class="title-block__left">
+                        <div class="title-block__icon" style="background:#ccfbf1;color:#0f766e;">02</div>
+                        <div>
+                            <div class="title-block__name">Advanced Topics</div>
+                            <div class="title-block__count">2 units</div>
+                        </div>
+                    </div>
+                    <div class="title-block__actions">
+                        <button class="c-icon-btn">✎</button>
+                        <button class="c-icon-btn">⋯</button>
+                    </div>
+                </div>
+
+                <!-- UNIT 2.1 -->
+                <div class="unit">
+                    <div class="unit__header" onclick="this.parentElement.classList.toggle('unit--open')">
+                        <div class="unit__left">
+                            <span class="unit__toggle">▶</span>
+                            <div class="unit__icon" style="background:#fce7f3;color:#db2777;">U1</div>
+                            <div>
+                                <div class="unit__name">Trees & Graphs</div>
+                                <div class="unit__meta">3 topics · Not started</div>
+                            </div>
+                        </div>
+                        <div class="unit__actions">
+                            <button class="c-icon-btn">✎</button>
+                            <button class="c-icon-btn">↕</button>
+                            <button class="c-icon-btn">⋯</button>
+                        </div>
+                    </div>
+                    <div class="unit__body">
+                        <div class="c-progress"><div class="c-progress__fill" style="width:0%;background:#db2777;"></div></div>
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                                    <span class="topic__title">Lecture 8 — Binary Trees</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fee2e2;color:#ef4444;">Video</span>
+                                        <span class="c-badge" style="background:#f1f5f9;color:#94a3b8;">Draft</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#fef3c7;color:#d97706;">📝</div>
+                                    <span class="topic__title">Tree Traversal — Study Notes</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#fef3c7;color:#d97706;">Text</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-topic">+ Add Topic</div>
+                    </div>
+                </div>
+
+                <!-- UNIT 2.2 -->
+                <div class="unit">
+                    <div class="unit__header" onclick="this.parentElement.classList.toggle('unit--open')">
+                        <div class="unit__left">
+                            <span class="unit__toggle">▶</span>
+                            <div class="unit__icon" style="background:#fee2e2;color:#ef4444;">U2</div>
+                            <div>
+                                <div class="unit__name">Midterm Preparation</div>
+                                <div class="unit__meta">2 topics · Not started</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="unit__body">
+                        <div class="c-progress"><div class="c-progress__fill" style="width:0%;background:#ef4444;"></div></div>
+                        <div class="topic">
+                            <div class="topic__header" onclick="this.parentElement.classList.toggle('topic--open')">
+                                <div class="topic__left">
+                                    <span class="topic__chevron">▶</span>
+                                    <div class="topic__type-icon" style="background:#e0f2fe;color:#0284c7;">📁</div>
+                                    <span class="topic__title">Practice Problems & Solutions</span>
+                                    <div class="topic__badges">
+                                        <span class="c-badge" style="background:#e0f2fe;color:#0284c7;">Files</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="add-topic">+ Add Topic</div>
+                    </div>
+                </div>
+
+                <div class="add-unit">+ Add Unit</div>
+            </div>
+
+        </div>
+
+{% endblock %}
