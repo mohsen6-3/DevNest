@@ -8,8 +8,8 @@ body {
 }
 
 .sidebar {
-    width: 280px;
-    min-width: 280px;
+    width: 200px;
+    min-width: 200px;
     height: 100vh;
     background-color: #1e293b;
 }
@@ -41,4 +41,141 @@ body {
 
 hr {
     border-color: #475569;
+}.navbar {
+    background-color: #1e293b;
+    padding: 10px 20px;
+    /* border-radius: 12px; */
+}
+/* Navbar */
+.custom-nav {
+    background: linear-gradient(90deg, #1f2937, #374151);
+    border-radius: 12px;
+    padding: 10px 0;
+}
+
+/* Links */
+.custom-nav .nav-link {
+    color: #9ca3af;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+/* Active */
+.custom-nav .nav-link.active {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Hover */
+.custom-nav .nav-link:hover {
+    color: #ffffff;
+}
+
+/* Disabled */
+.custom-nav .nav-link.disabled {
+    color: #6b7280 !important;
+    cursor: not-allowed;
+}
+
+/* Dropdown */
+.custom-nav .dropdown-menu {
+    border-radius: 10px;
+    border: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+body {
+    background-color: #f8fafc;
+}
+
+.qa-wrapper {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    min-height: 560px;
+}
+
+.qa-left {
+    border-right: 1px solid #e2e8f0;
+    min-height: 560px;
+}
+
+.qa-header {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.search-box {
+    background: #f1f3f7;
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    font-size: 16px;
+}
+
+.qa-card {
+    margin: 22px;
+    background: #fff;
+    border: 1px solid #edf0f5;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.question-title {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.vote-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 20px;
+    padding: 4px 12px;
+    color: #334155;
+}
+
+.qa-right {
+    padding: 50px 40px;
+}
+
+.form-card {
+    max-width: 620px;
+    background: #fff;
+    border: 1px solid #dbe1ea;
+    border-radius: 16px;
+    padding: 32px;
+}
+
+.form-control {
+    border-radius: 12px;
+    padding: 14px 18px;
+}
+
+textarea.form-control {
+    resize: none;
+}
+
+.btn-purple {
+    background-color: #4f35f5;
+    color: white;
+    border-radius: 12px;
+    padding: 13px 28px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(79, 53, 245, 0.25);
+}
+
+.btn-purple:hover {
+    background-color: #432be8;
+    color: white;
 }

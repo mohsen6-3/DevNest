@@ -13,64 +13,100 @@
 </head>
 
 <body>
-<div class="d-flex">
+    <div class="d-flex min-vh-100">
+        <!-- Sidebar -->
+        <div class="sidebar d-flex flex-column p-3 text-white ">
 
-    <!-- Sidebar -->
-    <div class="sidebar d-flex flex-column p-3 text-white">
+            <!-- Logo -->
+            <div class="d-flex align-items-center mb-4">
+                <div class="logo me-2"><img src="{% static 'images/logo.svg' %}" class="d-inline-block align-text-top" style="width: 40px; height: 40px;"
+                    alt="nest"></div>
+                <h5 class="m-0">DevNest</h5>
+            </div>
 
-        <!-- Logo -->
-        <div class="d-flex align-items-center mb-4">
-            <!-- <div class="logo me-2">B</div> -->
-            <h5 class="m-0">DevNest</h5>
+            <hr>
+
+            <!-- Menu -->
+            <ul class="nav nav-pills flex-column mb-auto gap-2">
+                <li>
+                    <a href="#" class="nav-link active text-white">
+                        <i class="bi bi-house me-2"></i> Home
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="nav-link text-white">
+                        <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="nav-link text-white">
+                        <i class="bi bi-list-nested me-2"></i> My Nests
+                    </a>
+                </li>
+
+                <li>
+                    <a href="#" class="nav-link text-white">
+                        <i class="bi bi-gear me-2"></i> Settings
+                    </a>
+                </li>
+            </ul>
+
+            <hr>
+
+            <!-- Profile -->
+            <div class="d-flex align-items-center mt-auto">
+                <!-- <img src="" class="rounded-circle me-2"> -->
+                <strong>mdo</strong>
+            </div>
         </div>
+        <!-- End sidebar -->
 
-        <hr>
+        <!-- Main Content -->
+        <div class="flex-grow-1 p-4">
+        
+            <!-- Tabs -->
+            <nav class="navbar navbar-expand-lg bg-dark rounded-4 p-2">
+                <div class="container-fluid justify-content-center">
 
-        <!-- Menu -->
-        <ul class="nav nav-pills flex-column mb-auto gap-2">
-            <li>
-                <a href="#" class="nav-link active text-white">
-                    <i class="bi bi-house me-2"></i> Home
-                </a>
-            </li>
+                    <ul class="navbar-nav gap-3">
 
-            <li>
-                <a href="#" class="nav-link text-white">
-                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
-                </a>
-            </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white fw-semibold" href="#">Centered nav only</a>
+                    </li>
 
-            <li>
-                <a href="#" class="nav-link text-white">
-                    <i class="bi bi-list-nested me-2"></i> My Nests
-                </a>
-            </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50" href="{% url 'posts:post_create_view' %}">Posts</a>
+                    </li>
 
-            <li>
-                <a href="#" class="nav-link text-white">
-                    <i class="bi bi-gear me-2"></i> Settings
-                </a>
-            </li>
-        </ul>
+                    <li class="nav-item">
+                        <a class="nav-link disabled text-white-50">Disabled</a>
+                    </li>
 
-        <hr>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white-50" href="#" role="button" data-bs-toggle="dropdown">
+                        Dropdown
+                        </a>
+                        <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        </ul>
+                    </li>
 
-        <!-- Profile -->
-        <div class="d-flex align-items-center mt-auto">
-            <!-- <img src="" class="rounded-circle me-2"> -->
-            <strong>mdo</strong>
+                    </ul>
+
+                </div>
+            </nav>
+            <!-- Main Content -->
+            <main class="mt-4">
+                {% block content %}
+                {% endblock %}
+            </main>
+        
         </div>
-
     </div>
-
-    <!-- Main Content -->
-    <main class="flex-grow-1 p-5 bg-light">
-        {% block content %}
-        {% endblock %}
-    </main>
-
-</div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
