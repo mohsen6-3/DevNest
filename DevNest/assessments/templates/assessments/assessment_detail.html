@@ -1,0 +1,26 @@
+{% extends 'posts/base.html' %}
+{% load static %}
+
+{% block title %}Assessment Detail{% endblock %}
+{% block content %}
+<h2>{{ assessment.title }}</h2>
+<a class="btn btn-success" href="{% url 'assessments:question_create_view' pk=assessment.id %}"> Add Question</a>
+
+<hr>
+
+{% for q in assessment.questions.all %}
+<div>
+    <h4>{{ q.text }}</h4>
+    <p>Type: {{ q.question_type }}</p>
+    <a class="btn btn-primary" href="{% url 'assessments:choice_create_view' question_id=q.id %}">+ Add Choice</a>
+
+    <ul>
+        {% for c in q.choices.all %}
+        <li>{{ c.text }} {% if c.is_correct %}(Correct){% endif %}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% empty %}
+<p>No questions yet.</p>
+{% endfor %}
+{% endblock %}

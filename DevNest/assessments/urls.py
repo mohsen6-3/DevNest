@@ -6,4 +6,7 @@ urlpatterns = [
     path('create/', views.assessment_create_view, name='assessment_create_view'),
     path('update/<int:pk>/', views.assessment_update_view, name='assessment_update_view'),
     path('delete/<int:pk>/', views.assessment_delete_view, name='assessment_delete_view'),
+    path('<int:pk>/questions/create/', views.question_create_view, name='question_create_view'),
+    path('<int:pk>/', views.assessment_detail_view, name='assessment_detail_view'),
+    path("question/<int:question_id>/choices/create/", views.choice_create_view, name="choice_create_view"),
 ]
