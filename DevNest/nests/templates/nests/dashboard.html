@@ -1,0 +1,16 @@
+{% extends "nests/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if nests|length == 0 %}
+    <p>You are not a member of any nests yet. <a href="{% url 'nests:add_nest_view' %}">Create one now!</a></p>
+{% else %}
+    {% for nest in nests %}
+        <div>
+            <h2>{{ nest.name }}</h2>
+            <p>{{ nest.description }}</p>
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

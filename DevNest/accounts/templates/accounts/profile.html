@@ -25,23 +25,7 @@
             <h5> About </h5>
             <p>{{user.profile.about}}</p>
 
-
             <hr />
-
-            <h3>{{user.first_name}} Comments</h3>
-
-            {% for c in user.user_comments.all %}
-            <div class="d-flex flex-column p-3 shadow">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4>{{c.user.first_name}} {{c.user.last_name}}</h4>
-                </div>
-                
-                <p>{{ c.comment }}</p>
-                <a href="{% url 'plants:plant_detail_view' c.plant.id %}"><h5>On Plant: {{ c.plant.name }}</h5></a>
-                <p class="text-muted">{{ c.created_at }}</p>
-            </div>
-            {% endfor %}
- 
 
         </div>
         
