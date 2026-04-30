@@ -1,0 +1,27 @@
+{% extends "posts/base.html" %}
+
+{% block title %}Q&A Form{% endblock %}
+
+{% block content %}
+
+<h3 class="fw-bold mb-4">Ask a New Question</h3>
+<form action="" method="post">
+    {% csrf_token %}
+    <div class="card rounded-4 shadow-sm p-4" style="max-width: auto;">
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Title</label>
+        <input type="text" class="form-control" placeholder="Enter title">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-bold">Details</label>
+        <textarea class="form-control" rows="5"></textarea>
+    </div>
+
+    <button class="btn btn-primary">Post Question</button>
+
+</div>
+</form>
+
+{% endblock %}
