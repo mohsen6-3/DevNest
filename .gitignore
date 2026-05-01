@@ -3,7 +3,7 @@ projEnv/
 __pycache__/
 *.py[codz]
 *$py.class
-
+db.sqlite3
 # C extensions
 *.so
 
