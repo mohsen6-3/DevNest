@@ -30,7 +30,7 @@
                         
                         {% if request.user.is_authenticated and request.user.is_staff %}
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'assessments:question_create_view' pk=assessment.pk %}" class="btn btn-secondary">Create Question</a>
+                            <!-- <a href="{% url 'assessments:question_create_view' pk=assessment.pk %}" class="btn btn-secondary">Create Question</a> -->
                             <a class="btn btn-outline-danger" href="{% url 'assessments:assessment_delete_view' assessment.pk %}">Delete</a>
                             <a class="btn btn-outline-primary" href="{% url 'assessments:assessment_update_view' assessment.pk %}">Update</a>
                         </div>

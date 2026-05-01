@@ -73,11 +73,15 @@ def question_update_view(request:HttpRequest, pk):
     return render(request, 'assessments/questions_update.html', {'form': form, 'question': question})
 
 def assessment_detail_view(request:HttpRequest, pk):
+    # if not request.user.is_authenticated or not request.user.is_staff:
+    #     return HttpResponse("Unauthorized", status=401)
     assessment = Assessment.objects.get(pk=pk)
     questions = assessment.questions.all()
     return render(request, 'assessments/assessment_detail.html', {'assessment': assessment, 'questions': questions})
 
 def choice_create_view(request, question_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return HttpResponse("Unauthorized", status=401)
     question = get_object_or_404(Question, pk=question_id, assessment__created_by=request.user)
     if request.method == "POST":
         form = ChoiceForm(request.POST)
@@ -93,6 +97,8 @@ def choice_create_view(request, question_id):
     return render(request, "assessments/choice_create.html", {"form": form, "question": question})
 
 def choice_update_view(request, choice_id):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return HttpResponse("Unauthorized", status=401)
     choice = get_object_or_404(Choice, pk=choice_id, question__assessment__created_by=request.user)
     if request.method == "POST":
         form = ChoiceForm(request.POST, instance=choice)
@@ -107,6 +113,7 @@ def choice_update_view(request, choice_id):
     return render(request, "assessments/choice_update.html", {"form": form, "choice": choice})
 
 def take_assessment_view(request, pk):
+    
     assessment = get_object_or_404(Assessment, pk=pk)
 
     if request.method == "POST":
@@ -138,5 +145,6 @@ def take_assessment_view(request, pk):
     return render(request, "assessments/take_assessment.html", {"assessment": assessment})
 
 def submission_result_view(request, submission_id):
+    
     submission = get_object_or_404(Submission, id=submission_id, student=request.user)
     return render(request, "assessments/submission_result.html", {"submission": submission})
