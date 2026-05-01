@@ -5,10 +5,31 @@
 {% block title %}Delete Assessment{% endblock %}
 
 {% block content %}
-<h1>Delete Assessment</h1>
-<form method="post" action="{% url 'assessments:assessment_delete_view' pk=assessment.pk %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-danger">Delete Assessment</button>
-</form>
+<div class="container mt-5">
+    <h2>Delete Assessment</h2>
+    <p>Are you sure you want to delete {{ assessment.title }}?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'assessments:assessment_page_view' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Delete Assessment</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete {{ assessment.title }} ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'assessments:assessment_delete_view' assessment.pk %}" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

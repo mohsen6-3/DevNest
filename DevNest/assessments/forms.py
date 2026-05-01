@@ -12,3 +12,21 @@ class AssessmentForm(forms.ModelForm):
             'points': forms.NumberInput(attrs={'class': 'form-control'}),
             'due_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
         }
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = '__all__'
+        widgets = {
+            'text': forms.Textarea(attrs={'class': 'form-control'}),
+            'question_type': forms.Select(attrs={'class': 'form-control'}),
+            'points': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+class ChoiceForm(forms.ModelForm):
+    class Meta:
+        model = Choice
+        fields = '__all__'
+        widgets = {
+            'text': forms.TextInput(attrs={'class': 'form-control'}),
+            'is_correct': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }

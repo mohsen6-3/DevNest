@@ -1,0 +1,27 @@
+{% extends 'posts/base.html' %}
+{% load static %}
+
+{% block title %}Take Assessment{% endblock %}
+{% block content %}
+<h2>{{ assessment.title }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    {% for q in assessment.questions.all %}
+    <div>
+        <h4>{{ q.text }}</h4>
+
+        {% for c in q.choices.all %}
+        <label>
+            <input type="radio" name="question_{{ q.id }}" value="{{ c.id }}">
+            {{ c.text }}
+        </label><br>
+        {% endfor %}
+    </div>
+    <hr>
+    {% endfor %}
+
+    <button class="btn btn-primary" type="submit">Submit</button>
+</form>
+{% endblock %}

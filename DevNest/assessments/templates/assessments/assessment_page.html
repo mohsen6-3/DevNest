@@ -6,7 +6,9 @@
 {% block content %}
     <h1>Assessment Page</h1>
     <p>Welcome to the assessment page. Here you can view and manage your assessments.</p>
-    <a href="{% url 'assessments:assessment_create_view' %}">Create New Assessment</a>
+    {% if request.user.is_authenticated and request.user.is_staff %}
+    <a class="btn btn-primary" href="{% url 'assessments:assessment_create_view' %}">Create New Assessment</a>
+    {% endif %}
     <hr>
     <div class="assessments-list">
         {% if assessments %}
@@ -15,11 +17,24 @@
             <div class="col-md-6 col-lg-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h5 class="card-title">{{ assessment.title }}</h5>
+                        <a href="{% url 'assessments:assessment_detail_view' pk=assessment.pk %}">
+                            <h5 class="card-title">{{ assessment.title }}</h5>
+                        </a>
                         <p class="card-text">Description: {{ assessment.description }}</p>
                         <p class="card-text">Type: {{ assessment.assessment_type }}</p>
                         <p class="card-text">Points: {{ assessment.points }}</p>
+                        <p class="card-text">Created By: {{ assessment.created_by.username }}</p>
+                        <p class="card-text">Created At: {{ assessment.created_at }}</p>
                         <p class="card-text">Due Date: {{ assessment.due_date }}</p>
+                        
+                        
+                        {% if request.user.is_authenticated and request.user.is_staff %}
+                        <div class="d-flex justify-content-between">
+                            <!-- <a href="{% url 'assessments:question_create_view' pk=assessment.pk %}" class="btn btn-secondary">Create Question</a> -->
+                            <a class="btn btn-outline-danger" href="{% url 'assessments:assessment_delete_view' assessment.pk %}">Delete</a>
+                            <a class="btn btn-outline-primary" href="{% url 'assessments:assessment_update_view' assessment.pk %}">Update</a>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

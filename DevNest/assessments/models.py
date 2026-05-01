@@ -1,6 +1,5 @@
 from django.db import models
-# from django.contrib.auth import User
-# Create your models here.
+from django.contrib.auth.models import User
 
 
 
@@ -16,7 +15,7 @@ class Assessment(models.Model):
     assessment_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     points = models.PositiveIntegerField(default=0)
     due_date = models.DateTimeField(null=True, blank=True)
-    # created_by = models.ForeignKey(User,on_delete=models.CASCADE,related_name='created_assessments')
+    created_by = models.ForeignKey(User,on_delete=models.CASCADE,related_name='created_assessments')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -52,7 +51,7 @@ class Choice(models.Model):
 class Submission(models.Model):
     assessment = models.ForeignKey(Assessment,on_delete=models.CASCADE,related_name='submissions')
 
-    # student = models.ForeignKey(User,on_delete=models.CASCADE,related_name='submissions')
+    student = models.ForeignKey(User,on_delete=models.CASCADE,related_name='submissions')
 
     submitted_at = models.DateTimeField(auto_now_add=True)
     score = models.FloatField(default=0)

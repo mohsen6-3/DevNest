@@ -1,0 +1,16 @@
+{% extends 'posts/base.html' %}
+{% load static %}
+
+{% block title %}Submission Result{% endblock %}
+{% block content %}
+<h2>Result</h2>
+<p>Score: {{ submission.score }}</p>
+
+<ul>
+    {% for ans in submission.answers.all %}
+    <li>{{ ans.question.text }} - {{ ans.selected_choice }}
+        {% if ans.is_correct %}✅ Correct{% else %}❌ Wrong{% endif %}
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
