@@ -17,7 +17,9 @@
             <div class="col-md-6 col-lg-4">
                 <div class="card shadow-sm h-100">
                     <div class="card-body">
-                        <h5 class="card-title">{{ assessment.title }}</h5>
+                        <a href="{% url 'assessments:assessment_detail_view' pk=assessment.pk %}">
+                            <h5 class="card-title">{{ assessment.title }}</h5>
+                        </a>
                         <p class="card-text">Description: {{ assessment.description }}</p>
                         <p class="card-text">Type: {{ assessment.assessment_type }}</p>
                         <p class="card-text">Points: {{ assessment.points }}</p>

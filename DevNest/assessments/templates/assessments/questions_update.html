@@ -1,0 +1,11 @@
+{% extends 'posts/base.html' %}
+{% load static %}
+{% block title %}Update Question{% endblock %}
+{% block content %}
+<h2>Update Question for: {{ assessment.title }}</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Update Question</button>  
+</form>
+{% endblock %}
