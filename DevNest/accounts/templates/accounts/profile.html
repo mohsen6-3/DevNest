@@ -29,7 +29,6 @@
 
         </div>
         {% if nests|length == 0 %}
-            <p>You are not a member of any nests yet. <a href="{% url 'nests:add_nest_view' %}">Create one now!</a></p>
         {% else %}
             {% for nest in nests %}
                 <div>

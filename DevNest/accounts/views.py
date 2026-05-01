@@ -1,15 +1,11 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
-from django.core.mail import EmailMessage
-from django.template.loader import render_to_string
-from django.conf import settings
 from .models import Profile
 from django.db import transaction
-import os
 
 
 
@@ -24,7 +20,10 @@ def sign_up(request: HttpRequest):
             new_user = User.objects.create_user(username=request.POST["username"],password=request.POST["password"],email=request.POST["email"], first_name=request.POST["first_name"], last_name=request.POST["last_name"])
             new_user.save()
 
-            profile = Profile.objects.create(user=new_user, about=request.POST["about"], social_link=request.POST["social_link"], avatar=request.FILES.get("avatar", Profile.avatar.field.get_default()))
+            profile = new_user.profile
+            profile.about = request.POST["about"]
+            profile.social_link = request.POST["social_link"]
+            profile.avatar = request.FILES.get("avatar", Profile.avatar.field.get_default())
             profile.save()
             messages.success(request, "Registered User Successfuly", "alert-success")
             return redirect("accounts:sign_in")
@@ -62,16 +61,12 @@ def log_out(request: HttpRequest):
     logout(request)
     messages.success(request, "logged out successfully", "alert-warning")
 
-    return redirect(request.GET.get("next", "/"))
+    return redirect("accounts:sign_in")
 
 def user_profile_view(request:HttpRequest, user_name):
 
     try:
         user = User.objects.get(username=user_name)
-        if not Profile.objects.filter(user=user).first():
-            new_profile = Profile(user=user)
-            new_profile.save()
-        
     except Exception as e:
         print(e)
         return render(request,'404.html')
