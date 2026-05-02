@@ -1,23 +1,25 @@
-{% extends 'posts/base.html' %}
+{% extends "nests/base.html" %}
 {% load static %}
 
 {% block title %}Assessment Detail{% endblock %}
 {% block content %}
 <h2>{{ assessment.title }}</h2>
-<a href="{% url 'assessments:take_assessment_view' pk=assessment.id %}" class="btn btn-primary">Start Assessment</a>
+<a href="{% url 'assessments:take_assessment_view' nest_id=nest.id pk=assessment.id %}" class="btn btn-primary">Start
+    Assessment</a>
 {% if request.user.is_authenticated and request.user.is_staff %}
-<a class="btn btn-success" href="{% url 'assessments:question_create_view' pk=assessment.id %}"> + Add Question</a>
-    
+<a class="btn btn-success" href="{% url 'assessments:question_create_view' nest_id=nest.id pk=assessment.id %}"> + Add
+    Question</a>
 {% endif %}
 <hr>
 {% if request.user.is_authenticated and request.user.is_staff %}
 {% for q in assessment.questions.all %}
 <div class="d-flex align-items-center gap-3">
     <h4>{{ q.text }}</h4>
-    <a class="btn btn-primary" href="{% url 'assessments:choice_create_view' question_id=q.id %}">+ Add Choice</a>
-    <a href="{% url 'assessments:question_update_view' pk=q.id %}" class="btn btn-secondary">Update</a>
-    <a href="{% url 'assessments:question_delete_view' pk=q.id %}" class="btn btn-danger">Delete</a>
-    
+    <a class="btn btn-primary" href="{% url 'assessments:choice_create_view' nest_id=nest.id question_id=q.id %}">+ Add
+        Choice</a>
+    <a href="{% url 'assessments:question_update_view' nest_id=nest.id pk=q.id %}" class="btn btn-secondary">Update</a>
+    <a href="{% url 'assessments:question_delete_view' nest_id=nest.id pk=q.id %}" class="btn btn-danger">Delete</a>
+
 </div>
 
 <ul>
@@ -25,7 +27,11 @@
     <li>
         {{ c.text }} {% if c.is_correct %}(Correct){% endif %}
         {% if request.user.is_authenticated and request.user.is_staff %}
-        <a class="btn btn-warning btn-sm gap-2" href="{% url 'assessments:choice_update_view' choice_id=c.id %}">Update</a>
+        <a class="btn btn-warning btn-sm gap-2"
+            href="{% url 'assessments:choice_update_view' nest_id=nest.id choice_id=c.id %}">Update</a>
+        <a class="btn btn-danger btn-sm gap-2"
+            href="{% url 'assessments:choice_delete_view' nest_id=nest.id choice_id=c.id %}">Delete</a>
+            
         {% endif %}
     </li>
     {% endfor %}
@@ -34,22 +40,4 @@
 <hr>
 {% endfor %}
 {% endif %}
-
-
-
-<!-- {% for q in assessment.questions.all %}
-<div>
-    <h4>{{ q.text }}</h4>
-    <p>Type: {{ q.question_type }}</p>
-    <a class="btn btn-primary" href="{% url 'assessments:choice_create_view' question_id=q.id %}">+ Add Choice</a>
-
-    <ul>
-        {% for c in q.choices.all %}
-        <li>{{ c.text }} {% if c.is_correct %}(Correct){% endif %}</li>
-        {% endfor %}
-    </ul>
-</div>
-{% empty %}
-<p>No questions yet.</p>
-{% endfor %} -->
 {% endblock %}

@@ -1,11 +1,11 @@
-{% extends 'posts/base.html' %}
+{% extends "nests/base.html" %}
 {% load static %}
 
 {% block title %}Update Assessment{% endblock %}
 
 {% block content %}
 <h1>Update Assessment</h1>
-<form method="post" action="{% url 'assessments:assessment_update_view' pk=assessment.pk %}">
+<form method="post" action="{% url 'assessments:assessment_update_view' nest_id=nest.pk pk=assessment.pk %}">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Update Assessment</button>
