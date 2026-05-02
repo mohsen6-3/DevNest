@@ -72,6 +72,15 @@ def question_update_view(request:HttpRequest, pk):
         form = QuestionForm(instance=question)
     return render(request, 'assessments/questions_update.html', {'form': form, 'question': question})
 
+def question_delete_view(request:HttpRequest, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return HttpResponse("Unauthorized", status=401)
+    question = Question.objects.get(pk=pk, assessment__created_by=request.user)
+    if request.method == 'POST':
+        question.delete()
+        return redirect('assessments:assessment_detail_view', pk=question.assessment.pk)
+    return render(request, 'assessments/questions_delete.html', {'question': question})
+
 def assessment_detail_view(request:HttpRequest, pk):
     # if not request.user.is_authenticated or not request.user.is_staff:
     #     return HttpResponse("Unauthorized", status=401)

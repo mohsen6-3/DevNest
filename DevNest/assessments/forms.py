@@ -11,6 +11,7 @@ class AssessmentForm(forms.ModelForm):
             'assessment_type': forms.Select(attrs={'class': 'form-control'}),
             'points': forms.NumberInput(attrs={'class': 'form-control'}),
             'due_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+
         }
 class QuestionForm(forms.ModelForm):
     class Meta:
