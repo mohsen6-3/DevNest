@@ -7,6 +7,11 @@
     <div>
         <h2 class="nest-page-title">{{ nest.name }}</h2>
         <p class="nest-page-subtitle">{{ nest.description }}</p>
+        <div class="mt-2">
+            <span class="nest-chip nest-chip-approved">
+                total Score : {{ total_score }}
+            </span>
+        </div>
         <small class="text-muted">Created by {{ nest.creator.username }}</small>
     </div>
     <div class="d-flex gap-2">
@@ -43,9 +48,9 @@
         <a href="{% url 'nests:nest_posts' nest_id=nest.pk %}" class="nest-subnav-link">
             <i class="bi bi-chat-left-text me-1"></i> Posts
         </a>
-        <a href="#" class="nest-subnav-link disabled" aria-disabled="true" tabindex="-1">
+        <a href="{% url 'assessments:assessment_page_view' nest_id=nest.pk %}" class="nest-subnav-link " aria-disabled="true" tabindex="-1">
             <i class="bi bi-card-checklist me-1"></i> Assessments
-            <span class="nest-subnav-badge">Soon</span>
+            <!-- <span class="nest-subnav-badge">Soon</span> -->
         </a>
         <a href="#" class="nest-subnav-link disabled" aria-disabled="true" tabindex="-1">
             <i class="bi bi-journal-code me-1"></i> Content

@@ -3,6 +3,8 @@ from django.contrib.auth.views import redirect_to_login
 from django.http import HttpRequest, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from django.db.models import Sum 
+from assessments.models import  Submission
 
 from posts.models import Post, PostType
 
@@ -95,6 +97,11 @@ def nest_detail_view(request: HttpRequest, nest_id: int):
     pending_membership = nest.memberships.filter(
         user=request.user, status=NestMembership.Status.PENDING
     ).first()
+    total_score = (
+        Submission.objects
+        .filter(student=request.user, assessment__nest=nest)
+        .aggregate(total=Sum('score'))['total'] or 0
+    )
 
     ann_type = PostType.objects.filter(name='Announcement').first()
     announcements = (
@@ -115,6 +122,7 @@ def nest_detail_view(request: HttpRequest, nest_id: int):
         'can_manage': nest.is_nest_staff(request.user) or nest.is_site_staff(request.user),
         'announcements': announcements,
         'recent_posts': recent_posts,
+        'total_score': total_score,
     })
 
 

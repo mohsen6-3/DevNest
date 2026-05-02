@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from nests.models import Nest
+
 
 
 class Assessment(models.Model):
@@ -17,6 +19,7 @@ class Assessment(models.Model):
     due_date = models.DateTimeField(null=True, blank=True)
     created_by = models.ForeignKey(User,on_delete=models.CASCADE,related_name='created_assessments')
     created_at = models.DateTimeField(auto_now_add=True)
+    nest = models.ForeignKey(Nest, on_delete=models.CASCADE, related_name='assessments', null=True, blank=True)
 
     def __str__(self):
         return self.title
