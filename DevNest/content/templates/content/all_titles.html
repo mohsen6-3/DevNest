@@ -1,0 +1,82 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}DevNest | All Titles{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'content/css/style.css' %}">
+
+<div class="c-topbar">
+    <div class="c-topbar__breadcrumb">
+        <span>Content</span>
+    </div>
+    <div class="c-topbar__actions">
+        <a href="{% url 'content:create_title_view' %}" class="c-btn c-btn--primary">+ New Title</a>
+    </div>
+</div>
+
+<div class="c-content">
+
+    {% if messages %}
+    <div style="margin-bottom:16px;">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" style="font-size:13px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="course-header">
+        <h1 class="course-header__title">Content</h1>
+        <p class="course-header__desc">Manage your course content organized into Titles, Units and Topics.</p>
+        <div class="course-header__meta">
+            <div class="meta-chip">{{ titles|length }} Title{{ titles|length|pluralize }}</div>
+        </div>
+    </div>
+
+    {% if titles %}
+        {% for title in titles %}
+        <div class="title-block">
+            <div class="title-block__header">
+                <div class="title-block__left">
+                    <div class="title-block__icon" style="background:#ede9fe;color:#5b21b6;">{{ forloop.counter|stringformat:"02d" }}</div>
+                    <div>
+                        <div class="title-block__name">{{ title.name }}</div>
+                        <div class="title-block__count">
+                            {% if title.description %}{{ title.description|truncatechars:60 }}{% else %}No description{% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="title-block__actions" style="opacity:1;">
+                    <a href="{% url 'content:title_detail_view' title_id=title.id %}" class="c-btn c-btn--sm c-btn--primary">View</a>
+                    <a href="{% url 'content:update_title_view' title_id=title.id %}" class="c-icon-btn" title="Edit">✎</a>
+                    <form method="POST" action="{% url 'content:delete_title_view' title_id=title.id %}" style="display:inline;" onsubmit="return confirm('Delete this title?')">
+                        {% csrf_token %}
+                        <button type="submit" class="c-icon-btn" title="Delete" style="color:#ef4444;">🗑</button>
+                    </form>
+                </div>
+            </div>
+
+            <div style="padding:4px 0 8px; display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="c-badge" style="background:{% if title.is_published %}#dcfce7;color:#16a34a;{% else %}#f1f5f9;color:#94a3b8;{% endif %}">
+                    {% if title.is_published %}Published{% else %}Draft{% endif %}
+                </span>
+                <span class="meta-chip">Created {{ title.created_at|date:"M d, Y" }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="add-unit" style="padding:40px; flex-direction:column; gap:10px;">
+            <div style="font-size:24px;">📚</div>
+            <div style="font-size:14px; font-weight:600; color:#475569;">No titles yet</div>
+            <p style="font-size:12px; color:#94a3b8; margin:0;">Create your first title to start organizing your content.</p>
+            <a href="{% url 'content:create_title_view' %}" class="c-btn c-btn--primary">+ New Title</a>
+        </div>
+    {% endif %}
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
