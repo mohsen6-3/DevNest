@@ -1,0 +1,138 @@
+{% extends "nests/base.html" %}
+
+{% block title %}Nest Review — Site Staff{% endblock %}
+
+{% block content %}
+<div class="nest-page-head">
+    <div>
+        <h2 class="nest-page-title"><i class="bi bi-shield-check me-2"></i>Nest Review</h2>
+        <p class="nest-page-subtitle">Review pending requests and moderate nest visibility.</p>
+    </div>
+    <span class="nest-chip nest-chip-rejected">Site Staff</span>
+</div>
+
+<div class="nest-surface mb-4 overflow-hidden">
+    <div class="card-header fw-semibold bg-transparent border-0 py-3">
+        Pending Nest Requests
+        <span class="nest-chip nest-chip-pending ms-2">{{ pending|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if pending %}
+        <table class="table table-hover mb-0 nest-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Requested by</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nest in pending %}
+                <tr>
+                    <td class="align-middle fw-semibold">{{ nest.name }}</td>
+                    <td class="align-middle text-muted small">{{ nest.description|truncatechars:80 }}</td>
+                    <td class="align-middle">{{ nest.creator.username }}</td>
+                    <td class="text-end">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="nest_id" value="{{ nest.pk }}">
+                            <button name="action" value="approve" class="nest-btn-main btn-sm me-1">
+                                <i class="bi bi-check-lg"></i> Approve
+                            </button>
+                            <button name="action" value="reject" class="btn btn-sm btn-outline-danger rounded-3">
+                                <i class="bi bi-x-lg"></i> Reject
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted p-3 mb-0">No pending nest requests at the moment.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="nest-surface mb-4 overflow-hidden">
+    <div class="card-header fw-semibold bg-transparent border-0 py-3">
+        Approved Nests
+        <span class="nest-chip nest-chip-approved ms-2">{{ approved|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if approved %}
+        <table class="table table-hover mb-0 nest-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Instructor</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nest in approved %}
+                <tr>
+                    <td class="align-middle">
+                        <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="text-decoration-none">{{ nest.name }}</a>
+                    </td>
+                    <td class="align-middle text-muted">{{ nest.creator.username }}</td>
+                    <td class="text-end">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="nest_id" value="{{ nest.pk }}">
+                            <button name="action" value="reject" class="btn btn-sm btn-outline-danger rounded-3">
+                                <i class="bi bi-x-lg"></i> Revoke
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted p-3 mb-0">No approved nests yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="nest-surface overflow-hidden">
+    <div class="card-header fw-semibold bg-transparent border-0 py-3 text-muted">
+        Rejected Nests
+        <span class="nest-chip nest-chip-rejected ms-2">{{ rejected|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if rejected %}
+        <table class="table table-hover mb-0 nest-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Requested by</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for nest in rejected %}
+                <tr>
+                    <td class="align-middle text-muted">{{ nest.name }}</td>
+                    <td class="align-middle text-muted">{{ nest.creator.username }}</td>
+                    <td class="text-end">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="nest_id" value="{{ nest.pk }}">
+                            <button name="action" value="approve" class="nest-btn-main btn-sm">
+                                <i class="bi bi-arrow-counterclockwise"></i> Re-approve
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted p-3 mb-0">No rejected nests.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

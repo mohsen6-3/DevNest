@@ -1,0 +1,42 @@
+{% extends "nests/base.html" %}
+
+{% block title %}Request a Nest{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="nest-page-head">
+            <div>
+                <h2 class="nest-page-title">Request a New Nest</h2>
+                <p class="nest-page-subtitle">Site staff will review your request. Approved requests make you the nest instructor.</p>
+            </div>
+            <a href="{% url 'nests:nest_dashboard' %}" class="nest-btn-soft">Back to Dashboard</a>
+        </div>
+
+        <form class="nest-surface p-4 p-md-5 d-flex flex-column gap-4" action="{% url 'nests:request_nest_view' %}" method="post">
+            {% csrf_token %}
+
+            <div>
+                <label class="form-label fw-semibold" for="name">Nest Name</label>
+                <input type="text"
+                       name="name" id="name"
+                       class="form-control"
+                       placeholder="e.g. CS 101, Data Structures, Algorithms"
+                       required minlength="5" maxlength="255"/>
+            </div>
+
+            <div>
+                <label class="form-label fw-semibold" for="description">Description</label>
+                <textarea name="description" id="description"
+                          class="form-control"
+                          placeholder="What is this nest about? Who is it for?"
+                          required style="height: 150px;"></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="nest-btn-main">Submit Request</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

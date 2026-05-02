@@ -1,0 +1,49 @@
+{% extends "nests/base.html" %}
+
+{% block title %}Browse Nests{% endblock %}
+
+{% block content %}
+
+<div class="nest-page-head">
+    <div>
+        <h2 class="nest-page-title">Browse Nests</h2>
+        <p class="nest-page-subtitle">Discover approved nests and join communities that match your interests.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'nests:nest_dashboard' %}" class="nest-btn-soft">My Dashboard</a>
+        <a href="{% url 'nests:request_nest_view' %}" class="nest-btn-main">+ Request a Nest</a>
+    </div>
+</div>
+
+{% if nests %}
+<div class="row g-3">
+    {% for nest in nests %}
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card nest-card">
+            <div class="card-body">
+                <h5 class="card-title">{{ nest.name }}</h5>
+                <p class="card-text text-muted">{{ nest.description }}</p>
+                <small class="text-muted">By {{ nest.creator.username }}</small>
+            </div>
+            <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
+                <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">View</a>
+                {% if nest.pk in user_nest_ids %}
+                    <span class="nest-chip nest-chip-approved">Joined</span>
+                {% else %}
+                    <form method="post" action="{% url 'nests:join_nest' nest_id=nest.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="nest-btn-main btn-sm">Request to Join</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="nest-surface p-4">
+    <p class="text-muted mb-0">No approved nests yet. <a href="{% url 'nests:request_nest_view' %}">Be the first to request one.</a></p>
+</div>
+{% endif %}
+
+{% endblock %}

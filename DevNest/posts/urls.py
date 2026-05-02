@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views
+from nests import views as nest_views
 app_name = "posts"
 urlpatterns = [
-    path('',views.post_create_view, name='post_create_view'),
+    path('', nest_views.nest_dashboard, name='nest_dashboard'),
     
 ]

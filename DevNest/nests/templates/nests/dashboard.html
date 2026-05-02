@@ -3,14 +3,49 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-{% if nests|length == 0 %}
-    <p>You are not a member of any nests yet. <a href="{% url 'nests:add_nest_view' %}">Create one now!</a></p>
-{% else %}
-    {% for nest in nests %}
-        <div>
-            <h2>{{ nest.name }}</h2>
-            <p>{{ nest.description }}</p>
-        </div>
+
+{% if pending_nests %}
+<div class="alert alert-warning nest-surface mb-4">
+    <strong>Pending requests:</strong>
+    {% for nest in pending_nests %}
+        <span class="nest-chip nest-chip-pending me-1">{{ nest.name }}</span>
     {% endfor %}
+    - waiting for site staff to approve.
+</div>
 {% endif %}
+
+<div class="nest-page-head">
+    <div>
+        <h2 class="nest-page-title">My Nests</h2>
+        <p class="nest-page-subtitle">Your active, approved learning spaces.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'nests:nest_list_view' %}" class="nest-btn-soft">Browse All Nests</a>
+        <a href="{% url 'nests:request_nest_view' %}" class="nest-btn-main">+ Request a Nest</a>
+    </div>
+</div>
+
+{% if nests %}
+    <div class="row g-3">
+        {% for nest in nests %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="card nest-card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ nest.name }}</h5>
+                    <p class="card-text text-muted">{{ nest.description }}</p>
+                    <span class="nest-chip nest-chip-approved">{{ nest.get_status_display }}</span>
+                </div>
+                <div class="card-footer bg-transparent d-flex gap-2">
+                    <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">Open Nest</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="nest-surface p-4">
+        <p class="text-muted mb-0">You are not a member of any approved nests yet. <a href="{% url 'nests:request_nest_view' %}">Request one now.</a></p>
+    </div>
+{% endif %}
+
 {% endblock %}
