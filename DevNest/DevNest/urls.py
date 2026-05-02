@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from . import settings
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +28,5 @@ urlpatterns = [
     path('posts/', include('posts.urls')),
     path('assessments/', include('assessments.urls')),
     path('nests/', include('nests.urls')),
+    path('content/', include('content.urls')),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,90 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}DevNest | {{ unit.name }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'content/css/style.css' %}">
+
+<div class="c-topbar">
+    <div class="c-topbar__breadcrumb">
+        <a href="{% url 'content:all_titles_view' %}">Content</a> /
+        <a href="{% url 'content:title_detail_view' title_id=unit.title.id %}">{{ unit.title.name }}</a> /
+        <span>{{ unit.name }}</span>
+    </div>
+    <div class="c-topbar__actions">
+        <a href="{% url 'content:create_topic_view' unit_id=unit.id %}" class="c-btn c-btn--primary">+ New Topic</a>
+        <a href="{% url 'content:update_unit_view' unit_id=unit.id %}" class="c-btn">✎ Edit</a>
+    </div>
+</div>
+
+<div class="c-content">
+
+    {% if messages %}
+    <div style="margin-bottom:16px;">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" style="font-size:13px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="course-header">
+        <h1 class="course-header__title">{{ unit.name }}</h1>
+        {% if unit.description %}<p class="course-header__desc">{{ unit.description }}</p>{% endif %}
+        <div class="course-header__meta">
+            <div class="meta-chip">{{ topics|length }} Topic{{ topics|length|pluralize }}</div>
+            <span class="c-badge" style="background:{% if unit.is_published %}#dcfce7;color:#16a34a;{% else %}#f1f5f9;color:#94a3b8;{% endif %}">
+                {% if unit.is_published %}Published{% else %}Draft{% endif %}
+            </span>
+        </div>
+    </div>
+
+    {% if topics %}
+        {% for topic in topics %}
+        <div class="topic">
+            <div class="topic__header">
+                <div class="topic__left">
+                    <div class="topic__type-icon" style="background:#ede9fe;color:#5b21b6;">📝</div>
+                    <span class="topic__title">{{ topic.name }}</span>
+                    <div class="topic__badges">
+                        <span class="c-badge" style="background:
+                            {% if topic.status == 'published' %}#dcfce7;color:#16a34a;
+                            {% elif topic.status == 'draft' %}#f1f5f9;color:#94a3b8;
+                            {% elif topic.status == 'scheduled' %}#e0f2fe;color:#0284c7;
+                            {% else %}#fee2e2;color:#ef4444;{% endif %}">
+                            {{ topic.get_status_display }}
+                        </span>
+                        {% if topic.due_date %}
+                        <span class="c-badge" style="background:#fef3c7;color:#d97706;">Due {{ topic.due_date|date:"M d" }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="topic__actions" style="opacity:1; display:flex; gap:5px;">
+                    <a href="{% url 'content:topic_detail_view' topic_id=topic.id %}" class="c-btn c-btn--sm c-btn--primary">View</a>
+                    <a href="{% url 'content:update_topic_view' topic_id=topic.id %}" class="c-icon-btn" title="Edit">✎</a>
+                    <form method="POST" action="{% url 'content:delete_topic_view' topic_id=topic.id %}" style="display:inline;" onsubmit="return confirm('Delete this topic?')">
+                        {% csrf_token %}
+                        <button type="submit" class="c-icon-btn" style="color:#ef4444;" title="Delete">🗑</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="add-unit" style="padding:40px; flex-direction:column; gap:10px;">
+            <div style="font-size:24px;">📝</div>
+            <div style="font-size:14px; font-weight:600; color:#475569;">No topics yet</div>
+            <p style="font-size:12px; color:#94a3b8; margin:0;">Add a topic to start adding content.</p>
+            <a href="{% url 'content:create_topic_view' unit_id=unit.id %}" class="c-btn c-btn--primary">+ New Topic</a>
+        </div>
+    {% endif %}
+
+    <a href="{% url 'content:create_topic_view' unit_id=unit.id %}" class="add-topic">+ Add Topic</a>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

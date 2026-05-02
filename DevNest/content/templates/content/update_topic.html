@@ -1,0 +1,98 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}DevNest | Edit Topic{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'content/css/style.css' %}">
+
+<div class="c-topbar">
+    <div class="c-topbar__breadcrumb">
+        <a href="{% url 'content:all_titles_view' %}">Content</a> /
+        <a href="{% url 'content:title_detail_view' title_id=topic.unit.title.id %}">{{ topic.unit.title.name }}</a> /
+        <a href="{% url 'content:unit_detail_view' unit_id=topic.unit.id %}">{{ topic.unit.name }}</a> /
+        <a href="{% url 'content:topic_detail_view' topic_id=topic.id %}">{{ topic.name|truncatechars:30 }}</a> /
+        <span>Edit</span>
+    </div>
+    <div class="c-topbar__actions">
+        <a href="{% url 'content:topic_detail_view' topic_id=topic.id %}" class="c-btn">← Cancel</a>
+    </div>
+</div>
+
+<div class="c-content">
+
+    {% if messages %}
+    <div style="margin-bottom:16px;">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" style="font-size:13px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="course-header">
+        <h1 class="course-header__title">Edit Topic</h1>
+        <p class="course-header__desc">Update the details for "{{ topic.name }}".</p>
+    </div>
+
+    <div class="c-settings-section">
+        <form method="POST" action="{% url 'content:update_topic_view' topic_id=topic.id %}">
+            {% csrf_token %}
+
+            <div class="c-form-group">
+                <label class="c-form-label">Topic Name <span style="color:#ef4444;">*</span></label>
+                <input class="c-form-input" type="text" name="name" value="{{ topic.name }}" required autofocus>
+            </div>
+
+            <div class="c-form-row">
+                <div class="c-form-group">
+                    <label class="c-form-label">Sort Order</label>
+                    <input class="c-form-input" type="number" name="sort_order" value="{{ topic.sort_order }}" min="0">
+                    <span class="c-form-hint">Lower numbers appear first.</span>
+                </div>
+                <div class="c-form-group">
+                    <label class="c-form-label">Status</label>
+                    <select class="c-form-select" name="status">
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if topic.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="c-form-group">
+                <label class="c-form-label">Due Date <span style="color:#94a3b8;">(optional)</span></label>
+                <input class="c-form-input" type="datetime-local" name="due_date"
+                    value="{% if topic.due_date %}{{ topic.due_date|date:'Y-m-d' }}T{{ topic.due_date|date:'H:i' }}{% endif %}">
+                <span class="c-form-hint">Leave blank to remove the due date.</span>
+            </div>
+
+            <div class="c-form-actions">
+                <button type="submit" class="c-btn c-btn--primary">Save Changes</button>
+                <a href="{% url 'content:topic_detail_view' topic_id=topic.id %}" class="c-btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="c-settings-section c-settings-section--danger" style="margin-top:16px;">
+        <div class="c-settings-section__header">
+            <h2 class="c-settings-section__title c-settings-section__title--danger">Danger Zone</h2>
+        </div>
+        <div class="c-danger-row">
+            <div class="c-danger-row__info">
+                <div class="c-danger-row__label">Delete Topic</div>
+                <div class="c-danger-row__desc">Permanently deletes "{{ topic.name }}" and all its content (videos, files, images, text, links). This cannot be undone.</div>
+            </div>
+            <form method="POST" action="{% url 'content:delete_topic_view' topic_id=topic.id %}" onsubmit="return confirm('Delete this topic permanently?')">
+                {% csrf_token %}
+                <button type="submit" class="c-btn c-btn--danger">Delete</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}
