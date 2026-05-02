@@ -1,0 +1,369 @@
+{% extends "posts/base.html" %}
+{% load static %}
+
+{% block title %}DevNest | {{ topic.name }}{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'content/css/style.css' %}">
+
+<div class="c-topbar">
+    <div class="c-topbar__breadcrumb">
+        <a href="{% url 'content:all_titles_view' %}">Content</a> /
+        <a href="{% url 'content:title_detail_view' title_id=topic.unit.title.id %}">{{ topic.unit.title.name }}</a> /
+        <a href="{% url 'content:unit_detail_view' unit_id=topic.unit.id %}">{{ topic.unit.name }}</a> /
+        <span>{{ topic.name|truncatechars:40 }}</span>
+    </div>
+    <div class="c-topbar__actions">
+        <a href="{% url 'content:update_topic_view' topic_id=topic.id %}" class="c-btn">✎ Edit Topic</a>
+    </div>
+</div>
+
+<div class="c-content">
+
+    {% if messages %}
+    <div style="margin-bottom:16px;">
+        {% for message in messages %}
+        <div class="alert {{ message.tags }} alert-dismissible fade show" role="alert" style="font-size:13px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- TOPIC HEADER -->
+    <div class="c-topic-header">
+        <div class="c-topic-header__left">
+            <div class="c-topic-header__icon" style="background:#ede9fe;color:#5b21b6;">📝</div>
+            <div>
+                <h1 class="c-topic-header__title">{{ topic.name }}</h1>
+                <div class="c-topic-header__meta">
+                    <span class="c-badge" style="background:{% if topic.status == 'published' %}#dcfce7;color:#16a34a;{% elif topic.status == 'draft' %}#f1f5f9;color:#94a3b8;{% elif topic.status == 'scheduled' %}#e0f2fe;color:#0284c7;{% else %}#fee2e2;color:#ef4444;{% endif %}">{{ topic.get_status_display }}</span>
+                    {% if topic.due_date %}<span class="c-badge" style="background:#fef3c7;color:#d97706;">Due {{ topic.due_date|date:"M d, Y" }}</span>{% endif %}
+                    <span class="c-topic-header__sep">·</span>
+                    <span>Updated {{ topic.updated_at|date:"M d, Y" }}</span>
+                    <span class="c-topic-header__sep">·</span>
+                    <span>{{ videos|length }} video{{ videos|length|pluralize }}, {{ files|length }} file{{ files|length|pluralize }}, {{ images|length }} image{{ images|length|pluralize }}, {{ texts|length }} text{{ texts|length|pluralize }}, {{ links|length }} link{{ links|length|pluralize }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT TABS -->
+    <div class="c-tabs" style="margin-bottom:20px;">
+        <button class="c-tab c-tab--active" onclick="showTab('tab-all',this)">All</button>
+        <button class="c-tab" onclick="showTab('tab-video',this)">Videos ({{ videos|length }})</button>
+        <button class="c-tab" onclick="showTab('tab-files',this)">Files ({{ files|length }})</button>
+        <button class="c-tab" onclick="showTab('tab-images',this)">Images ({{ images|length }})</button>
+        <button class="c-tab" onclick="showTab('tab-text',this)">Text ({{ texts|length }})</button>
+        <button class="c-tab" onclick="showTab('tab-links',this)">Links ({{ links|length }})</button>
+    </div>
+
+    <!-- TAB: ALL -->
+    <div id="tab-all" class="c-tab-panel c-tab-panel--active">
+
+        {% if videos %}
+        <div class="c-detail-item">
+            <div class="c-detail-item__header">
+                <div class="c-detail-item__type-icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                <div class="c-detail-item__info"><div class="c-detail-item__name">Videos ({{ videos|length }})</div></div>
+            </div>
+            <div class="content-list">
+                {% for video in videos %}
+                <div class="content-item">
+                    <div class="content-item__icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                    <div class="content-item__info">
+                        <div class="content-item__name">{{ video.video_title }}</div>
+                        <div class="content-item__meta">{% if video.duration %}<span>{{ video.duration }}s</span>{% endif %}</div>
+                    </div>
+                    <div class="content-item__right">
+                        {% if video.video_file %}<a href="{{ video.video_file.url }}" class="c-btn c-btn--sm" target="_blank">Play</a>{% endif %}
+                        <form method="POST" action="{% url 'content:delete_video_view' video_id=video.id %}" style="display:inline;" onsubmit="return confirm('Delete this video?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if files %}
+        <div class="c-detail-item">
+            <div class="c-detail-item__header">
+                <div class="c-detail-item__type-icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                <div class="c-detail-item__info"><div class="c-detail-item__name">Files ({{ files|length }})</div></div>
+            </div>
+            <div class="content-list">
+                {% for file in files %}
+                <div class="content-item">
+                    <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                    <div class="content-item__info">
+                        <div class="content-item__name">{{ file.file_name }}</div>
+                        <div class="content-item__meta"><span>{{ file.file_type|upper }}</span><span>Downloaded {{ file.download_count }}×</span></div>
+                    </div>
+                    <div class="content-item__right">
+                        <a href="{% url 'content:download_file_view' file_id=file.id %}" class="c-btn c-btn--sm">Download</a>
+                        <form method="POST" action="{% url 'content:delete_file_view' file_id=file.id %}" style="display:inline;" onsubmit="return confirm('Delete this file?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if images %}
+        <div class="c-detail-item">
+            <div class="c-detail-item__header">
+                <div class="c-detail-item__type-icon" style="background:#fce7f3;color:#db2777;">🖼</div>
+                <div class="c-detail-item__info"><div class="c-detail-item__name">Images ({{ images|length }})</div></div>
+            </div>
+            <div class="image-grid">
+                {% for image in images %}
+                <div class="image-thumb" style="position:relative;">
+                    <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;">
+                    <span class="image-thumb__label">{{ image.image_title|default:image.alt_text }}</span>
+                    <form method="POST" action="{% url 'content:delete_image_view' image_id=image.id %}" style="position:absolute;top:4px;right:4px;" onsubmit="return confirm('Delete image?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="background:rgba(255,255,255,.9);color:#ef4444;width:20px;height:20px;font-size:9px;">🗑</button></form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% for text in texts %}
+        <div class="c-detail-item">
+            <div class="c-detail-item__header">
+                <div class="c-detail-item__type-icon" style="background:#fef3c7;color:#d97706;">📝</div>
+                <div class="c-detail-item__info">
+                    <div class="c-detail-item__name">{{ text.text_title|default:"Text Block" }}</div>
+                    <div class="c-detail-item__meta"><span>{{ text.get_format_display }}</span></div>
+                </div>
+                <div class="c-detail-item__actions">
+                    <form method="POST" action="{% url 'content:delete_text_view' text_id=text.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                </div>
+            </div>
+            <div class="text-preview">{{ text.body|linebreaksbr }}</div>
+        </div>
+        {% endfor %}
+
+        {% if links %}
+        <div class="c-detail-item">
+            <div class="c-detail-item__header">
+                <div class="c-detail-item__type-icon" style="background:#ede9fe;color:#5b21b6;">🔗</div>
+                <div class="c-detail-item__info"><div class="c-detail-item__name">Links ({{ links|length }})</div></div>
+            </div>
+            <div class="content-list">
+                {% for link in links %}
+                <div class="content-item">
+                    <div class="content-item__icon" style="background:#ede9fe;color:#5b21b6;">🔗</div>
+                    <div class="content-item__info">
+                        <div class="content-item__name">{{ link.display_text }}</div>
+                        <div class="content-item__meta"><span>{{ link.url|truncatechars:60 }}</span></div>
+                    </div>
+                    <div class="content-item__right">
+                        <a href="{{ link.url }}" class="c-btn c-btn--sm" target="_blank" rel="noopener noreferrer">Visit</a>
+                        <form method="POST" action="{% url 'content:delete_link_view' link_id=link.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not videos and not files and not images and not texts and not links %}
+        <div class="add-unit" style="padding:40px;flex-direction:column;gap:10px;">
+            <div style="font-size:24px;">📂</div>
+            <div style="font-size:14px;font-weight:600;color:#475569;">No content yet</div>
+            <p style="font-size:12px;color:#94a3b8;margin:0;">Use the forms below to add videos, files, images, text or links.</p>
+        </div>
+        {% endif %}
+
+        <!-- ADD CONTENT FORMS -->
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
+
+            <details class="c-settings-section" style="padding:14px 16px;">
+                <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
+                    <span style="background:#fee2e2;color:#ef4444;padding:3px 8px;border-radius:5px;font-size:11px;">▶ Add Video</span>
+                </summary>
+                <form method="POST" action="{% url 'content:add_video_view' topic_id=topic.id %}" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                    {% csrf_token %}
+                    <div class="c-form-row">
+                        <div class="c-form-group"><label class="c-form-label">Title *</label><input class="c-form-input" type="text" name="video_title" required placeholder="Video title"></div>
+                        <div class="c-form-group"><label class="c-form-label">Duration (seconds)</label><input class="c-form-input" type="number" name="duration" min="0"></div>
+                    </div>
+                    <div class="c-form-group"><label class="c-form-label">Video File *</label><input class="c-form-input" type="file" name="video_file" accept="video/*" required></div>
+                    <div class="c-form-group"><label class="c-form-label">Thumbnail (optional)</label><input class="c-form-input" type="file" name="thumbnail" accept="image/*"></div>
+                    <div><button type="submit" class="c-btn c-btn--primary c-btn--sm">Upload Video</button></div>
+                </form>
+            </details>
+
+            <details class="c-settings-section" style="padding:14px 16px;">
+                <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
+                    <span style="background:#e0f2fe;color:#0284c7;padding:3px 8px;border-radius:5px;font-size:11px;">📄 Add File</span>
+                </summary>
+                <form method="POST" action="{% url 'content:add_file_view' topic_id=topic.id %}" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                    {% csrf_token %}
+                    <div class="c-form-row">
+                        <div class="c-form-group"><label class="c-form-label">Display Name</label><input class="c-form-input" type="text" name="file_name" placeholder="Leave blank to use filename"></div>
+                        <div class="c-form-group"><label class="c-form-label">File *</label><input class="c-form-input" type="file" name="file" required></div>
+                    </div>
+                    <div><button type="submit" class="c-btn c-btn--primary c-btn--sm">Upload File</button></div>
+                </form>
+            </details>
+
+            <details class="c-settings-section" style="padding:14px 16px;">
+                <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
+                    <span style="background:#fce7f3;color:#db2777;padding:3px 8px;border-radius:5px;font-size:11px;">🖼 Add Image</span>
+                </summary>
+                <form method="POST" action="{% url 'content:add_image_view' topic_id=topic.id %}" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                    {% csrf_token %}
+                    <div class="c-form-row">
+                        <div class="c-form-group"><label class="c-form-label">Title</label><input class="c-form-input" type="text" name="image_title" placeholder="Image title"></div>
+                        <div class="c-form-group"><label class="c-form-label">Alt Text</label><input class="c-form-input" type="text" name="alt_text" placeholder="Descriptive text"></div>
+                    </div>
+                    <div class="c-form-group"><label class="c-form-label">Image File *</label><input class="c-form-input" type="file" name="image" accept="image/*" required></div>
+                    <div><button type="submit" class="c-btn c-btn--primary c-btn--sm">Upload Image</button></div>
+                </form>
+            </details>
+
+            <details class="c-settings-section" style="padding:14px 16px;">
+                <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
+                    <span style="background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:5px;font-size:11px;">📝 Add Text</span>
+                </summary>
+                <form method="POST" action="{% url 'content:add_text_view' topic_id=topic.id %}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                    {% csrf_token %}
+                    <div class="c-form-row">
+                        <div class="c-form-group"><label class="c-form-label">Title</label><input class="c-form-input" type="text" name="text_title" placeholder="Text block title"></div>
+                        <div class="c-form-group"><label class="c-form-label">Format</label><select class="c-form-select" name="format"><option value="plain">Plain Text</option><option value="markdown">Markdown</option><option value="html">HTML</option></select></div>
+                    </div>
+                    <div class="c-form-group"><label class="c-form-label">Body *</label><textarea class="c-form-textarea" name="body" rows="5" required placeholder="Write your text content here…"></textarea></div>
+                    <div><button type="submit" class="c-btn c-btn--primary c-btn--sm">Add Text</button></div>
+                </form>
+            </details>
+
+            <details class="c-settings-section" style="padding:14px 16px;">
+                <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
+                    <span style="background:#ede9fe;color:#5b21b6;padding:3px 8px;border-radius:5px;font-size:11px;">🔗 Add Link</span>
+                </summary>
+                <form method="POST" action="{% url 'content:add_link_view' topic_id=topic.id %}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
+                    {% csrf_token %}
+                    <div class="c-form-row">
+                        <div class="c-form-group"><label class="c-form-label">Display Text *</label><input class="c-form-input" type="text" name="display_text" required placeholder="e.g. GeeksForGeeks — Arrays"></div>
+                        <div class="c-form-group"><label class="c-form-label">URL *</label><input class="c-form-input" type="url" name="url" required placeholder="https://…"></div>
+                    </div>
+                    <div><button type="submit" class="c-btn c-btn--primary c-btn--sm">Add Link</button></div>
+                </form>
+            </details>
+
+        </div>
+    </div>
+
+    <!-- TAB: VIDEO -->
+    <div id="tab-video" class="c-tab-panel">
+        {% if videos %}
+        <div class="content-list">
+            {% for video in videos %}
+            <div class="content-item">
+                <div class="content-item__icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                <div class="content-item__info">
+                    <div class="content-item__name">{{ video.video_title }}</div>
+                    <div class="content-item__meta">{% if video.duration %}<span>{{ video.duration }}s</span>{% endif %}</div>
+                </div>
+                <div class="content-item__right">
+                    {% if video.video_file %}<a href="{{ video.video_file.url }}" class="c-btn c-btn--sm" target="_blank">Play</a>{% endif %}
+                    <form method="POST" action="{% url 'content:delete_video_view' video_id=video.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">▶</div><div style="font-size:13px;color:#475569;">No videos yet</div></div>{% endif %}
+    </div>
+
+    <!-- TAB: FILES -->
+    <div id="tab-files" class="c-tab-panel">
+        {% if files %}
+        <div class="content-list">
+            {% for file in files %}
+            <div class="content-item">
+                <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                <div class="content-item__info">
+                    <div class="content-item__name">{{ file.file_name }}</div>
+                    <div class="content-item__meta"><span>{{ file.file_type|upper }}</span><span>Downloaded {{ file.download_count }}×</span></div>
+                </div>
+                <div class="content-item__right">
+                    <a href="{% url 'content:download_file_view' file_id=file.id %}" class="c-btn c-btn--sm">Download</a>
+                    <form method="POST" action="{% url 'content:delete_file_view' file_id=file.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">📄</div><div style="font-size:13px;color:#475569;">No files yet</div></div>{% endif %}
+    </div>
+
+    <!-- TAB: IMAGES -->
+    <div id="tab-images" class="c-tab-panel">
+        {% if images %}
+        <div class="image-grid">
+            {% for image in images %}
+            <div class="image-thumb" style="position:relative;">
+                <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;">
+                <span class="image-thumb__label">{{ image.image_title|default:image.alt_text }}</span>
+                <form method="POST" action="{% url 'content:delete_image_view' image_id=image.id %}" style="position:absolute;top:4px;right:4px;" onsubmit="return confirm('Delete image?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="background:rgba(255,255,255,.9);color:#ef4444;width:20px;height:20px;font-size:9px;">🗑</button></form>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">🖼</div><div style="font-size:13px;color:#475569;">No images yet</div></div>{% endif %}
+    </div>
+
+    <!-- TAB: TEXT -->
+    <div id="tab-text" class="c-tab-panel">
+        {% if texts %}
+        {% for text in texts %}
+        <div class="c-detail-item">
+            <div class="c-detail-item__header">
+                <div class="c-detail-item__type-icon" style="background:#fef3c7;color:#d97706;">📝</div>
+                <div class="c-detail-item__info">
+                    <div class="c-detail-item__name">{{ text.text_title|default:"Text Block" }}</div>
+                    <div class="c-detail-item__meta"><span>{{ text.get_format_display }}</span></div>
+                </div>
+                <div class="c-detail-item__actions">
+                    <form method="POST" action="{% url 'content:delete_text_view' text_id=text.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                </div>
+            </div>
+            <div class="text-preview">{{ text.body|linebreaksbr }}</div>
+        </div>
+        {% endfor %}
+        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">📝</div><div style="font-size:13px;color:#475569;">No text blocks yet</div></div>{% endif %}
+    </div>
+
+    <!-- TAB: LINKS -->
+    <div id="tab-links" class="c-tab-panel">
+        {% if links %}
+        <div class="content-list">
+            {% for link in links %}
+            <div class="content-item">
+                <div class="content-item__icon" style="background:#ede9fe;color:#5b21b6;">🔗</div>
+                <div class="content-item__info">
+                    <div class="content-item__name">{{ link.display_text }}</div>
+                    <div class="content-item__meta"><span>{{ link.url|truncatechars:70 }}</span></div>
+                </div>
+                <div class="content-item__right">
+                    <a href="{{ link.url }}" class="c-btn c-btn--sm" target="_blank" rel="noopener noreferrer">Visit</a>
+                    <form method="POST" action="{% url 'content:delete_link_view' link_id=link.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">🔗</div><div style="font-size:13px;color:#475569;">No links yet</div></div>{% endif %}
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function showTab(tabId, btn) {
+    document.querySelectorAll('.c-tab-panel').forEach(p => p.classList.remove('c-tab-panel--active'));
+    document.querySelectorAll('.c-tab').forEach(b => b.classList.remove('c-tab--active'));
+    document.getElementById(tabId).classList.add('c-tab-panel--active');
+    btn.classList.add('c-tab--active');
+}
+</script>
+{% endblock %}
