@@ -6,6 +6,8 @@ from django.contrib import messages
 from django.views.decorators.cache import never_cache
 from .models import Profile
 from django.db import transaction
+from posts.models import Post
+from nests.models import Nest, NestMembership
 
 
 
@@ -63,16 +65,36 @@ def log_out(request: HttpRequest):
 
     return redirect("accounts:sign_in")
 
-def user_profile_view(request:HttpRequest, user_name):
-
+def user_profile_view(request: HttpRequest, user_name):
     try:
         user = User.objects.get(username=user_name)
     except Exception as e:
         print(e)
-        return render(request,'404.html')
-    
+        return render(request, '404.html')
 
-    return render(request, 'accounts/profile.html', {"user" : user, "nests": user.nest_set.all()})
+    # Nests the user is an active member of
+    active_memberships = NestMembership.objects.filter(
+        user=user, status=NestMembership.Status.ACTIVE
+    ).select_related('nest')
+    nests = [m.nest for m in active_memberships]
+
+    # Posts authored by the user
+    posts = Post.objects.filter(user=user).order_by('-created_at')
+
+    # Announcements (posts whose type name is 'Announcement')
+    announcements = posts.filter(post_type__name__iexact='Announcement')[:5]
+
+    is_owner = request.user == user
+
+    return render(request, 'accounts/profile.html', {
+        "user": user,
+        "nests": nests,
+        "posts": posts[:5],
+        "announcements": announcements,
+        "post_count": posts.count(),
+        "nest_count": len(nests),
+        "is_owner": is_owner,
+    })
 
 def update_user_profile(request:HttpRequest):
 

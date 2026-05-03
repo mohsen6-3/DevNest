@@ -1,50 +1,136 @@
-{% extends 'main/base.html'%}
+{% extends 'main/base.html' %}
 
-
-{% block title %} profile for {{user.username}}  {% endblock %}
+{% block title %}{{ user.username }} — DevNest{% endblock %}
 
 {% block content %}
+<div class="row g-4">
 
-
-<div class="row gap-3">
-
-    <div class="col-2">
-
-        <img src="{{user.profile.avatar.url}}" class="rounded-circle" style="width: 80px; height: 80px; object-fit: cover;" />
-        <h5>@{{user.username}}</h5>
-        <a href="{{user.profile.social_link}}" target="_blank"><i class="bi bi-back"></i></a>
-        {% if request.user == user %}
-        <a href="{% url 'accounts:update_user_profile' %}"><i class="bi bi-pencil-square"></i></a>
-        {% endif %}
-    </div>
-
-
-    <div class="col">
-
-        <div class="d-flex flex-column gap-3">
-            <h5> About </h5>
-            <p>{{user.profile.about}}</p>
-
-            <hr />
-
-        </div>
-        {% if nests|length == 0 %}
-        {% else %}
-            {% for nest in nests %}
-                <div>
-                    <h2>{{ nest.name }}</h2>
-                    <p>{{ nest.description }}</p>
+    <!-- Profile card -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-4">
+                <img src="{{ user.profile.avatar.url }}" alt="avatar"
+                    class="profile-avatar rounded-circle border shadow-sm">
+                <div class="flex-grow-1">
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                        <h4 class="fw-bold mb-0">
+                            {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}
+                        </h4>
+                        <span class="text-muted fw-normal">@{{ user.username }}</span>
+                    </div>
+                    {% if user.profile.about %}
+                    <p class="text-secondary mb-2">{{ user.profile.about }}</p>
+                    {% endif %}
+                    {% if user.profile.social_link %}
+                    <a href="{{ user.profile.social_link }}" target="_blank" rel="noopener"
+                        class="small text-primary text-decoration-none">
+                        <i class="bi bi-link-45deg me-1"></i>{{ user.profile.social_link }}
+                    </a>
+                    {% endif %}
+                    <div class="d-flex gap-4 mt-3">
+                        <div class="text-center">
+                            <div class="fw-bold">{{ nest_count }}</div>
+                            <div class="text-muted small">Nests</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="fw-bold">{{ post_count }}</div>
+                            <div class="text-muted small">Posts</div>
+                        </div>
+                    </div>
                 </div>
-            {% endfor %}
-        {% endif %}
-        
+                {% if is_owner %}
+                <a href="{% url 'accounts:update_user_profile' %}" class="btn btn-outline-secondary btn-sm align-self-start">
+                    <i class="bi bi-pencil me-1"></i>Edit Profile
+                </a>
+                {% endif %}
+            </div>
+        </div>
     </div>
-    
+
+    <!-- Nests -->
+    <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="section-header">
+                <h6><i class="bi bi-layers me-1"></i>Nests</h6>
+                <a href="{% url 'nests:nest_dashboard' %}">View all</a>
+            </div>
+            {% if nests %}
+            <ul class="list-group list-group-flush">
+                {% for nest in nests %}
+                <li class="list-group-item px-0 py-2 border-0 border-bottom d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="fw-semibold">{{ nest.name }}</div>
+                        <small class="text-muted">{{ nest.description|truncatechars:60 }}</small>
+                    </div>
+                    <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}"
+                        class="btn btn-sm btn-outline-secondary rounded-3 ms-2">Open</a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted small mb-0">Not a member of any nest yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Latest Posts -->
+    <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+            <div class="section-header">
+                <h6><i class="bi bi-chat-left-text me-1"></i>Latest Posts</h6>
+            </div>
+            {% if posts %}
+            <ul class="list-group list-group-flush">
+                {% for post in posts %}
+                <li class="list-group-item px-0 py-2 border-0 border-bottom">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div>
+                            {% if post.nest %}
+                            <a href="{% url 'nests:nest_post_detail' nest_id=post.nest.pk post_id=post.pk %}"
+                                class="fw-semibold text-decoration-none">{{ post.title }}</a>
+                            {% else %}
+                            <span class="fw-semibold">{{ post.title }}</span>
+                            {% endif %}
+                            <div><small class="text-muted">{{ post.created_at|date:"M j, Y" }}</small></div>
+                        </div>
+                        {% if post.post_type %}
+                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill" style="font-size:.72rem;">{{ post.post_type.name }}</span>
+                        {% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted small mb-0">No posts yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if is_owner %}
+    <!-- Announcements (owner only) -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <div class="section-header">
+                <h6><i class="bi bi-megaphone me-1"></i>Latest Announcements</h6>
+            </div>
+            {% if announcements %}
+            <ul class="list-group list-group-flush">
+                {% for post in announcements %}
+                <li class="list-group-item px-0 py-2 border-0 border-bottom">
+                    <div class="fw-semibold">{{ post.title }}</div>
+                    <small class="text-muted">
+                        {% if post.nest %}<a href="{% url 'nests:nest_detail' nest_id=post.nest.pk %}" class="text-muted text-decoration-none">{{ post.nest.name }}</a> &middot;{% endif %}
+                        {{ post.created_at|date:"M j, Y" }}
+                    </small>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted small mb-0">No announcements posted yet.</p>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 
 </div>
-
-
-
-
-
 {% endblock %}

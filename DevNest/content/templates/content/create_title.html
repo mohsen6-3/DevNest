@@ -1,18 +1,19 @@
-{% extends "posts/base.html" %}
+{% extends "nests/nest_detail_base.html" %}
 {% load static %}
 
 {% block title %}DevNest | Create Title{% endblock %}
 
-{% block content %}
-<link rel="stylesheet" href="{% static 'content/css/style.css' %}">
+{% block extra_css %}<link rel="stylesheet" href="{% static 'content/css/style.css' %}">{% endblock %}
+
+{% block feature_content %}
 
 <div class="c-topbar">
     <div class="c-topbar__breadcrumb">
-        <a href="{% url 'content:all_titles_view' %}">Content</a> /
+        <a href="{% url 'content:all_titles_view' %}{% if nest %}?nest_id={{ nest.id }}{% endif %}">Content</a> /
         <span>New Title</span>
     </div>
     <div class="c-topbar__actions">
-        <a href="{% url 'content:all_titles_view' %}" class="c-btn">← Cancel</a>
+        <a href="{% url 'content:all_titles_view' %}{% if nest %}?nest_id={{ nest.id }}{% endif %}" class="c-btn">← Cancel</a>
     </div>
 </div>
 
@@ -35,8 +36,11 @@
     </div>
 
     <div class="c-settings-section">
-        <form method="POST" action="{% url 'content:create_title_view' %}">
+        <form method="POST" action="{% url 'content:create_title_view' %}{% if nest %}?nest_id={{ nest.id }}{% endif %}">
             {% csrf_token %}
+            {% if nest %}
+            <input type="hidden" name="nest_id" value="{{ nest.id }}">
+            {% endif %}
 
             <div class="c-form-group">
                 <label class="c-form-label">Title Name <span style="color:#ef4444;">*</span></label>
@@ -65,7 +69,7 @@
 
             <div class="c-form-actions">
                 <button type="submit" class="c-btn c-btn--primary">Create Title</button>
-                <a href="{% url 'content:all_titles_view' %}" class="c-btn">Cancel</a>
+                <a href="{% url 'content:all_titles_view' %}{% if nest %}?nest_id={{ nest.id }}{% endif %}" class="c-btn">Cancel</a>
             </div>
         </form>
     </div>

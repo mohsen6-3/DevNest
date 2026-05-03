@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from nests.models import Nest
+
 
 class Title(models.Model):
     name = models.CharField(max_length=255)
@@ -8,6 +10,7 @@ class Title(models.Model):
     sort_order = models.IntegerField(default=0)
     is_published = models.BooleanField(default=False)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    nest = models.ForeignKey(Nest, on_delete=models.CASCADE, related_name='titles', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

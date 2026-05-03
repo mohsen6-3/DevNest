@@ -1,14 +1,15 @@
-{% extends "posts/base.html" %}
+{% extends "nests/nest_detail_base.html" %}
 {% load static %}
 
 {% block title %}DevNest | {{ topic.name }}{% endblock %}
 
-{% block content %}
-<link rel="stylesheet" href="{% static 'content/css/style.css' %}">
+{% block extra_css %}<link rel="stylesheet" href="{% static 'content/css/style.css' %}">{% endblock %}
+
+{% block feature_content %}
 
 <div class="c-topbar">
     <div class="c-topbar__breadcrumb">
-        <a href="{% url 'content:all_titles_view' %}">Content</a> /
+        <a href="{% url 'content:all_titles_view' %}{% if nest %}?nest_id={{ nest.id }}{% endif %}">Content</a> /
         <a href="{% url 'content:title_detail_view' title_id=topic.unit.title.id %}">{{ topic.unit.title.name }}</a> /
         <a href="{% url 'content:unit_detail_view' unit_id=topic.unit.id %}">{{ topic.unit.name }}</a> /
         <span>{{ topic.name|truncatechars:40 }}</span>

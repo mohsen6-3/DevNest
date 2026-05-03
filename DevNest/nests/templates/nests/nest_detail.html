@@ -1,4 +1,4 @@
-{% extends "nests/base.html" %}
+{% extends "nests/nest_detail_base.html" %}
 
 {% block title %}{{ nest.name }}{% endblock %}
 
@@ -7,13 +7,11 @@
     <div>
         <h2 class="nest-page-title">{{ nest.name }}</h2>
         <p class="nest-page-subtitle">{{ nest.description }}</p>
-        {% if not can_manage %}
         <div class="mt-2">
             <span class="nest-chip nest-chip-approved">
                 total Score : {{ total_score }}
             </span>
         </div>
-        {% endif %}
         <small class="text-muted">Created by {{ nest.creator.username }}</small>
     </div>
     <div class="d-flex gap-2">
@@ -134,4 +132,4 @@
     </div>
 </div>
 
-{% endblock %}
+{% endblock feature_content %}

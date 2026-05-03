@@ -1,121 +1,117 @@
-{% extends "nests/base.html" %}
+{% extends "nests/nest_detail_base.html" %}
 
 {% block title %}{{ nest.name }} - Posts{% endblock %}
 
-{% block content %}
-<div class="nest-page-head">
-    <div>
-        <h2 class="nest-page-title">{{ nest.name }}</h2>
-        <p class="nest-page-subtitle">Posts and discussions for this nest.</p>
-        <small class="text-muted">Created by {{ nest.creator.username }}</small>
-    </div>
-    <div class="d-flex gap-2">
-        {% if can_manage %}
-            <a href="{% url 'nests:manage_nest' nest_id=nest.pk %}" class="nest-btn-soft">
-                <i class="bi bi-gear me-1"></i> Manage
+{% block tab_posts %}active{% endblock %}
+
+{% block feature_content %}
+<div class="row g-0" style="min-height:70vh;">
+
+    <!-- ── Sidebar ────────────────────────────────── -->
+    <div class="col-12 col-lg-3 border-end" style="max-height:75vh;overflow-y:auto;position:sticky;top:72px;">
+        <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+            <span class="fw-bold small">Posts</span>
+            <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">{{ posts|length }}</span>
+        </div>
+
+        {% for label, group in grouped_posts %}
+        <div class="px-3 pt-3 pb-1">
+            <p class="text-muted mb-2" style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">{{ label }}</p>
+            {% for p in group %}
+            <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=p.pk %}"
+               class="d-block text-decoration-none rounded-3 px-3 py-2 mb-1 sidebar-post-item
+                      {% if active_post and active_post.pk == p.pk %}active{% endif %}">
+                <div class="fw-semibold small text-truncate">{{ p.title }}</div>
+                {% if p.post_type %}
+                <small class="text-muted">{{ p.post_type.name }}</small>
+                {% endif %}
             </a>
-        {% endif %}
-
-        {% if membership %}
-            <span class="nest-chip nest-chip-approved align-self-center">
-                <i class="bi bi-check-circle me-1"></i> {{ membership.get_role_display }}
-            </span>
-        {% elif pending_membership %}
-            <span class="nest-chip nest-chip-pending align-self-center">
-                <i class="bi bi-hourglass-split me-1"></i> Request Pending
-            </span>
-        {% endif %}
+            {% endfor %}
+        </div>
+        {% empty %}
+        <p class="text-muted p-3 small">No posts yet.</p>
+        {% endfor %}
     </div>
-</div>
 
-<div class="nest-subnav-wrap nest-surface p-2 p-md-3 mb-4">
-    <nav class="nest-subnav" aria-label="Nest feature navigation">
-        <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="nest-subnav-link">
-            <i class="bi bi-speedometer2 me-1"></i> Dashboard
-        </a>
-        <a href="{% url 'nests:nest_posts' nest_id=nest.pk %}" class="nest-subnav-link active">
-            <i class="bi bi-chat-left-text me-1"></i> Posts
-        </a>
-        <a href="#" class="nest-subnav-link disabled" aria-disabled="true" tabindex="-1">
-            <i class="bi bi-card-checklist me-1"></i> Assessments
-            <span class="nest-subnav-badge">Soon</span>
-        </a>
-        <a href="#" class="nest-subnav-link disabled" aria-disabled="true" tabindex="-1">
-            <i class="bi bi-journal-code me-1"></i> Content
-            <span class="nest-subnav-badge">Soon</span>
-        </a>
-    </nav>
-</div>
+    <!-- ── Main area ────────────────────────────────── -->
+    <div class="col-12 col-lg-9 p-4">
+        <div class="row g-3">
 
-<div class="row g-3">
-    <div class="col-12 col-lg-7">
-        <div class="nest-surface p-4 p-md-5">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0">Latest Posts</h5>
-                <span class="nest-chip nest-chip-approved">{{ posts|length }} total</span>
-            </div>
+            <!-- Post list (full cards when no post selected) -->
+            <div class="col-12 col-xl-7">
+                <div class="nest-surface p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Latest Posts</h5>
+                    </div>
 
-            {% if posts %}
-                <div class="d-flex flex-column gap-3">
-                    {% for post in posts %}
-                        <article class="border rounded-3 p-3">
-                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                    {% if posts %}
+                    <div class="d-flex flex-column gap-3">
+                        {% for post in posts %}
+                        <article class="border rounded-3 p-3 hover-shadow">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
                                 <h6 class="mb-0">
-                                    <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}" class="text-decoration-none">
-                                        {{ post.title }}
-                                    </a>
+                                    <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}"
+                                        class="text-decoration-none fw-semibold">{{ post.title }}</a>
                                 </h6>
                                 {% if post.post_type %}
-                                    <span class="nest-chip {% if post.post_type.name|lower == 'announcement' %}nest-chip-rejected{% elif post.post_type.name|lower == 'question' %}nest-chip-pending{% else %}nest-chip-approved{% endif %}">
-                                        {{ post.post_type.name }}
-                                    </span>
+                                <span class="nest-chip {% if post.post_type.name|lower == 'announcement' %}nest-chip-rejected{% elif post.post_type.name|lower == 'question' %}nest-chip-pending{% else %}nest-chip-approved{% endif %}">
+                                    {{ post.post_type.name }}
+                                </span>
                                 {% endif %}
                             </div>
-                            <p class="text-muted mb-2">{{ post.content|truncatechars:140 }}</p>
+                            <p class="text-muted small mb-2">{{ post.content|truncatechars:120 }}</p>
                             <div class="d-flex align-items-center justify-content-between">
                                 <small class="text-muted">By {{ post.user.username }} &middot; {{ post.created_at|date:"M j, Y" }}</small>
-                                <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}" class="nest-subnav-badge text-decoration-none">
-                                    <i class="bi bi-chat-dots me-1"></i>{{ post.comments.count }} replies
+                                <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}"
+                                    class="nest-subnav-badge text-decoration-none">
+                                    <i class="bi bi-chat-dots me-1"></i>{{ post.comments.count }}
                                 </a>
                             </div>
                         </article>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="text-muted mb-0">No posts yet. Start the first discussion.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="col-12 col-lg-5">
-        <div class="nest-surface p-4 p-md-5">
-            <h5 class="mb-3">Create Post</h5>
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="title">Title</label>
-                    <input id="title" name="title" class="form-control" maxlength="200" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="post_type_id">Post Type</label>
-                    <select id="post_type_id" name="post_type_id" class="form-select" required>
-                        <option value="">Select type</option>
-                        {% for t in post_types %}
-                            <option value="{{ t.id }}">{{ t.name }}</option>
                         {% endfor %}
-                    </select>
-                    {% if not is_nest_staff %}
-                        <small class="text-muted">Announcements are restricted to nest-staff.</small>
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No posts yet. Start the first discussion.</p>
                     {% endif %}
                 </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold" for="content">Content</label>
-                    <textarea id="content" name="content" class="form-control" rows="5" required></textarea>
+            </div>
+
+            <!-- Create post form -->
+            <div class="col-12 col-xl-5">
+                <div class="nest-surface p-4">
+                    <h5 class="mb-3">New Post</h5>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small" for="postTitle">Title</label>
+                            <input id="postTitle" name="title" class="form-control" maxlength="200" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small" for="postType">Post Type</label>
+                            <select id="postType" name="post_type_id" class="form-select" required>
+                                <option value="">Select type</option>
+                                {% for t in post_types %}
+                                <option value="{{ t.id }}">{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                            {% if not is_nest_staff %}
+                            <div class="form-text">Announcements are restricted to nest-staff.</div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small" for="postContent">Content</label>
+                            <textarea id="postContent" name="content" class="form-control" rows="5" required></textarea>
+                        </div>
+                        <button class="nest-btn-main w-100" type="submit">
+                            <i class="bi bi-send me-1"></i> Publish
+                        </button>
+                    </form>
                 </div>
-                <button class="nest-btn-main" type="submit">Publish Post</button>
-            </form>
+            </div>
+
         </div>
     </div>
+
 </div>
 
-{% endblock %}
+{% endblock feature_content %}

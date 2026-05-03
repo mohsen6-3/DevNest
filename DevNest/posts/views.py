@@ -4,6 +4,7 @@ from django.contrib.auth.views import redirect_to_login
 from django.db.models import Q
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
 from nests.models import Nest, NestMembership
 
@@ -29,6 +30,22 @@ def _ensure_core_post_types():
         post_type, _ = PostType.objects.get_or_create(name=name)
         items.append(post_type)
     return items
+
+
+def _group_posts_by_date(posts):
+    """Group posts into Today / Yesterday / Older buckets."""
+    today = timezone.localdate()
+    yesterday = today - timezone.timedelta(days=1)
+    groups = {'Today': [], 'Yesterday': [], 'Older': []}
+    for post in posts:
+        post_date = timezone.localtime(post.created_at).date()
+        if post_date == today:
+            groups['Today'].append(post)
+        elif post_date == yesterday:
+            groups['Yesterday'].append(post)
+        else:
+            groups['Older'].append(post)
+    return [(label, items) for label, items in groups.items() if items]
 
 
 def _base_nest_context(nest: Nest, user):
@@ -88,6 +105,8 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
     context.update({
         'posts': posts,
         'post_types': post_types,
+        'grouped_posts': _group_posts_by_date(posts),
+        'active_post': None,
     })
     return render(request, 'posts/nest_posts.html', context)
 
@@ -121,10 +140,14 @@ def nest_post_detail_view(request: HttpRequest, nest_id: int, post_id: int):
     )
     nest_staff_ids = staff_pks | site_staff_pks
 
+    all_posts = Post.objects.filter(nest=nest).select_related('user', 'post_type')
     context.update({
         'post': post,
         'top_comments': top_comments,
         'nest_staff_ids': nest_staff_ids,
+        'posts': all_posts,
+        'grouped_posts': _group_posts_by_date(all_posts),
+        'active_post': post,
     })
     return render(request, 'posts/nest_post_detail.html', context)
 

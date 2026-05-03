@@ -1,24 +1,53 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 
-.devnest-landing-page {
+body {
     font-family: 'Manrope', sans-serif;
+    color: #1e293b;
+    background-color: #f8fafc;
 }
 
-.devnest-landing-page > div.container-fluid.sticky-top {
-    display: none !important;
+/* ── Navbar ─────────────────────────────────── */
+.navbar-brand {
+    font-size: 1.1rem;
+    letter-spacing: -.01em;
 }
 
-.devnest-landing-page > div.container:last-of-type {
-    display: none !important;
+/* ── Auth cards ──────────────────────────────── */
+.auth-card {
+    max-width: 460px;
+    width: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #fff;
+    padding: 2.5rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,.06);
 }
 
-.devnest-landing-page main.container {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin-top: 0 !important;
+/* ── Profile ─────────────────────────────────── */
+.profile-avatar {
+    width: 96px;
+    height: 96px;
+    object-fit: cover;
 }
 
-.devnest-landing footer {
-    border-top: 1px solid #e2e8f0;
+/* ── Section header ──────────────────────────── */
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .75rem;
 }
+.section-header h6 {
+    font-weight: 700;
+    font-size: .9rem;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: #64748b;
+    margin: 0;
+}
+.section-header a {
+    font-size: .8rem;
+    color: #3b82f6;
+    text-decoration: none;
+}
+.section-header a:hover { text-decoration: underline; }

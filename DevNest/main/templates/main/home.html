@@ -4,83 +4,82 @@
 {% block title %}DevNest{% endblock %}
 
 {% block content %}
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-    document.body.classList.add('devnest-landing-page');
-</script>
+<div class="container py-5">
 
-<div class="devnest-landing min-h-screen bg-slate-100 text-slate-800">
-    <div class="mx-auto max-w-7xl px-6 py-6 md:px-10 md:py-10">
-        <nav class="mb-10 flex items-center justify-between rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur md:px-6">
-            <div class="flex items-center gap-3">
-                <img src="{% static 'images/logo.svg' %}" alt="DevNest logo" class="h-11 w-11 object-contain">
-                <div class="text-2xl font-extrabold tracking-tight text-slate-800">DevNest</div>
+    <!-- Hero -->
+    <div class="row align-items-center g-5 py-4">
+
+        <!-- Left: text -->
+        <div class="col-12 col-lg-6">
+            <span class="badge rounded-pill border border-primary-subtle bg-primary-subtle text-primary-emphasis mb-3 px-3 py-2 fw-semibold text-uppercase ls-wide">
+                Academic Platform
+            </span>
+            <h1 class="display-5 fw-bold lh-sm mb-3">
+                DevNest: A Unified Space<br>for Academic Growth.
+            </h1>
+            <p class="lead text-secondary mb-4">
+                DevNest is a collaborative academic platform designed to enhance student learning through
+                structured communities called <strong>Nests</strong>. It combines Q&amp;A discussions,
+                organised content, automated assessments, and AI-powered feedback in one place.
+            </p>
+            {% if not request.user.is_authenticated %}
+            <div class="d-flex gap-3 flex-wrap">
+                <a href="{% url 'accounts:sign_up' %}?next=/" class="btn btn-primary btn-lg px-4">
+                    <i class="bi bi-person-plus me-1"></i> Sign Up
+                </a>
+                <a href="{% url 'accounts:sign_in' %}?next=/" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Log In
+                </a>
             </div>
-            <div class="flex items-center gap-3">
-                <a href="{% url 'accounts:sign_in' %}?next={{ request.path }}" class="rounded-xl border border-slate-300 bg-transparent px-5 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-100">Log In</a>
-                <a href="{% url 'accounts:sign_up' %}?next={{ request.path }}" class="rounded-xl bg-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-sky-600">Sign Up</a>
-            </div>
-        </nav>
+            {% else %}
+            <a href="{% url 'nests:nest_dashboard' %}" class="btn btn-primary btn-lg px-4">
+                <i class="bi bi-grid-1x2-fill me-1"></i> Go to Dashboard
+            </a>
+            {% endif %}
+        </div>
 
-        <section class="grid items-center gap-10 lg:grid-cols-2 lg:gap-14">
-            <div class="space-y-6">
-                <p class="inline-flex rounded-full border border-sky-100 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
-                    Academic Platform
-                </p>
-                <h1 class="max-w-xl text-4xl font-extrabold leading-tight text-slate-900 md:text-5xl">
-                    DevNest: A Unified Space for Academic Growth.
-                </h1>
-                <p class="max-w-2xl text-base leading-8 text-slate-600 md:text-lg">
-                    DevNest is a collaborative academic platform designed to enhance student learning through structured communities ('Nests'). It combines Q&amp;A discussions, organized Nest content, automated assessments, and AI-powered feedback to centralize learning and improve knowledge retention.
-                </p>
-            </div>
+        <!-- Right: mockup card -->
+        <div class="col-12 col-lg-6">
+            <div class="card shadow border-0 rounded-4 overflow-hidden">
+                <!-- Search bar mockup -->
+                <div class="card-header bg-light border-bottom py-3">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0 text-secondary">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0 bg-white text-secondary" placeholder="Search in DevNest..." disabled>
+                    </div>
+                </div>
 
-            <div class="relative">
-                <div class="absolute -left-4 -top-4 h-24 w-24 rounded-full bg-sky-200/40 blur-2xl"></div>
-                <div class="absolute -bottom-6 -right-2 h-28 w-28 rounded-full bg-slate-300/50 blur-2xl"></div>
-
-                <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl">
-                    <div class="border-b border-slate-200 bg-slate-50 px-5 py-4">
-                        <div class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-400">
-                            Search in DevNest...
+                <!-- Two-column inner layout -->
+                <div class="row g-0">
+                    <!-- Sidebar: Nests list -->
+                    <div class="col-4 border-end bg-light p-3">
+                        <p class="text-uppercase fw-semibold text-secondary mb-2" style="font-size:.7rem; letter-spacing:.1em;">Nests</p>
+                        <div class="d-flex flex-column gap-2">
+                            <span class="badge rounded-3 bg-primary bg-opacity-10 text-primary fw-semibold px-3 py-2 text-start">CS 101</span>
+                            <span class="badge rounded-3 bg-white text-dark border px-3 py-2 text-start fw-normal">MATH 201</span>
+                            <span class="badge rounded-3 bg-white text-dark border px-3 py-2 text-start fw-normal">PHYS 110</span>
+                            <span class="badge rounded-3 bg-white text-dark border px-3 py-2 text-start fw-normal">ENG 220</span>
                         </div>
                     </div>
 
-                    <div class="grid md:grid-cols-[180px_1fr]">
-                        <aside class="border-b border-slate-200 bg-slate-50 p-4 md:border-b-0 md:border-r">
-                            <p class="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nests</p>
-                            <div class="space-y-2 text-sm">
-                                <div class="rounded-lg bg-sky-100 px-3 py-2 font-semibold text-sky-800">CS 101</div>
-                                <div class="rounded-lg bg-white px-3 py-2 text-slate-700 shadow-sm">MATH 201</div>
-                                <div class="rounded-lg bg-white px-3 py-2 text-slate-700 shadow-sm">PHYS 110</div>
-                                <div class="rounded-lg bg-white px-3 py-2 text-slate-700 shadow-sm">ENG 220</div>
-                            </div>
-                        </aside>
-
-                        <div class="space-y-4 p-5">
-                            <div class="rounded-xl border border-slate-200 bg-white p-4">
-                                <p class="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">Q&amp;A Preview</p>
-                                <h3 class="text-sm font-bold text-slate-800">How does Big-O help compare sorting algorithms?</h3>
-                                <p class="mt-2 text-sm leading-6 text-slate-600">Big-O describes growth trends as input size increases, so we can compare algorithm efficiency beyond small test cases.</p>
-                            </div>
-                            <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                                <p class="text-xs font-semibold uppercase tracking-[0.15em] text-slate-500">Latest Note</p>
-                                <p class="mt-2 text-sm leading-6 text-slate-600">Week 5 assessment covers recursion trees, recurrence relations, and practical complexity analysis examples.</p>
-                            </div>
+                    <!-- Main area: preview cards -->
+                    <div class="col-8 p-3 d-flex flex-column gap-3">
+                        <div class="p-3 border rounded-3 bg-white">
+                            <p class="text-uppercase fw-semibold text-secondary mb-1" style="font-size:.68rem; letter-spacing:.1em;">Q&amp;A Preview</p>
+                            <p class="fw-bold mb-1 small">How does Big-O help compare sorting algorithms?</p>
+                            <p class="text-secondary mb-0 small">Big-O describes growth trends so we can compare algorithm efficiency beyond small test cases.</p>
+                        </div>
+                        <div class="p-3 border rounded-3 bg-light">
+                            <p class="text-uppercase fw-semibold text-secondary mb-1" style="font-size:.68rem; letter-spacing:.1em;">Latest Note</p>
+                            <p class="text-secondary mb-0 small">Week 5 covers recursion trees, recurrence relations, and practical complexity analysis.</p>
                         </div>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <footer class="mt-12 border-t border-slate-300 px-5 py-6 text-sm text-slate-600 md:px-8">
-            <div class="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
-                <p class="font-semibold text-slate-700">DevNest</p>
-                <p>Unified learning spaces for better academic growth.</p>
-                <p>© 2026 DevNest. All rights reserved.</p>
-            </div>
-        </footer>
+        </div>
     </div>
+
 </div>
-    {% include 'main/components/hero.html' with message='hi' another='value' %}
 {% endblock %}
