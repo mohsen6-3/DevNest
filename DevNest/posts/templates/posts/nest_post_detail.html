@@ -92,6 +92,8 @@
             {% for p in group %}
             <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=p.pk %}{% if current_query %}?{{ current_query }}{% endif %}"
                class="d-block text-decoration-none rounded-3 px-3 py-2 mb-1 sidebar-post-item
+                    {% if not p.is_read %}post-is-unread{% endif %}
+                    {% if p.is_read %}post-is-read{% endif %}
                       {% if active_post and active_post.pk == p.pk %}active{% endif %}">
                 <div class="fw-semibold small text-truncate">{{ p.title }}</div>
                 {% if p.post_type %}
@@ -114,6 +116,37 @@
         <div class="row g-4">
             <!-- Post body + comments -->
             <div class="col-12">
+
+                <form method="post" action="{% url 'nests:nest_toggle_post_subscription' nest_id=nest.pk post_id=post.pk %}" class="mb-3 nest-subscription-box">
+                    {% csrf_token %}
+                    <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+                        <div class="d-flex align-items-start gap-2">
+                            <span class="nest-subscription-icon"><i class="bi bi-bell"></i></span>
+                            <div>
+                                <div class="fw-semibold" style="line-height:1.2;">Email Updates</div>
+                                <small class="text-muted">Get notified when someone comments or replies on this post.</small>
+                            </div>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                role="switch"
+                                id="postSubscription"
+                                name="subscribe"
+                                value="1"
+                                {% if is_subscribed_to_post %}checked{% endif %}
+                                onchange="this.form.submit()"
+                            >
+                            <label class="form-check-label small ms-1" for="postSubscription">
+                                {% if is_subscribed_to_post %}On{% else %}Off{% endif %}
+                            </label>
+                        </div>
+                    </div>
+                    <noscript>
+                        <button class="btn btn-sm btn-outline-secondary mt-2" type="submit">Save</button>
+                    </noscript>
+                </form>
 
                 <!-- Post body -->
                 <div class="nest-surface p-4 mb-4">

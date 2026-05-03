@@ -3,7 +3,12 @@
 {% block title %}{{ user.username }} — DevNest{% endblock %}
 
 {% block content %}
-<div class="row g-4">
+<div class="mb-3">
+    <a href="{% url 'nests:nest_dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+        <i class="bi bi-arrow-left me-1"></i>Back to Nests
+    </a>
+</div>
+<div class="row g-4 profile-shell">
 
     <!-- Profile card -->
     <div class="col-12">

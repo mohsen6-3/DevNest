@@ -91,6 +91,91 @@
     color: #fff;
 }
 
+/* ── Mobile nav toggle & panel ──────────────────────── */
+.nest-mobile-toggle {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: var(--nest-radius-sm);
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+}
+
+.nest-mobile-toggle:focus {
+    outline: none;
+    border-color: rgba(255,255,255,.6);
+}
+
+.nest-mobile-panel {
+    background: var(--nest-accent-hover);
+    border-top: 1px solid rgba(255,255,255,.12);
+    padding: .5rem 1.25rem .75rem;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+}
+
+.nest-mobile-section {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding: .5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+
+.nest-mobile-section:last-child {
+    border-bottom: none;
+}
+
+.nest-mobile-label {
+    color: rgba(255,255,255,.5);
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    padding: .2rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.nest-mobile-link {
+    display: flex;
+    align-items: center;
+    color: rgba(255,255,255,.85);
+    text-decoration: none;
+    font-size: .875rem;
+    font-weight: 600;
+    padding: .45rem .25rem;
+    border-radius: 4px;
+    transition: color .12s, background .12s;
+}
+
+.nest-mobile-link:hover {
+    color: #fff;
+    background: rgba(255,255,255,.08);
+}
+
+.nest-subscription-box {
+    background: var(--nest-soft);
+    border: 1px solid var(--nest-line);
+    border-radius: var(--nest-radius-sm);
+    padding: .75rem .9rem;
+}
+
+.nest-subscription-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--nest-accent);
+    background: #fff;
+    border: 1px solid var(--nest-line);
+}
+
 /* ── Layout ─────────────────────────────────────────── */
 .nest-layout {
     display: block;
@@ -305,13 +390,20 @@
     margin-top: .85rem;
     margin-bottom: 1.5rem;
     overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+}
+
+.nest-subnav-wrap::-webkit-scrollbar {
+    display: none;
+    height: 0;
 }
 
 .nest-subnav {
-    display: inline-flex;
+    display: flex;
     align-items: flex-end;
     gap: 0;
-    min-width: 100%;
+    width: 100%;
     padding: 0 .5rem;
 }
 
@@ -419,6 +511,7 @@
     border-left: 3px solid transparent;
     border-radius: 6px;
     padding: .55rem .85rem;
+    position: relative;
     transition: background .12s, border-color .12s, color .12s;
     font-size: .875rem;
 }
@@ -436,6 +529,43 @@
     border-color: #c9cee6;
     border-left-color: var(--nest-accent);
     font-weight: 600;
+}
+
+.sidebar-post-item.post-is-unread {
+    background: #fff;
+    border-color: #d8dce8;
+    border-left-color: var(--nest-accent);
+    box-shadow: 0 1px 2px rgba(29, 52, 97, 0.08);
+}
+
+.sidebar-post-item.post-is-unread .fw-semibold {
+    color: #1c2b4a;
+}
+
+.sidebar-post-item.post-is-unread::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--nest-amber);
+    position: absolute;
+    top: .6rem;
+    right: .6rem;
+}
+
+.sidebar-post-item.post-is-read {
+    background: #f5f6f8;
+    border-color: #e2e5ea;
+    border-left-color: #d1d6df;
+}
+
+.sidebar-post-item.post-is-read .fw-semibold {
+    color: #667085;
+    font-weight: 600;
+}
+
+.sidebar-post-item.post-is-read small {
+    color: #8a93a3 !important;
 }
 
 .sidebar-post-item small {
@@ -488,6 +618,33 @@
 /* ── Misc ────────────────────────────────────────────── */
 .hover-shadow:hover { box-shadow: var(--nest-shadow); }
 
+.post-card-unread {
+    border-left: 3px solid var(--nest-accent) !important;
+    background: linear-gradient(180deg, #ffffff 0%, #fcfcff 100%);
+}
+
+.post-card-unread h6 a {
+    color: #1c2b4a;
+}
+
+.post-card-read {
+    background: #f8f9fb;
+    border-color: #e4e7ee !important;
+}
+
+.post-card-read:hover {
+    background: #f3f5f8;
+}
+
+.post-card-read h6 a {
+    color: #667085;
+    font-weight: 600;
+}
+
+.post-card-read .text-muted {
+    color: #8a93a3 !important;
+}
+
 .list-group-item {
     background: transparent;
 }
@@ -527,3 +684,50 @@
     position: relative;
 }
 /* end score  */
+
+/* ── Unread dot on post cards ────────────────────────── */
+.post-card-unread::before {
+    content: '';
+    position: absolute;
+    top: .7rem;
+    right: .7rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--nest-accent);
+    box-shadow: 0 0 0 2px #fff;
+}
+
+/* ── Sticky mobile FAB (Create Post) ─────────────────── */
+.posts-mobile-fab {
+    display: none;
+}
+
+@media (max-width: 991px) {
+    .posts-mobile-fab {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        z-index: 200;
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: var(--nest-accent);
+        color: #fff;
+        font-size: 1.4rem;
+        box-shadow: 0 4px 16px rgba(29, 52, 97, .35);
+        border: none;
+        cursor: pointer;
+        transition: background .15s, transform .15s;
+        text-decoration: none;
+    }
+
+    .posts-mobile-fab:hover {
+        background: var(--nest-accent-hover);
+        color: #fff;
+        transform: scale(1.08);
+    }
+}

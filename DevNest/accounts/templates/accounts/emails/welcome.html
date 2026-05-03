@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to DevNest</title>
+    <style>
+        body {
+            font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            color: #1a1a2e;
+            background: #f5f4ef;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid #dddbd3;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
+        }
+        .header {
+            background: #1d3461;
+            padding: 40px 30px;
+            text-align: center;
+            border-bottom: 3px solid #16294f;
+        }
+        .logo {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            display: block;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 32px;
+            font-family: 'DM Serif Display', serif;
+            color: #ffffff;
+            letter-spacing: 0.3px;
+            font-weight: 400;
+        }
+        .header p {
+            margin: 8px 0 0 0;
+            color: rgba(255,255,255,0.8);
+            font-size: 14px;
+            letter-spacing: 0.2px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            font-family: 'DM Serif Display', serif;
+            color: #1d3461;
+            margin: 0 0 12px 0;
+            font-size: 24px;
+            font-weight: 400;
+            letter-spacing: 0.2px;
+        }
+        .content p {
+            margin: 0 0 16px 0;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 24px 0;
+        }
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #dddbd3;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .feature-list li:before {
+            content: "▪ ";
+            color: #c57c0e;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #c57c0e;
+            color: #ffffff;
+            padding: 13px 32px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 24px 0;
+            font-weight: 600;
+            font-size: 15px;
+            letter-spacing: 0.3px;
+            border: 1px solid #c57c0e;
+            transition: all 0.2s;
+        }
+        .cta-button:hover {
+            background: #16294f;
+            border-color: #16294f;
+        }
+        .divider {
+            height: 1px;
+            background: #dddbd3;
+            margin: 24px 0;
+        }
+        .footer {
+            background: #f5f4ef;
+            padding: 24px 30px;
+            border-top: 1px solid #dddbd3;
+            font-size: 13px;
+            color: #6b7280;
+            text-align: center;
+        }
+        .footer p {
+            margin: 0 0 8px 0;
+        }
+        .footer p:last-child {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img class="logo" src="cid:{{ logo_cid }}" alt="DevNest Logo">
+            <h1>Welcome to DevNest</h1>
+            <p>Your Learning Nest Awaits</p>
+        </div>
+        
+        <div class="content">
+            <h2>Hi {{ full_name }},</h2>
+            
+            <p>Welcome to the DevNest community! We're thrilled to have you join us on this collaborative learning journey.</p>
+            
+            <p>Here's what you can explore:</p>
+            
+            <ul class="feature-list">
+                <li><strong>Browse Nests</strong> — Find communities aligned with your learning goals</li>
+                <li><strong>Join a Community</strong> — Connect with instructors and peers who share your interests</li>
+                <li><strong>Participate</strong> — Share posts, ask questions, and contribute your insights</li>
+                <li><strong>Assess & Grow</strong> — Complete assessments and track your progress</li>
+                <li><strong>Earn Recognition</strong> — Get acknowledged for your valuable contributions</li>
+            </ul>
+            
+            <div class="divider"></div>
+            
+            <p style="margin-top: 24px;">Ready to get started? Jump into your first nest and introduce yourself to the community. We can't wait to see what you'll discover!</p>
+            
+            <div style="text-align: center;">
+                <a href="{{ site_url }}" class="cta-button">Enter DevNest</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>DevNest</strong> — Where Learning Happens Together</p>
+            <p>© 2026 All Rights Reserved</p>
+        </div>
+    </div>
+</body>
+</html>

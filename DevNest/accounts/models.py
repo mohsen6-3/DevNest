@@ -6,6 +6,10 @@ class Profile(models.Model):
     about = models.TextField(blank=True)
     avatar = models.ImageField(upload_to='avatars/', default='avatars/default.svg')
     social_link = models.URLField(blank=True)
+    notify_in_app_post_updates = models.BooleanField(default=True)
+    notify_email_post_updates = models.BooleanField(default=True)
+    notify_in_app_announcements = models.BooleanField(default=True)
+    notify_email_announcements = models.BooleanField(default=True)
 
     @property
     def is_site_staff(self):

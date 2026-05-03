@@ -16,6 +16,7 @@ urlpatterns = [
     path('<int:nest_id>/posts/',  post_views.nest_posts_view,   name='nest_posts'),
     path('<int:nest_id>/posts/<int:post_id>/',                          post_views.nest_post_detail_view, name='nest_post_detail'),
     path('<int:nest_id>/posts/<int:post_id>/vote/',                     post_views.vote_post_view,        name='nest_vote_post'),
+    path('<int:nest_id>/posts/<int:post_id>/subscribe/',                post_views.toggle_post_subscription_view, name='nest_toggle_post_subscription'),
     path('<int:nest_id>/posts/<int:post_id>/comment/',                  post_views.add_comment_view,      name='nest_add_comment'),
     path('<int:nest_id>/posts/<int:post_id>/comment/<int:comment_id>/verify/', post_views.verify_comment_view, name='nest_verify_comment'),
     path('<int:nest_id>/posts/<int:post_id>/delete/',                   post_views.delete_post_view,      name='nest_delete_post'),

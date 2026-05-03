@@ -1,18 +1,24 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
+from django.conf import settings
+from django.core.mail import EmailMessage
 from django.db.models import Count, Q, Sum
 from django.http import HttpRequest
+from django.template.loader import render_to_string
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models.functions import Coalesce
+from email.mime.image import MIMEImage
 
+from main.models import Notification
 from nests.models import Nest, NestMembership
 from recognition.models import NestRecognition
 
-from .models import Comment, Post, PostTag, PostType, PostVote
+from .models import Comment, Post, PostReadStatus, PostSubscription, PostTag, PostType, PostVote
 
 
 CORE_POST_TYPES = [
@@ -183,13 +189,165 @@ def _attach_recognition(items, rec_map: dict, user_attr: str = 'user'):
         item.recognition = rec_map.get(user_id)
 
 
+def _attach_subscription_state(posts, user):
+    if not posts or not getattr(user, 'is_authenticated', False):
+        return
+
+    post_ids = [post.pk for post in posts]
+    rows = PostSubscription.objects.filter(post_id__in=post_ids, user=user).values_list('post_id', 'is_enabled')
+    subscription_map = {post_id: is_enabled for post_id, is_enabled in rows}
+
+    for post in posts:
+        if post.pk in subscription_map:
+            post.is_subscribed = subscription_map[post.pk]
+        else:
+            # Keep "author default on" behavior for old posts without an explicit record yet.
+            post.is_subscribed = post.user_id == user.pk
+
+
+def _attach_read_state(posts, user, active_post_id=None):
+    if not posts or not getattr(user, 'is_authenticated', False):
+        return
+
+    post_ids = [post.pk for post in posts]
+    read_post_ids = set(
+        PostReadStatus.objects.filter(post_id__in=post_ids, user=user).values_list('post_id', flat=True)
+    )
+
+    for post in posts:
+        is_read = post.pk in read_post_ids or post.user_id == user.pk
+        if active_post_id and post.pk == active_post_id:
+            is_read = True
+        post.is_read = is_read
+
+
+def _upsert_post_subscription(post: Post, user, is_enabled: bool):
+    subscription, created = PostSubscription.objects.get_or_create(
+        post=post,
+        user=user,
+        defaults={'is_enabled': is_enabled},
+    )
+    if not created and subscription.is_enabled != is_enabled:
+        subscription.is_enabled = is_enabled
+        subscription.save(update_fields=['is_enabled', 'updated_at'])
+
+
+def _attach_email_logo(email_message, logo_cid='devnest-logo'):
+    logo_path = settings.BASE_DIR / 'main' / 'static' / 'images' / 'logo.svg'
+    try:
+        with open(logo_path, 'rb') as logo_file:
+            logo = MIMEImage(logo_file.read(), _subtype='svg+xml')
+        logo.add_header('Content-ID', f'<{logo_cid}>')
+        logo.add_header('Content-Disposition', 'inline', filename='logo.svg')
+        email_message.attach(logo)
+    except OSError:
+        # Keep email delivery working even if logo file is missing.
+        pass
+
+
+def _send_post_update_emails(post: Post, actor, comment: Comment):
+    post_path = reverse('nests:nest_post_detail', kwargs={'nest_id': post.nest_id, 'post_id': post.pk})
+    post_url = f"{settings.SITE_URL.rstrip('/')}{post_path}"
+    is_reply = comment.parent_id is not None
+    event_label = 'reply' if is_reply else 'comment'
+    actor_name = actor.get_full_name() or actor.username
+    subscriptions = PostSubscription.objects.filter(post=post, is_enabled=True).select_related('user')
+
+    for subscription in subscriptions:
+        recipient = subscription.user
+        if recipient.pk == actor.pk:
+            continue
+
+        Notification.objects.create(
+            user=recipient,
+            message=f'{actor_name} added a new {event_label} on "{post.title}".',
+            link=post_path,
+        )
+
+        if not recipient.email:
+            continue
+
+        context = {
+            'recipient_name': recipient.get_full_name() or recipient.username,
+            'actor_name': actor_name,
+            'post_title': post.title,
+            'nest_name': post.nest.name if post.nest_id else 'DevNest',
+            'event_label': event_label,
+            'comment_content': comment.content,
+            'post_url': post_url,
+            'site_url': settings.SITE_URL,
+            'logo_cid': 'devnest-logo',
+        }
+        html_content = render_to_string('posts/emails/post_update.html', context)
+        email_message = EmailMessage(
+            f"New {event_label} on: {post.title}",
+            html_content,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient.email],
+        )
+        email_message.content_subtype = 'html'
+        _attach_email_logo(email_message, logo_cid='devnest-logo')
+        email_message.send(fail_silently=True)
+
+
+def _send_announcement_emails(post: Post, actor):
+    if not post.nest_id:
+        return
+
+    post_path = reverse('nests:nest_post_detail', kwargs={'nest_id': post.nest_id, 'post_id': post.pk})
+    post_url = f"{settings.SITE_URL.rstrip('/')}{post_path}"
+    actor_name = actor.get_full_name() or actor.username
+
+    memberships = post.nest.memberships.filter(
+        status=NestMembership.Status.ACTIVE,
+    ).select_related('user')
+
+    for membership in memberships:
+        recipient = membership.user
+        if recipient.pk == actor.pk:
+            continue
+
+        Notification.objects.create(
+            user=recipient,
+            message=f'New announcement in {post.nest.name}: "{post.title}"',
+            link=post_path,
+        )
+
+        if not recipient.email:
+            continue
+        context = {
+            'recipient_name': recipient.get_full_name() or recipient.username,
+            'actor_name': actor_name,
+            'nest_name': post.nest.name,
+            'post_title': post.title,
+            'post_content': post.content,
+            'post_url': post_url,
+            'site_url': settings.SITE_URL,
+            'logo_cid': 'devnest-logo',
+        }
+        html_content = render_to_string('posts/emails/announcement.html', context)
+        email_message = EmailMessage(
+            f"New announcement in {post.nest.name}: {post.title}",
+            html_content,
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient.email],
+        )
+        email_message.content_subtype = 'html'
+        _attach_email_logo(email_message, logo_cid='devnest-logo')
+        email_message.send(fail_silently=True)
+
+
 def nest_posts_view(request: HttpRequest, nest_id: int):
     if not request.user.is_authenticated:
         return _require_auth(request, 'You must be signed in to access nest posts.')
 
     nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     context = _base_nest_context(nest, request.user)
-    post_types = _ensure_core_post_types()
+    all_post_types = _ensure_core_post_types()
+    if context['is_nest_staff']:
+        post_types = all_post_types
+    else:
+        post_types = [p for p in all_post_types if p.name.lower() != 'announcement']
 
     # Nest staff can always post. Members can post too once active.
     has_access = context['is_nest_staff'] or (context['membership'] is not None)
@@ -201,6 +359,7 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
         content = request.POST.get('content', '').strip()
         post_type_id = request.POST.get('post_type_id', '')
         raw_tags = request.POST.get('tags', '').strip()
+        subscribe_updates = request.POST.get('subscribe_updates') == '1'
 
         selected_post_type = PostType.objects.filter(pk=post_type_id).first()
 
@@ -221,6 +380,9 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
                 tags = _resolve_post_tags(raw_tags)
                 if tags:
                     post.tags.set(tags)
+                _upsert_post_subscription(post, request.user, is_enabled=subscribe_updates)
+                if is_announcement and context['is_nest_staff']:
+                    _send_announcement_emails(post, request.user)
                 messages.success(request, 'Post published successfully.', 'alert-success')
                 return redirect('nests:nest_posts', nest_id=nest.pk)
 
@@ -228,6 +390,8 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
     base_posts = Post.objects.filter(nest=nest).select_related('user', 'post_type').prefetch_related('tags')
     posts = list(_apply_post_filters(base_posts, filter_state))
     _attach_user_votes(posts, request.user)
+    _attach_subscription_state(posts, request.user)
+    _attach_read_state(posts, request.user)
     rec_map = _recognition_map(nest)
     _attach_recognition(posts, rec_map)
     available_tags = PostTag.objects.filter(posts__nest=nest).distinct().order_by('name')
@@ -286,10 +450,18 @@ def nest_post_detail_view(request: HttpRequest, nest_id: int, post_id: int):
     all_posts_qs = Post.objects.filter(nest=nest).select_related('user', 'post_type').prefetch_related('tags')
     all_posts = list(_apply_post_filters(all_posts_qs, filter_state))
     _attach_user_votes(all_posts, request.user)
+    _attach_subscription_state(all_posts, request.user)
+    _attach_read_state(all_posts, request.user, active_post_id=post.pk)
     rec_map = _recognition_map(nest)
     _attach_recognition(all_posts, rec_map)
 
+    PostReadStatus.objects.update_or_create(post=post, user=request.user)
     post_vote = PostVote.objects.filter(post=post, user=request.user).values_list('value', flat=True).first()
+    subscription, _ = PostSubscription.objects.get_or_create(
+        post=post,
+        user=request.user,
+        defaults={'is_enabled': request.user.pk == post.user_id},
+    )
     post.vote_score = PostVote.objects.filter(post=post).aggregate(total=Coalesce(Sum('value'), 0))['total']
     post.user_vote = post_vote or 0
     post.recognition = rec_map.get(post.user_id)
@@ -317,8 +489,34 @@ def nest_post_detail_view(request: HttpRequest, nest_id: int, post_id: int):
         'filter_state': filter_state,
         'active_filters_count': active_filters_count,
         'current_query': request.GET.urlencode(),
+        'is_subscribed_to_post': subscription.is_enabled,
     })
     return render(request, 'posts/nest_post_detail.html', context)
+
+
+def toggle_post_subscription_view(request: HttpRequest, nest_id: int, post_id: int):
+    if not request.user.is_authenticated:
+        return _require_auth(request, 'You must be signed in to manage post updates.')
+
+    if request.method != 'POST':
+        return redirect('nests:nest_post_detail', nest_id=nest_id, post_id=post_id)
+
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
+    post = get_object_or_404(Post, pk=post_id, nest=nest)
+
+    membership = nest.membership_for(request.user)
+    is_staff = nest.is_nest_staff(request.user) or nest.is_site_staff(request.user)
+    if not (is_staff or membership is not None):
+        return _deny_access(request, 'You must be an active nest member to manage updates.', 'nests:nest_detail', nest_id=nest_id)
+
+    wants_subscription = request.POST.get('subscribe') == '1'
+    _upsert_post_subscription(post, request.user, is_enabled=wants_subscription)
+    if wants_subscription:
+        messages.success(request, 'Email updates enabled for this post.', 'alert-success')
+    else:
+        messages.info(request, 'Email updates turned off for this post.', 'alert-info')
+
+    return redirect('nests:nest_post_detail', nest_id=nest_id, post_id=post_id)
 
 
 def vote_post_view(request: HttpRequest, nest_id: int, post_id: int):
@@ -386,12 +584,13 @@ def add_comment_view(request: HttpRequest, nest_id: int, post_id: int):
     if parent_id:
         parent = get_object_or_404(Comment, pk=parent_id, post=post, parent=None)
 
-    Comment.objects.create(
+    new_comment = Comment.objects.create(
         user=request.user,
         post=post,
         content=content,
         parent=parent,
     )
+    _send_post_update_emails(post, request.user, new_comment)
     messages.success(request, 'Comment posted.', 'alert-success')
     return redirect('nests:nest_post_detail', nest_id=nest_id, post_id=post_id)
 

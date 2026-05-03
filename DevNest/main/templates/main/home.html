@@ -4,20 +4,20 @@
 {% block title %}DevNest{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container py-5 landing-shell">
 
     <!-- Hero -->
-    <div class="row align-items-center g-5 py-4">
+    <div class="row align-items-center g-5 py-4 landing-hero">
 
         <!-- Left: text -->
         <div class="col-12 col-lg-6">
-            <span class="badge rounded-pill border border-primary-subtle bg-primary-subtle text-primary-emphasis mb-3 px-3 py-2 fw-semibold text-uppercase ls-wide">
+            <span class="badge rounded-pill landing-badge mb-3 px-3 py-2 fw-semibold text-uppercase ls-wide">
                 Academic Platform
             </span>
-            <h1 class="display-5 fw-bold lh-sm mb-3">
+            <h1 class="display-5 fw-bold lh-sm mb-3 landing-title">
                 DevNest: A Unified Space<br>for Academic Growth.
             </h1>
-            <p class="lead text-secondary mb-4">
+            <p class="lead text-secondary mb-4 landing-subtitle">
                 DevNest is a collaborative academic platform designed to enhance student learning through
                 structured communities called <strong>Nests</strong>. It combines Q&amp;A discussions,
                 organised content, automated assessments, and AI-powered feedback in one place.
@@ -40,42 +40,49 @@
 
         <!-- Right: mockup card -->
         <div class="col-12 col-lg-6">
-            <div class="card shadow border-0 rounded-4 overflow-hidden">
-                <!-- Search bar mockup -->
-                <div class="card-header bg-light border-bottom py-3">
-                    <div class="input-group">
-                        <span class="input-group-text bg-white border-end-0 text-secondary">
-                            <i class="bi bi-search"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0 bg-white text-secondary" placeholder="Search in DevNest..." disabled>
+            <div class="landing-preview-card">
+                <div class="landing-nest-topbar">
+                    <div class="landing-nest-brand">
+                        <img src="{% static 'images/logo.svg' %}" alt="DevNest logo">
+                        <span>DevNest</span>
                     </div>
+                    <span class="landing-nest-user">@student</span>
                 </div>
 
-                <!-- Two-column inner layout -->
-                <div class="row g-0">
-                    <!-- Sidebar: Nests list -->
-                    <div class="col-4 border-end bg-light p-3">
-                        <p class="text-uppercase fw-semibold text-secondary mb-2" style="font-size:.7rem; letter-spacing:.1em;">Nests</p>
-                        <div class="d-flex flex-column gap-2">
-                            <span class="badge rounded-3 bg-primary bg-opacity-10 text-primary fw-semibold px-3 py-2 text-start">CS 101</span>
-                            <span class="badge rounded-3 bg-white text-dark border px-3 py-2 text-start fw-normal">MATH 201</span>
-                            <span class="badge rounded-3 bg-white text-dark border px-3 py-2 text-start fw-normal">PHYS 110</span>
-                            <span class="badge rounded-3 bg-white text-dark border px-3 py-2 text-start fw-normal">ENG 220</span>
+                <div class="landing-nest-body">
+                    <section class="landing-nest-content">
+                        <div class="landing-mock-head">
+                            <h6 class="mb-1">Intro to Algorithms</h6>
+                            <small>CS 101 Nest · A collaborative space for algorithms practice and discussion.</small>
                         </div>
-                    </div>
 
-                    <!-- Main area: preview cards -->
-                    <div class="col-8 p-3 d-flex flex-column gap-3">
-                        <div class="p-3 border rounded-3 bg-white">
-                            <p class="text-uppercase fw-semibold text-secondary mb-1" style="font-size:.68rem; letter-spacing:.1em;">Q&amp;A Preview</p>
-                            <p class="fw-bold mb-1 small">How does Big-O help compare sorting algorithms?</p>
-                            <p class="text-secondary mb-0 small">Big-O describes growth trends so we can compare algorithm efficiency beyond small test cases.</p>
+                        <div class="landing-subnav-wrap">
+                            <nav class="landing-subnav" aria-label="Nest feature navigation preview">
+                                <a href="#" class="landing-subnav-link active"><i class="bi bi-speedometer2 me-1"></i> Overview</a>
+                                <a href="#" class="landing-subnav-link"><i class="bi bi-chat-left-text me-1"></i> Posts</a>
+                                <a href="#" class="landing-subnav-link"><i class="bi bi-card-checklist me-1"></i> Assessments</a>
+                                <a href="#" class="landing-subnav-link"><i class="bi bi-journal-code me-1"></i> Content</a>
+                            </nav>
                         </div>
-                        <div class="p-3 border rounded-3 bg-light">
-                            <p class="text-uppercase fw-semibold text-secondary mb-1" style="font-size:.68rem; letter-spacing:.1em;">Latest Note</p>
-                            <p class="text-secondary mb-0 small">Week 5 covers recursion trees, recurrence relations, and practical complexity analysis.</p>
+
+                        <div class="landing-mock-card">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <strong class="small">How does Big-O help compare sorting algorithms?</strong>
+                                <span class="landing-mock-chip">Question</span>
+                            </div>
+                            <p class="small mb-2">Big-O describes growth trends so we can compare algorithm efficiency beyond small test cases.</p>
+                            <small class="text-muted">By instructor · 14 replies</small>
                         </div>
-                    </div>
+
+                        <div class="landing-mock-card muted">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <strong class="small">Week 5 Announcement</strong>
+                                <span class="landing-mock-chip amber">Announcement</span>
+                            </div>
+                            <p class="small mb-2">Recursion trees, recurrence relations, and practical complexity analysis with review quiz.</p>
+                            <small class="text-muted">Posted today</small>
+                        </div>
+                    </section>
                 </div>
             </div>
         </div>
