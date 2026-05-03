@@ -9,6 +9,10 @@
 {% if request.user.is_authenticated and request.user.is_staff %}
 <a class="btn btn-success" href="{% url 'assessments:question_create_view' nest_id=nest.id pk=assessment.id %}"> + Add
     Question</a>
+
+<a class="btn btn-secondary" href="{% url 'assessments:assessment_submissions_view' nest_id=nest.id pk=assessment.id %}">
+    View Submissions
+</a>
 {% endif %}
 <hr>
 {% if request.user.is_authenticated and request.user.is_staff %}

@@ -9,7 +9,7 @@ class Assessment(models.Model):
     TYPE_CHOICES = [
         ('quiz', 'Quiz'),
         ('assignment', 'Assignment'),
-        ('coding', 'Coding'),
+        # ('coding', 'Coding'),
     ]
 
     title = models.CharField(max_length=200)
@@ -29,7 +29,7 @@ class Question(models.Model):
     QUESTION_TYPES = [
         ('mcq', 'Multiple Choice'),
         ('text', 'Text Answer'),
-        ('code', 'Coding'),
+        # ('code', 'Coding'),
     ]
 
     assessment = models.ForeignKey(Assessment,on_delete=models.CASCADE,related_name='questions')

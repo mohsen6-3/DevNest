@@ -478,3 +478,15 @@
         margin-top: 1.25rem;
     }
 }
+
+/* score  */
+.score-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.card {
+    position: relative;
+}
+/* end score  */
