@@ -32,10 +32,15 @@ class Migration(migrations.Migration):
                 'ordering': ['nest', 'joined_at'],
             },
         ),
-        migrations.AlterField(
-            model_name='nest',
-            name='members',
-            field=models.ManyToManyField(related_name='nests', through='nests.NestMembership', to=settings.AUTH_USER_MODEL),
+        migrations.SeparateDatabaseAndState(
+            database_operations=[],
+            state_operations=[
+                migrations.AlterField(
+                    model_name='nest',
+                    name='members',
+                    field=models.ManyToManyField(related_name='nests', through='nests.NestMembership', to=settings.AUTH_USER_MODEL),
+                ),
+            ],
         ),
         migrations.AddConstraint(
             model_name='nestmembership',

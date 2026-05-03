@@ -5,26 +5,98 @@
 {% block tab_posts %}active{% endblock %}
 
 {% block feature_content %}
-<div class="row g-0" style="min-height:70vh;">
+<div class="row g-0" style="min-height:70vh;" id="postsLayout">
 
     <!-- ── Sidebar ────────────────────────────────── -->
-    <div class="col-12 col-lg-3 border-end" style="max-height:75vh;overflow-y:auto;position:sticky;top:72px;">
+    <div class="col-12 col-lg-3" style="max-height:75vh;overflow-y:auto;position:sticky;top:72px;background:var(--nest-paper);border:1px solid var(--nest-line);border-radius:var(--nest-radius);box-shadow:var(--nest-shadow-sm);">
         <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
             <span class="fw-bold small">Posts</span>
-            <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">{{ posts|length }}</span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">{{ posts|length }}</span>
+                <button type="button" class="btn btn-sm nest-btn-main py-0 px-2" id="newPostToggle" onclick="toggleNewPostForm()" title="New Post">
+                    <i class="bi bi-plus-lg"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="p-3 border-bottom">
+            <form method="get">
+                <div class="input-group input-group-sm">
+                    <input
+                        type="search"
+                        name="q"
+                        value="{{ filter_state.q }}"
+                        class="form-control"
+                        placeholder="Search posts..."
+                    >
+                    <button class="btn btn-outline-secondary" type="submit" title="Search">
+                        <i class="bi bi-search"></i>
+                    </button>
+                    <button
+                        class="btn btn-outline-secondary dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        data-bs-auto-close="outside"
+                        aria-expanded="false"
+                        title="Filters"
+                    >
+                        <i class="bi bi-sliders"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end p-3" style="min-width:260px;">
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold mb-1">Type</label>
+                            <select name="type" class="form-select form-select-sm">
+                                <option value="">All types</option>
+                                {% for t in post_types %}
+                                <option value="{{ t.id }}" {% if filter_state.type == t.id|stringformat:"s" %}selected{% endif %}>{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold mb-1">Tag</label>
+                            <select name="tag" class="form-select form-select-sm">
+                                <option value="">All tags</option>
+                                {% for tag in available_tags %}
+                                <option value="{{ tag.slug }}" {% if filter_state.tag == tag.slug %}selected{% endif %}>#{{ tag.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold mb-1">Sort</label>
+                            <select name="sort" class="form-select form-select-sm">
+                                <option value="newest" {% if filter_state.sort == 'newest' %}selected{% endif %}>Newest</option>
+                                <option value="oldest" {% if filter_state.sort == 'oldest' %}selected{% endif %}>Oldest</option>
+                                <option value="top" {% if filter_state.sort == 'top' %}selected{% endif %}>Top votes</option>
+                                <option value="discussed" {% if filter_state.sort == 'discussed' %}selected{% endif %}>Most discussed</option>
+                            </select>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm nest-btn-main" type="submit">Apply</button>
+                            <a class="btn btn-sm btn-outline-secondary" href="{% url 'nests:nest_posts' nest_id=nest.pk %}">Reset</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            {% if active_filters_count %}
+            <small class="text-muted d-block mt-2">{{ active_filters_count }} active filter{{ active_filters_count|pluralize }}</small>
+            {% endif %}
         </div>
 
         {% for label, group in grouped_posts %}
         <div class="px-3 pt-3 pb-1">
             <p class="text-muted mb-2" style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;">{{ label }}</p>
             {% for p in group %}
-            <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=p.pk %}"
+            <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=p.pk %}{% if current_query %}?{{ current_query }}{% endif %}"
                class="d-block text-decoration-none rounded-3 px-3 py-2 mb-1 sidebar-post-item
                       {% if active_post and active_post.pk == p.pk %}active{% endif %}">
                 <div class="fw-semibold small text-truncate">{{ p.title }}</div>
                 {% if p.post_type %}
                 <small class="text-muted">{{ p.post_type.name }}</small>
                 {% endif %}
+                <div class="d-flex align-items-center gap-2 mt-1">
+                    <small class="text-muted"><i class="bi bi-chat-dots me-1"></i>{{ p.comment_count|default:0 }}</small>
+                    <small class="text-muted"><i class="bi bi-caret-up-fill me-1"></i>{{ p.vote_score|default:0 }}</small>
+                </div>
             </a>
             {% endfor %}
         </div>
@@ -35,83 +107,178 @@
 
     <!-- ── Main area ────────────────────────────────── -->
     <div class="col-12 col-lg-9 p-4">
-        <div class="row g-3">
-
-            <!-- Post list (full cards when no post selected) -->
-            <div class="col-12 col-xl-7">
-                <div class="nest-surface p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="mb-0">Latest Posts</h5>
-                    </div>
-
-                    {% if posts %}
-                    <div class="d-flex flex-column gap-3">
-                        {% for post in posts %}
-                        <article class="border rounded-3 p-3 hover-shadow">
-                            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
-                                <h6 class="mb-0">
-                                    <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}"
-                                        class="text-decoration-none fw-semibold">{{ post.title }}</a>
-                                </h6>
-                                {% if post.post_type %}
-                                <span class="nest-chip {% if post.post_type.name|lower == 'announcement' %}nest-chip-rejected{% elif post.post_type.name|lower == 'question' %}nest-chip-pending{% else %}nest-chip-approved{% endif %}">
-                                    {{ post.post_type.name }}
-                                </span>
-                                {% endif %}
-                            </div>
-                            <p class="text-muted small mb-2">{{ post.content|truncatechars:120 }}</p>
-                            <div class="d-flex align-items-center justify-content-between">
-                                <small class="text-muted">By {{ post.user.username }} &middot; {{ post.created_at|date:"M j, Y" }}</small>
-                                <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}"
-                                    class="nest-subnav-badge text-decoration-none">
-                                    <i class="bi bi-chat-dots me-1"></i>{{ post.comments.count }}
-                                </a>
-                            </div>
-                        </article>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <p class="text-muted mb-0">No posts yet. Start the first discussion.</p>
-                    {% endif %}
-                </div>
+        <!-- New Post form (hidden by default) -->
+        <div id="newPostForm" class="nest-surface p-4 mb-4" style="display:none;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">New Post</h5>
+                <button type="button" class="btn-close" onclick="toggleNewPostForm()"></button>
             </div>
-
-            <!-- Create post form -->
-            <div class="col-12 col-xl-5">
-                <div class="nest-surface p-4">
-                    <h5 class="mb-3">New Post</h5>
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small" for="postTitle">Title</label>
-                            <input id="postTitle" name="title" class="form-control" maxlength="200" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small" for="postType">Post Type</label>
-                            <select id="postType" name="post_type_id" class="form-select" required>
-                                <option value="">Select type</option>
-                                {% for t in post_types %}
-                                <option value="{{ t.id }}">{{ t.name }}</option>
-                                {% endfor %}
-                            </select>
-                            {% if not is_nest_staff %}
-                            <div class="form-text">Announcements are restricted to nest-staff.</div>
-                            {% endif %}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold small" for="postContent">Content</label>
-                            <textarea id="postContent" name="content" class="form-control" rows="5" required></textarea>
-                        </div>
-                        <button class="nest-btn-main w-100" type="submit">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold small" for="postTitle">Title</label>
+                        <input id="postTitle" name="title" class="form-control" maxlength="200" required>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label class="form-label fw-semibold small" for="postType">Post Type</label>
+                        <select id="postType" name="post_type_id" class="form-select" required>
+                            <option value="">Select type</option>
+                            {% for t in post_types %}
+                            <option value="{{ t.id }}">{{ t.name }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if not is_nest_staff %}
+                        <div class="form-text">Announcements are restricted to nest-staff.</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold small" for="postTags">Tags</label>
+                        <input id="postTags" name="tags" class="form-control" placeholder="e.g. python, loops, exam-prep">
+                        <div class="form-text">Comma-separated. Up to 8 tags.</div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold small" for="postContent">Content</label>
+                        <textarea id="postContent" name="content" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <button class="nest-btn-main" type="submit">
                             <i class="bi bi-send me-1"></i> Publish
                         </button>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </form>
+        </div>
 
+        <!-- Post list -->
+        <div class="nest-surface p-4">
+            <h5 class="mb-3">Latest Posts</h5>
+            {% if posts %}
+            <div class="d-flex flex-column gap-3">
+                {% for post in posts %}
+                <article class="border rounded-3 p-3 hover-shadow {% if post.is_pinned %}border-warning{% endif %}">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                        <h6 class="mb-0">
+                            {% if post.is_pinned %}<i class="bi bi-pin-fill text-warning me-1" title="Pinned"></i>{% endif %}
+                            <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}{% if current_query %}?{{ current_query }}{% endif %}"
+                                class="text-decoration-none fw-semibold">{{ post.title }}</a>
+                        </h6>
+                        <div class="d-flex align-items-center gap-1">
+                        {% if post.post_type %}
+                        <span class="nest-chip {% if post.post_type.name|lower == 'announcement' %}nest-chip-rejected{% elif post.post_type.name|lower == 'question' %}nest-chip-pending{% else %}nest-chip-approved{% endif %}">
+                            {{ post.post_type.name }}
+                        </span>
+                        {% endif %}
+                        {% if is_nest_staff %}
+                        <form method="post" action="{% url 'nests:nest_pin_post' nest_id=nest.pk post_id=post.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                            <button type="submit" class="btn btn-sm btn-outline-warning rounded-3 vote-btn" title="{% if post.is_pinned %}Unpin{% else %}Pin{% endif %}">
+                                <i class="bi bi-pin{% if post.is_pinned %}-fill{% endif %}"></i>
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'nests:nest_delete_post' nest_id=nest.pk post_id=post.pk %}" class="d-inline delete-form">
+                            {% csrf_token %}
+                            <span class="delete-trigger">
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-3 vote-btn" title="Delete post" onclick="showDeleteConfirm(this)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </span>
+                            <span class="delete-confirm d-none">
+                                <small class="text-danger me-1">Delete?</small>
+                                <button type="submit" class="btn btn-sm btn-danger vote-btn">Yes</button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary vote-btn" onclick="cancelDeleteConfirm(this)">No</button>
+                            </span>
+                        </form>
+                        {% endif %}
+                        </div>
+                    </div>
+                    {% if post.tags.all %}
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        {% for tag in post.tags.all %}
+                        <a class="nest-subnav-badge text-decoration-none" href="{% url 'nests:nest_posts' nest_id=nest.pk %}?tag={{ tag.slug }}">#{{ tag.name }}</a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    <p class="text-muted small mb-2">{{ post.content|truncatechars:120 }}</p>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-1 mt-1">
+                        <div class="d-flex align-items-center gap-1 flex-wrap">
+                            <small class="text-muted">By <a href="{% url 'accounts:user_profile_view' user_name=post.user.username %}" class="text-decoration-none text-muted fw-semibold">{{ post.user.username }}</a></small>
+                            {% if post.recognition %}
+                            <span class="recog-title-pill">{{ post.recognition.title }}</span>
+                            {% if post.recognition.badge %}
+                            <span class="recog-badge-pill"><i class="bi {{ post.recognition.badge_icon }}"></i> {{ post.recognition.badge }}</span>
+                            {% endif %}
+                            {% endif %}
+                            <small class="text-muted">&middot; {{ post.created_at|date:"M j, Y" }}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <form method="post" action="{% url 'nests:nest_vote_post' nest_id=nest.pk post_id=post.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="value" value="1">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button class="btn btn-sm vote-btn {% if post.user_vote == 1 %}btn-success{% else %}btn-outline-success{% endif %}" type="submit">
+                                    <i class="bi bi-caret-up-fill"></i>
+                                </button>
+                            </form>
+                            <span class="small fw-semibold" style="min-width:1.5ch;text-align:center;">{{ post.vote_score }}</span>
+                            <form method="post" action="{% url 'nests:nest_vote_post' nest_id=nest.pk post_id=post.pk %}" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="value" value="-1">
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <button class="btn btn-sm vote-btn {% if post.user_vote == -1 %}btn-danger{% else %}btn-outline-danger{% endif %}" type="submit">
+                                    <i class="bi bi-caret-down-fill"></i>
+                                </button>
+                            </form>
+                            <a href="{% url 'nests:nest_post_detail' nest_id=nest.pk post_id=post.pk %}{% if current_query %}?{{ current_query }}{% endif %}"
+                                class="nest-subnav-badge text-decoration-none ms-1">
+                                <i class="bi bi-chat-dots me-1"></i>{{ post.comment_count }}
+                            </a>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">No posts yet. Start the first discussion.</p>
+            {% endif %}
         </div>
     </div>
 
 </div>
+
+<script>
+function toggleNewPostForm() {
+    const form = document.getElementById('newPostForm');
+    const btn = document.getElementById('newPostToggle');
+    const isVisible = form.style.display !== 'none';
+    form.style.display = isVisible ? 'none' : 'block';
+    btn.classList.toggle('active', !isVisible);
+    if (!isVisible) form.querySelector('input[name="title"]').focus();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('open_new_post') === '1') {
+        const form = document.getElementById('newPostForm');
+        if (form && form.style.display === 'none') {
+            toggleNewPostForm();
+        }
+    }
+});
+</script>
+
+<script>
+function showDeleteConfirm(btn) {
+    var form = btn.closest('form');
+    form.querySelector('.delete-trigger').classList.add('d-none');
+    form.querySelector('.delete-confirm').classList.remove('d-none');
+}
+function cancelDeleteConfirm(btn) {
+    var form = btn.closest('form');
+    form.querySelector('.delete-confirm').classList.add('d-none');
+    form.querySelector('.delete-trigger').classList.remove('d-none');
+}
+</script>
 
 {% endblock feature_content %}

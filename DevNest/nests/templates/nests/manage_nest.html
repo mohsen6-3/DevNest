@@ -29,7 +29,9 @@
             <tbody>
                 {% for m in pending_requests %}
                 <tr>
-                    <td class="align-middle">{{ m.user.username }}</td>
+                    <td class="align-middle">
+                        <a href="{% url 'accounts:user_profile_view' user_name=m.user.username %}" class="text-decoration-none fw-semibold">{{ m.user.username }}</a>
+                    </td>
                     <td class="align-middle text-muted small">{{ m.joined_at|date:"N j, Y" }}</td>
                     <td class="text-end">
                         <form method="post" class="d-inline">
@@ -66,18 +68,40 @@
                     <th>Username</th>
                     <th>Role</th>
                     <th>Joined</th>
+                    <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for m in active_members %}
                 <tr>
-                    <td>{{ m.user.username }}</td>
+                    <td>
+                        <a href="{% url 'accounts:user_profile_view' user_name=m.user.username %}" class="text-decoration-none fw-semibold">{{ m.user.username }}</a>
+                    </td>
                     <td>
                         <span class="nest-chip {% if m.role == 'instructor' %}nest-chip-rejected{% elif m.role == 'assistant' %}nest-chip-pending{% else %}nest-chip-approved{% endif %}">
                             {{ m.get_role_display }}
                         </span>
                     </td>
                     <td class="text-muted small">{{ m.joined_at|date:"N j, Y" }}</td>
+                    <td class="text-end">
+                        {% if m.role == 'member' %}
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="membership_id" value="{{ m.pk }}">
+                            <button name="action" value="promote" class="btn btn-sm btn-outline-secondary rounded-3">
+                                <i class="bi bi-arrow-up-circle me-1"></i>Promote
+                            </button>
+                        </form>
+                        {% elif m.role == 'assistant' %}
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="membership_id" value="{{ m.pk }}">
+                            <button name="action" value="demote" class="btn btn-sm btn-outline-warning rounded-3">
+                                <i class="bi bi-arrow-down-circle me-1"></i>Demote
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -87,5 +111,53 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Engagement Analytics -->
+{% if analytics %}
+<div class="nest-surface overflow-hidden mt-4">
+    <div class="card-header fw-semibold bg-transparent border-0 py-3">
+        <i class="bi bi-bar-chart me-1"></i>Member Engagement
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 nest-table">
+            <thead>
+                <tr>
+                    <th>Member</th>
+                    <th class="text-center">Posts</th>
+                    <th class="text-center">Comments</th>
+                    <th class="text-center">Vote Score</th>
+                    <th>Recognition</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in analytics %}
+                <tr>
+                    <td>
+                        <a href="{% url 'accounts:user_profile_view' user_name=row.membership.user.username %}" class="text-decoration-none fw-semibold">{{ row.membership.user.username }}</a>
+                    </td>
+                    <td class="text-center">{{ row.post_count }}</td>
+                    <td class="text-center">{{ row.comment_count }}</td>
+                    <td class="text-center">
+                        <span class="{% if row.vote_score > 0 %}text-success{% elif row.vote_score < 0 %}text-danger{% else %}text-muted{% endif %} fw-semibold">
+                            {{ row.vote_score }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if row.rec %}
+                        <span class="recog-title-pill">{{ row.rec.title }}</span>
+                        {% if row.rec.badge %}
+                        <span class="recog-badge-pill ms-1"><i class="bi {{ row.rec.badge_icon }}"></i> {{ row.rec.badge }}</span>
+                        {% endif %}
+                        {% else %}
+                        <small class="text-muted">—</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
 
 {% endblock %}

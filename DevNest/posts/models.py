@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 
 from nests.models import Nest
 
@@ -11,12 +12,30 @@ class PostType(models.Model):
         return self.name
 
 
+class PostTag(models.Model):
+    name = models.CharField(max_length=64, unique=True)
+    slug = models.SlugField(max_length=80, unique=True, blank=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     nest = models.ForeignKey(Nest, on_delete=models.CASCADE, related_name='posts', null=True, blank=True)
     title = models.CharField(max_length=200)
     content = models.TextField()
+    is_pinned = models.BooleanField(default=False)
     post_type = models.ForeignKey(PostType, on_delete=models.CASCADE, default=None, null=True, blank=True)
+    tags = models.ManyToManyField(PostTag, blank=True, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -24,6 +43,26 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class PostVote(models.Model):
+    class Value(models.IntegerChoices):
+        DOWN = -1, 'Downvote'
+        UP = 1, 'Upvote'
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='votes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_votes')
+    value = models.SmallIntegerField(choices=Value.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['post', 'user'], name='unique_post_vote'),
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} {self.value:+d} on {self.post_id}'
     
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

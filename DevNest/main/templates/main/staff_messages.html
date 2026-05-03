@@ -1,0 +1,89 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Contact Messages — DevNest Staff{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="bi bi-envelope me-2"></i>Contact Messages</h4>
+    <a href="{% url 'accounts:user_profile_view' request.user.username %}" class="btn btn-sm btn-outline-secondary rounded-3">
+        <i class="bi bi-arrow-left me-1"></i>Back to Profile
+    </a>
+</div>
+
+<!-- Open messages -->
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+    <div class="card-header bg-transparent fw-semibold border-0 py-3">
+        Open Messages
+        <span class="badge bg-danger-subtle text-danger-emphasis rounded-pill ms-2">{{ open_msgs|length }}</span>
+    </div>
+    <div class="card-body p-0">
+        {% if open_msgs %}
+        <div class="accordion accordion-flush" id="openMsgs">
+            {% for msg in open_msgs %}
+            <div class="accordion-item border-bottom">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed fw-semibold" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#msg{{ msg.pk }}">
+                        <div class="d-flex gap-3 align-items-center w-100 me-3">
+                            <span>{{ msg.subject }}</span>
+                            <small class="text-muted fw-normal ms-auto">{{ msg.name }} &middot; {{ msg.created_at|date:"M j, Y" }}</small>
+                        </div>
+                    </button>
+                </h2>
+                <div id="msg{{ msg.pk }}" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <p class="small text-muted mb-1"><i class="bi bi-envelope me-1"></i>{{ msg.email }}</p>
+                        <p class="mb-3">{{ msg.body|linebreaksbr }}</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="message_id" value="{{ msg.pk }}">
+                            <div class="mb-2">
+                                <label class="form-label fw-semibold small">Reply (optional note)</label>
+                                <textarea name="staff_reply" class="form-control" rows="3" placeholder="Internal reply or note…"></textarea>
+                            </div>
+                            <button name="action" value="resolve" type="submit" class="btn btn-sm btn-success rounded-3">
+                                <i class="bi bi-check-lg me-1"></i>Mark Resolved
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted p-3 mb-0">No open messages.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Resolved messages -->
+{% if closed_msgs %}
+<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-transparent fw-semibold border-0 py-3 text-muted">
+        Recently Resolved (last 20)
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Subject</th><th>From</th><th>Resolved by</th><th>Date</th><th></th></tr></thead>
+            <tbody>
+                {% for msg in closed_msgs %}
+                <tr>
+                    <td>{{ msg.subject }}</td>
+                    <td class="text-muted small">{{ msg.name }}</td>
+                    <td class="text-muted small">{{ msg.resolved_by.username|default:"—" }}</td>
+                    <td class="text-muted small">{{ msg.created_at|date:"M j, Y" }}</td>
+                    <td class="text-end">
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="message_id" value="{{ msg.pk }}">
+                            <button name="action" value="reopen" type="submit" class="btn btn-sm btn-outline-secondary rounded-3">Reopen</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

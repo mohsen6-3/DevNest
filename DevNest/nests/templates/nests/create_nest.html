@@ -1,0 +1,108 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Create Nest — DevNest{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0"><i class="bi bi-plus-circle me-2"></i>Create Nest</h4>
+            <a href="{% url 'accounts:user_profile_view' request.user.username %}" class="btn btn-sm btn-outline-secondary rounded-3">
+                <i class="bi bi-arrow-left me-1"></i>Back to Profile
+            </a>
+        </div>
+        <div class="card border-0 shadow-sm rounded-4 p-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-4">
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Nest Name</label>
+                        <input type="text" name="name" class="form-control" required maxlength="100">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Instructor <span class="text-danger">*</span></label>
+                        <div class="border rounded-3 p-0 overflow-hidden">
+                            <div class="p-2 border-bottom bg-light">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search users…" oninput="filterCheckboxes(this, 'instructor-list')">
+                            </div>
+                            <div id="instructor-list" class="overflow-auto p-2" style="max-height:200px">
+                                {% for u in users %}
+                                <div class="form-check user-check-item py-1 border-bottom border-light-subtle">
+                                    <input class="form-check-input" type="radio" name="instructor" value="{{ u.pk }}" id="inst_{{ u.pk }}" required>
+                                    <label class="form-check-label w-100" for="inst_{{ u.pk }}">
+                                        <span class="fw-semibold">{{ u.username }}</span>
+                                        {% if u.get_full_name %}<span class="text-muted ms-1 small">{{ u.get_full_name }}</span>{% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Assistants checkbox panel -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Assistants <span class="text-muted fw-normal">(optional)</span></label>
+                        <div class="border rounded-3 p-0 overflow-hidden">
+                            <div class="p-2 border-bottom bg-light">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search users…" oninput="filterCheckboxes(this, 'assistants-list')">
+                            </div>
+                            <div id="assistants-list" class="overflow-auto p-2" style="max-height:220px">
+                                {% for u in users %}
+                                <div class="form-check user-check-item py-1 border-bottom border-light-subtle">
+                                    <input class="form-check-input" type="checkbox" name="assistants" value="{{ u.pk }}" id="asst_{{ u.pk }}">
+                                    <label class="form-check-label w-100" for="asst_{{ u.pk }}">
+                                        <span class="fw-semibold">{{ u.username }}</span>
+                                        {% if u.get_full_name %}<span class="text-muted ms-1 small">{{ u.get_full_name }}</span>{% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Members checkbox panel -->
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Members <span class="text-muted fw-normal">(optional)</span></label>
+                        <div class="border rounded-3 p-0 overflow-hidden">
+                            <div class="p-2 border-bottom bg-light">
+                                <input type="text" class="form-control form-control-sm" placeholder="Search users…" oninput="filterCheckboxes(this, 'members-list')">
+                            </div>
+                            <div id="members-list" class="overflow-auto p-2" style="max-height:280px">
+                                {% for u in users %}
+                                <div class="form-check user-check-item py-1 border-bottom border-light-subtle">
+                                    <input class="form-check-input" type="checkbox" name="members" value="{{ u.pk }}" id="mem_{{ u.pk }}">
+                                    <label class="form-check-label w-100" for="mem_{{ u.pk }}">
+                                        <span class="fw-semibold">{{ u.username }}</span>
+                                        {% if u.get_full_name %}<span class="text-muted ms-1 small">{{ u.get_full_name }}</span>{% endif %}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i>Create Nest
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterCheckboxes(input, listId) {
+    const q = input.value.toLowerCase();
+    document.querySelectorAll('#' + listId + ' .user-check-item').forEach(function(item) {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}
