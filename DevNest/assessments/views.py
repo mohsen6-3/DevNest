@@ -7,18 +7,43 @@ from django.db.models import Sum
 
 # Create your views here.
 
+# def assessment_page_view(request: HttpRequest, nest_id):
+#     nest = get_object_or_404(Nest, id=nest_id)
+#     assessments = Assessment.objects.filter(nest=nest)
+#     total_score = (
+#         Submission.objects
+#         .filter(student=request.user, assessment__nest=nest)
+#         .aggregate(total=Sum('score'))['total'] or 0
+#     )
+#     user = request.user
+#     return render(request, 'assessments/assessment_page.html', {
+#         'assessments': assessments,
+#         'user': user,
+#         'nest': nest,
+#         'total_score': total_score
+#     })
 def assessment_page_view(request: HttpRequest, nest_id):
     nest = get_object_or_404(Nest, id=nest_id)
     assessments = Assessment.objects.filter(nest=nest)
+
+    if request.user.is_authenticated and not request.user.is_staff:
+        submissions = Submission.objects.filter(student=request.user, assessment__nest=nest)
+        submissions_map = {s.assessment_id: s.score for s in submissions}
+
+        for assessment in assessments:
+            assessment.student_score = submissions_map.get(assessment.id)
+    else:
+        for assessment in assessments:
+            assessment.student_score = None
+
     total_score = (
         Submission.objects
         .filter(student=request.user, assessment__nest=nest)
         .aggregate(total=Sum('score'))['total'] or 0
     )
-    user = request.user
+
     return render(request, 'assessments/assessment_page.html', {
         'assessments': assessments,
-        'user': user,
         'nest': nest,
         'total_score': total_score
     })
@@ -113,9 +138,28 @@ def question_delete_view(request: HttpRequest, nest_id, pk):
         return redirect('assessments:assessment_detail_view', nest_id=nest.id, pk=question.assessment.pk)
     return render(request, 'assessments/questions_delete.html', {'question': question, 'nest': nest})
 
+# def assessment_detail_view(request: HttpRequest, nest_id, pk):
+#     nest = get_object_or_404(Nest, id=nest_id)
+#     assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
+#     questions = assessment.questions.all()
+#     return render(request, 'assessments/assessment_detail.html', {
+#         'assessment': assessment,
+#         'questions': questions,
+#         'nest': nest
+#     })
 def assessment_detail_view(request: HttpRequest, nest_id, pk):
     nest = get_object_or_404(Nest, id=nest_id)
     assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
+
+    # إذا الطالب سبق وسلّم، امنعه من دخول الاختبار مرة ثانية
+    if request.user.is_authenticated and not request.user.is_staff:
+        already_submitted = Submission.objects.filter(
+            student=request.user,
+            assessment=assessment
+        ).exists()
+        if already_submitted:
+            return redirect("assessments:assessment_page_view", nest_id=nest.id)
+
     questions = assessment.questions.all()
     return render(request, 'assessments/assessment_detail.html', {
         'assessment': assessment,
@@ -171,49 +215,182 @@ def choice_delete_view(request, nest_id, choice_id):
         return redirect("assessments:assessment_detail_view", nest_id=nest.id, pk=choice.question.assessment.id)
     return render(request, "assessments/choice_delete.html", {"choice": choice, "nest": nest})
 
-def take_assessment_view(request, nest_id, pk):
-    nest = get_object_or_404(Nest, id=nest_id)
-    assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
+# def take_assessment_view(request, nest_id, pk):
+    # nest = get_object_or_404(Nest, id=nest_id)
+    # assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
 
-    if request.method == "POST":
-        submission = Submission.objects.create(
-            assessment=assessment,
-            student=request.user
-        )
+    # if request.method == "POST":
+    #     submission = Submission.objects.create(
+    #         assessment=assessment,
+    #         student=request.user
+    #     )
 
-        score = 0
-        for question in assessment.questions.all():
-            if question.question_type == "mcq":
-                choice_id = request.POST.get(f"question_{question.id}")
-                if choice_id:
-                    choice = Choice.objects.get(id=choice_id)
-                    is_correct = choice.is_correct
-                    if is_correct:
-                        score += question.points
+    #     score = 0
+    #     for question in assessment.questions.all():
+    #         if question.question_type == "mcq":
+    #             choice_id = request.POST.get(f"question_{question.id}")
+    #             if choice_id:
+    #                 choice = Choice.objects.get(id=choice_id)
+    #                 is_correct = choice.is_correct
+    #                 if is_correct:
+    #                     score += question.points
 
+    #                 Answer.objects.create(
+    #                     submission=submission,
+    #                     question=question,
+    #                     selected_choice=choice,
+    #                     is_correct=is_correct
+    #                 )
+
+    #         elif question.question_type == "text":
+    #             text_answer = request.POST.get(f"question_{question.id}", "")
+    #             Answer.objects.create(
+    #                 submission=submission,
+    #                 question=question,
+    #                 text_answer=text_answer
+    #             )
+
+    #     submission.score = score
+    #     submission.save()
+    #     return redirect("assessments:submission_result_view", nest_id=nest.id, submission_id=submission.id)
+
+    # return render(request, "assessments/take_assessment.html", {"assessment": assessment, "nest": nest})
+def take_assessment_view(request: HttpRequest, nest_id, pk):
+        nest = get_object_or_404(Nest, id=nest_id)
+        assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
+
+        # منع إعادة الاختبار
+        if request.user.is_authenticated and not request.user.is_staff:
+            if Submission.objects.filter(student=request.user, assessment=assessment).exists():
+                submission = Submission.objects.filter(
+                    student=request.user,
+                    assessment=assessment
+                ).latest("id")
+                return redirect(
+                    "assessments:submission_result_view",
+                    nest_id=nest.id,
+                    submission_id=submission.id
+                )
+
+        if request.method == "POST":
+            submission = Submission.objects.create(
+                assessment=assessment,
+                student=request.user
+            )
+
+            score = 0
+            for question in assessment.questions.all():
+                if question.question_type == "mcq":
+                    choice_id = request.POST.get(f"question_{question.id}")
+                    if choice_id:
+                        choice = Choice.objects.get(id=choice_id)
+                        is_correct = choice.is_correct
+                        if is_correct:
+                            score += question.points
+
+                        Answer.objects.create(
+                            submission=submission,
+                            question=question,
+                            selected_choice=choice,
+                            is_correct=is_correct
+                        )
+
+                elif question.question_type == "text":
+                    text_answer = request.POST.get(f"question_{question.id}", "")
                     Answer.objects.create(
                         submission=submission,
                         question=question,
-                        selected_choice=choice,
-                        is_correct=is_correct
+                        text_answer=text_answer
                     )
 
-            elif question.question_type == "text":
-                text_answer = request.POST.get(f"question_{question.id}", "")
-                Answer.objects.create(
-                    submission=submission,
-                    question=question,
-                    text_answer=text_answer
-                )
+            submission.score = score
+            submission.save()
 
-        submission.score = score
-        submission.save()
-        return redirect("assessments:submission_result_view", nest_id=nest.id, submission_id=submission.id)
+            return redirect(
+                "assessments:submission_result_view",
+                nest_id=nest.id,
+                submission_id=submission.id
+            )
 
-    return render(request, "assessments/take_assessment.html", {"assessment": assessment, "nest": nest})
+        return render(request, "assessments/take_assessment.html", {
+            "assessment": assessment,
+            "nest": nest
+    })
+
+# def submission_result_view(request, nest_id, submission_id):
+#     nest = get_object_or_404(Nest, id=nest_id)
+#     submission = get_object_or_404(Submission, id=submission_id, student=request.user, assessment__nest=nest)
+#     return render(request, "assessments/submission_result.html", {"submission": submission, "nest": nest})
+# def submission_result_view(request, nest_id, submission_id):
+#     nest = get_object_or_404(Nest, id=nest_id)
+
+#     # الطالب يشوف نتيجته، المعلم يشوف أي Submission داخل Nest
+#     if request.user.is_staff:
+#         submission = get_object_or_404(Submission, id=submission_id, assessment__nest=nest)
+#     else:
+#         submission = get_object_or_404(Submission, id=submission_id, student=request.user, assessment__nest=nest)
+
+#     if request.method == "POST" and request.user.is_staff:
+#         total_score = 0
+#         for answer in submission.answers.all():
+#             value = request.POST.get(f"answer_{answer.id}")
+#             if value == "correct":
+#                 answer.is_correct = True
+#                 total_score += answer.question.points
+#             elif value == "wrong":
+#                 answer.is_correct = False
+#             answer.save()
+
+#         submission.score = total_score
+#         submission.save()
+#         return redirect("assessments:submission_result_view", nest_id=nest_id, submission_id=submission.id)
+
+#     return render(request, "assessments/submission_result.html", {
+#         "submission": submission,
+#         "nest": nest
+#     })
 
 def submission_result_view(request, nest_id, submission_id):
     nest = get_object_or_404(Nest, id=nest_id)
-    submission = get_object_or_404(Submission, id=submission_id, student=request.user, assessment__nest=nest)
-    return render(request, "assessments/submission_result.html", {"submission": submission, "nest": nest})
+
+    # الطالب يشوف نتيجته، المعلم يشوف أي Submission داخل Nest
+    if request.user.is_staff:
+        submission = get_object_or_404(Submission, id=submission_id, assessment__nest=nest)
+    else:
+        submission = get_object_or_404(Submission, id=submission_id, student=request.user, assessment__nest=nest)
+
+    if request.method == "POST" and request.user.is_staff:
+        for answer in submission.answers.all():
+            value = request.POST.get(f"answer_{answer.id}")
+            if value == "correct":
+                answer.is_correct = True
+            elif value == "wrong":
+                answer.is_correct = False
+            answer.save()
+
+        total_score = 0
+        for answer in submission.answers.all():
+            if answer.is_correct:
+                total_score += answer.question.points
+
+        submission.score = total_score
+        submission.save()
+        return redirect("assessments:submission_result_view", nest_id=nest_id, submission_id=submission.id)
+
+    return render(request, "assessments/submission_result.html", {
+        "submission": submission,
+        "nest": nest
+    })
+
+def assessment_submissions_view(request, nest_id, pk):
+    if not request.user.is_authenticated or not request.user.is_staff:
+        return HttpResponse("Unauthorized", status=401)
+    nest = get_object_or_404(Nest, id=nest_id)
+    assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
+    submissions = assessment.submissions.all()
+    return render(request, 'assessments/assessment_submissions.html', {
+        'assessment': assessment,
+        'submissions': submissions,
+        'nest': nest
+    })
 

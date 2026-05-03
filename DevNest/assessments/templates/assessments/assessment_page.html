@@ -18,6 +18,9 @@
         <div class="col-md-6 col-lg-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body">
+                    {% if request.user.is_authenticated and not request.user.is_staff and assessment.student_score is not None %}
+                    <span class="badge bg-primary fs-6 score-badge">Score: {{ assessment.student_score }}/{{ assessment.points }}</span>
+                    {% endif %}
                     <a href="{% url 'assessments:assessment_detail_view' nest_id=nest.id pk=assessment.pk %}">
                         <h5 class="card-title">{{ assessment.title }}</h5>
                     </a>

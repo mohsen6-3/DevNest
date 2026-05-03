@@ -1,0 +1,19 @@
+{% extends "nests/base.html" %}
+
+{% block title %}Submissions{% endblock %}
+{% block content %}
+<h2>Submissions - {{ assessment.title }}</h2>
+
+<ul>
+    {% for sub in submissions %}
+    <li>
+        {{ sub.student.username }} -
+        <a  class="btn btn-primary" href="{% url 'assessments:submission_result_view' nest.id sub.id %}">
+            View Result
+        </a>
+    </li>
+    {% empty %}
+    <li>No submissions yet.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

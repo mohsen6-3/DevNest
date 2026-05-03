@@ -12,16 +12,20 @@
     <div>
         <h4>{{ q.text }}</h4>
 
+        {% if q.question_type == "mcq" %}
         {% for c in q.choices.all %}
         <label>
             <input type="radio" name="question_{{ q.id }}" value="{{ c.id }}">
             {{ c.text }}
         </label><br>
         {% endfor %}
+        {% elif q.question_type == "text" %}
+        <textarea name="question_{{ q.id }}" class="form-control" rows="3"></textarea>
+        {% endif %}
     </div>
     <hr>
     {% endfor %}
 
-    <button class="btn btn-primary" type="submit">Submit</button>
+    <button class="btn btn-primary" type="submit">Submit Assessment</button>
 </form>
 {% endblock %}

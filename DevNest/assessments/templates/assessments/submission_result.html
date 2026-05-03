@@ -6,11 +6,45 @@
 <h2>Result</h2>
 <p>Score: {{ submission.score }}</p>
 
-<ul>
-    {% for ans in submission.answers.all %}
-    <li>{{ ans.question.text }} - {{ ans.selected_choice }}
-        {% if ans.is_correct %}✅ Correct{% else %}❌ Wrong{% endif %}
-    </li>
-    {% endfor %}
-</ul>
+<form method="post">
+    {% csrf_token %}
+    <ul>
+        {% for ans in submission.answers.all %}
+        <li>
+            <strong>{{ ans.question.text }}</strong><br>
+
+            {% if ans.question.question_type == "mcq" %}
+            Your answer: {{ ans.selected_choice }}<br>
+            {% if ans.is_correct %}✅ Correct{% else %}❌ Wrong{% endif %}
+            {% elif ans.question.question_type == "text" %}
+            Your answer: {{ ans.text_answer }}<br>
+
+            {% if request.user.is_staff %}
+            <label>
+                <input type="radio" name="answer_{{ ans.id }}" value="correct">
+                Correct
+            </label>
+            <label>
+                <input type="radio" name="answer_{{ ans.id }}" value="wrong">
+                Wrong
+            </label>
+            {% else %}
+            {% if ans.is_correct == None %}
+            ⏳ Waiting for grading
+            {% elif ans.is_correct %}
+            ✅ Correct
+            {% else %}
+            ❌ Wrong
+            {% endif %}
+            {% endif %}
+            {% endif %}
+        </li>
+        <hr>
+        {% endfor %}
+    </ul>
+
+    {% if request.user.is_staff %}
+    <button class="btn btn-primary" type="submit">Save Grade</button>
+    {% endif %}
+</form>
 {% endblock %}

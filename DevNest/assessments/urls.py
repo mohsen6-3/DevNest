@@ -31,5 +31,6 @@ urlpatterns = [
 
     path('nests/<int:nest_id>/assessment/<int:pk>/take/', views.take_assessment_view, name="take_assessment_view"),
     path('nests/<int:nest_id>/submission/<int:submission_id>/result/', views.submission_result_view, name="submission_result_view"),
+    path('nests/<int:nest_id>/assessment/<int:pk>/submissions/', views.assessment_submissions_view, name='assessment_submissions_view'),
 ]
 

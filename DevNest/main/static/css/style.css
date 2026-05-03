@@ -22,3 +22,64 @@
 .devnest-landing footer {
     border-top: 1px solid #e2e8f0;
 }
+
+/* landing page */
+body {
+    background: #f7f6fb;
+}
+
+.hero-bg {
+    position: relative;
+    overflow: hidden;
+    background: #f7f6fb;
+    border-radius: 20px;
+}
+
+.hero-bg::before,
+.hero-bg::after {
+    content: "";
+    position: absolute;
+    width: 420px;
+    height: 420px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    z-index: 0;
+}
+
+.hero-bg::before {
+    /* background: #8b5cf6; */
+    top: -120px;
+    left: -120px;
+}
+
+.hero-bg::after {
+    /* background: #c084fc; */
+    bottom: -120px;
+    right: -120px;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.badge-pill {
+    background: #eef2ff;
+    /* color: #4f46e5; */
+    border: 1px solid #dbeafe;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.hero-title {
+    font-weight: 800;
+    font-size: clamp(2.5rem, 6vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+}
+
