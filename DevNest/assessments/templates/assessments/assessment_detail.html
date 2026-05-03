@@ -35,7 +35,6 @@
             href="{% url 'assessments:choice_update_view' nest_id=nest.id choice_id=c.id %}">Update</a>
         <a class="btn btn-danger btn-sm gap-2"
             href="{% url 'assessments:choice_delete_view' nest_id=nest.id choice_id=c.id %}">Delete</a>
-            
         {% endif %}
     </li>
     {% endfor %}
