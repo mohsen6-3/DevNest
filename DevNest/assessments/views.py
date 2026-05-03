@@ -151,7 +151,6 @@ def assessment_detail_view(request: HttpRequest, nest_id, pk):
     nest = get_object_or_404(Nest, id=nest_id)
     assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
 
-    # إذا الطالب سبق وسلّم، امنعه من دخول الاختبار مرة ثانية
     if request.user.is_authenticated and not request.user.is_staff:
         already_submitted = Submission.objects.filter(
             student=request.user,

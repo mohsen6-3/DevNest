@@ -8,9 +8,10 @@
     {% for sub in submissions %}
     <li>
         {{ sub.student.username }} -
-        <a  class="btn btn-primary" href="{% url 'assessments:submission_result_view' nest.id sub.id %}">
+        <a  class="btn btn-primary " href="{% url 'assessments:submission_result_view' nest.id sub.id %}">
             View Result
         </a>
+        <span class="nest-chip nest-chip-pending">Score: {{ sub.score }}/{{ assessment.points }}</span>
     </li>
     {% empty %}
     <li>No submissions yet.</li>
