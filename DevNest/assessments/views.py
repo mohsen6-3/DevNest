@@ -2,10 +2,24 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpRequest
 from .models import Assessment, Question, Choice, Submission, Answer
 from .forms import AssessmentForm, QuestionForm, ChoiceForm
-from nests.models import Nest
+from nests.models import Nest, NestMembership
 from django.db.models import Sum
 
 # Create your views here.
+
+
+def _nest_context(nest: Nest, user):
+    membership = nest.membership_for(user)
+    pending_membership = nest.memberships.filter(
+        user=user,
+        status=NestMembership.Status.PENDING,
+    ).first()
+    return {
+        'membership': membership,
+        'pending_membership': pending_membership,
+        'can_manage': nest.is_nest_staff(user) or nest.is_site_staff(user),
+        'is_nest_staff': nest.is_nest_staff(user) or nest.is_site_staff(user),
+    }
 
 # def assessment_page_view(request: HttpRequest, nest_id):
 #     nest = get_object_or_404(Nest, id=nest_id)
@@ -42,11 +56,13 @@ def assessment_page_view(request: HttpRequest, nest_id):
         .aggregate(total=Sum('score'))['total'] or 0
     )
 
-    return render(request, 'assessments/assessment_page.html', {
+    context = {
         'assessments': assessments,
         'nest': nest,
-        'total_score': total_score
-    })
+        'total_score': total_score,
+    }
+    context.update(_nest_context(nest, request.user))
+    return render(request, 'assessments/assessment_page.html', context)
 
 def assessment_create_view(request: HttpRequest, nest_id):
     if not request.user.is_authenticated or not request.user.is_staff:
