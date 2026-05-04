@@ -63,7 +63,39 @@ class PostVote(models.Model):
 
     def __str__(self):
         return f'{self.user.username} {self.value:+d} on {self.post_id}'
-    
+
+
+class PostSubscription(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='subscriptions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_subscriptions')
+    is_enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['post', 'user'], name='unique_post_subscription'),
+        ]
+
+    def __str__(self):
+        state = 'on' if self.is_enabled else 'off'
+        return f'{self.user.username} subscription {state} on {self.post_id}'
+
+
+class PostReadStatus(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='read_statuses')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='post_read_statuses')
+    read_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['post', 'user'], name='unique_post_read_status'),
+        ]
+
+    def __str__(self):
+        return f'{self.user.username} read post {self.post_id}'
+
+
 class Comment(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')

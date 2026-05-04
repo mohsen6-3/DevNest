@@ -85,14 +85,15 @@ def nest_list_view(request: HttpRequest):
         return _require_auth(request, 'You must be signed in to browse nests.')
     """Browse all approved nests."""
     nests = Nest.objects.filter(status=Nest.Status.APPROVED).order_by('name')
-    # Attach the user's membership status to each nest for the template
-    user_nest_ids = set(
-        NestMembership.objects.filter(user=request.user)
-        .values_list('nest_id', flat=True)
-    )
+    # Attach active/pending membership status so the browse cards render correctly.
+    memberships = NestMembership.objects.filter(user=request.user).values_list('nest_id', 'status')
+    active_nest_ids = {nest_id for nest_id, status in memberships if status == NestMembership.Status.ACTIVE}
+    pending_nest_ids = {nest_id for nest_id, status in memberships if status == NestMembership.Status.PENDING}
+
     return render(request, 'nests/nest_list.html', {
         'nests': nests,
-        'user_nest_ids': user_nest_ids,
+        'active_nest_ids': active_nest_ids,
+        'pending_nest_ids': pending_nest_ids,
     })
 
 

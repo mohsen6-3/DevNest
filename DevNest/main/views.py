@@ -3,12 +3,37 @@ from django.http import HttpRequest
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 
-from .models import ContactMessage, Report
+from .models import ContactMessage, Notification, Report
 from posts.models import Post, Comment
 
 
 def home_view(request):
     return render(request, 'main/home.html')
+
+
+def read_notification_view(request: HttpRequest, notification_id: int):
+    if not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path())
+
+    notification = get_object_or_404(Notification, pk=notification_id, user=request.user)
+    if not notification.is_read:
+        notification.is_read = True
+        notification.save(update_fields=['is_read'])
+
+    if notification.link:
+        return redirect(notification.link)
+    return redirect('main:home_view')
+
+
+def read_all_notifications_view(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path())
+
+    Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    next_url = request.GET.get('next', '').strip()
+    if next_url:
+        return redirect(next_url)
+    return redirect('main:home_view')
 
 
 # ── Contact Us ────────────────────────────────────────────────────────────────

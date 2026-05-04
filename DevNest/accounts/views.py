@@ -6,6 +6,10 @@ from django.contrib.auth.views import redirect_to_login
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib import messages
 from django.views.decorators.cache import never_cache
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.conf import settings
+from email.mime.image import MIMEImage
 from .models import Profile
 from django.db import transaction
 from posts.models import Post
@@ -18,24 +22,73 @@ from main.models import ContactMessage, Report
 # Create your views here.
 
 
+def _attach_email_logo(email_message, logo_cid='devnest-logo'):
+    logo_path = settings.BASE_DIR / 'main' / 'static' / 'images' / 'logo.svg'
+    try:
+        with open(logo_path, 'rb') as logo_file:
+            logo = MIMEImage(logo_file.read(), _subtype='svg+xml')
+        logo.add_header('Content-ID', f'<{logo_cid}>')
+        logo.add_header('Content-Disposition', 'inline', filename='logo.svg')
+        email_message.attach(logo)
+    except OSError:
+        # Keep email delivery working even if logo file is missing.
+        pass
+
+
+def send_welcome_email(user):
+    """Send welcome email to newly registered user."""
+    context = {
+        'username': user.username,
+        'full_name': user.get_full_name() or user.username,
+        'site_url': settings.SITE_URL,
+        'logo_cid': 'devnest-logo',
+    }
+    content_html = render_to_string('accounts/emails/welcome.html', context)
+    email_message = EmailMessage(
+        'Welcome to DevNest!',
+        content_html,
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email]
+    )
+    email_message.content_subtype = 'html'
+    _attach_email_logo(email_message, logo_cid='devnest-logo')
+    email_message.send(fail_silently=True)
+
+
 def sign_up(request: HttpRequest):
 
     if request.method == "POST":
 
         try:
-            new_user = User.objects.create_user(username=request.POST["username"],password=request.POST["password"],email=request.POST["email"], first_name=request.POST["first_name"], last_name=request.POST["last_name"])
-            new_user.save()
+            with transaction.atomic():
+                new_user = User.objects.create_user(
+                    username=request.POST["username"],
+                    password=request.POST["password"],
+                    email=request.POST["email"],
+                    first_name=request.POST["first_name"],
+                    last_name=request.POST["last_name"],
+                )
 
-            profile = new_user.profile
-            profile.about = request.POST["about"]
-            profile.social_link = request.POST["social_link"]
-            profile.avatar = request.FILES.get("avatar", Profile.avatar.field.get_default())
-            profile.save()
-            messages.success(request, "Registered User Successfuly", "alert-success")
-            return redirect("accounts:sign_in")
+                profile = new_user.profile
+                profile.about = request.POST.get("about", "")
+                profile.social_link = request.POST.get("social_link", "")
+                uploaded_avatar = request.FILES.get("avatar")
+                if uploaded_avatar:
+                    profile.avatar = uploaded_avatar
+                profile.save()
         except Exception as e:
             messages.error(request, "Couldn't register user. Try again", "alert-danger")
             print(e)
+
+        else:
+            try:
+                send_welcome_email(new_user)
+            except Exception as e:
+                print(e)
+                messages.warning(request, "Account created, but welcome email could not be sent.", "alert-warning")
+
+            messages.success(request, "Registered User Successfuly", "alert-success")
+            return redirect("accounts:sign_in")
     
     return render(request, "accounts/signup.html", {})
 
@@ -183,6 +236,10 @@ def update_user_profile(request:HttpRequest):
                 profile:Profile = user.profile
                 profile.about = request.POST["about"]
                 profile.social_link = request.POST["social_link"]
+                profile.notify_in_app_post_updates = request.POST.get("notify_in_app_post_updates") == "on"
+                profile.notify_email_post_updates = request.POST.get("notify_email_post_updates") == "on"
+                profile.notify_in_app_announcements = request.POST.get("notify_in_app_announcements") == "on"
+                profile.notify_email_announcements = request.POST.get("notify_email_announcements") == "on"
                 if "avatar" in request.FILES: profile.avatar = request.FILES["avatar"]
                 profile.save()
 

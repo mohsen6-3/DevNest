@@ -49,6 +49,37 @@
                 <div class="d-flex align-items-center gap-2">
                     {% if request.user.is_authenticated %}
                     <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                            <i class="bi bi-bell"></i>
+                            {% if unread_notifications_count %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ unread_notifications_count }}</span>
+                            {% endif %}
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-end shadow-sm p-0" aria-labelledby="notifDropdown" style="min-width:320px;">
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                                <strong class="small">Notifications</strong>
+                                {% if unread_notifications_count %}
+                                <a class="small text-decoration-none" href="{% url 'main:read_all_notifications' %}?next={{ request.path }}">Mark all read</a>
+                                {% endif %}
+                            </div>
+                            {% if unread_notifications %}
+                                {% for notif in unread_notifications %}
+                                <a class="dropdown-item small py-2" href="{% url 'main:read_notification' notification_id=notif.pk %}">
+                                    <div class="fw-semibold">{{ notif.message }}</div>
+                                    <div class="text-muted" style="font-size:.75rem;">{{ notif.created_at|timesince }} ago</div>
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <div class="px-3 py-3 small text-muted">No unread notifications.</div>
+                            {% endif %}
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+                                <a class="small text-decoration-none text-muted" href="{% url 'accounts:update_user_profile' %}#notif-prefs">
+                                    <i class="bi bi-sliders me-1"></i>Notification settings
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown">
                         <a href="#" class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle"
                             id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                             <img src="{{ request.user.profile.avatar.url }}"
@@ -77,9 +108,9 @@
                     </div>
                     {% else %}
                     <a href="{% url 'accounts:sign_in' %}?next={{ request.path }}"
-                        class="btn btn-outline-secondary btn-sm">Sign In</a>
+                        class="main-user-link">Sign In</a>
                     <a href="{% url 'accounts:sign_up' %}?next={{ request.path }}"
-                        class="btn btn-primary btn-sm">Sign Up</a>
+                        class="main-user-link main-user-link-strong">Sign Up</a>
                     {% endif %}
                 </div>
             </div>
