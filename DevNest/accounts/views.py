@@ -10,12 +10,16 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from django.conf import settings
 from email.mime.image import MIMEImage
+import logging
+from threading import Thread
 from .models import Profile
 from django.db import transaction
 from posts.models import Post
 from nests.models import NestMembership
 from recognition.models import NestRecognition
 from main.models import ContactMessage, Report
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -55,6 +59,18 @@ def send_welcome_email(user):
     email_message.send(fail_silently=False)
 
 
+def send_welcome_email_async(user):
+    """Send welcome email in a background thread so signup response is not blocked."""
+
+    def _worker():
+        try:
+            send_welcome_email(user)
+        except Exception:
+            logger.exception("Welcome email failed for user id=%s", user.pk)
+
+    Thread(target=_worker, daemon=True).start()
+
+
 def sign_up(request: HttpRequest):
 
     if request.method == "POST":
@@ -81,12 +97,7 @@ def sign_up(request: HttpRequest):
             print(e)
 
         else:
-            try:
-                send_welcome_email(new_user)
-            except Exception as e:
-                # Do not fail signup if email service is temporarily unavailable.
-                print(e)
-                messages.warning(request, "Account created, but welcome email could not be sent.", "alert-warning")
+            send_welcome_email_async(new_user)
 
             messages.success(request, "Registered User Successfuly", "alert-success")
             return redirect("accounts:sign_in")
