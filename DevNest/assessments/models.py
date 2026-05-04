@@ -17,6 +17,7 @@ class Assessment(models.Model):
     assessment_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     points = models.PositiveIntegerField(default=0)
     due_date = models.DateTimeField(null=True, blank=True)
+    duration = models.PositiveIntegerField(default=0, help_text="Duration in minutes (0 = no time limit)")
     created_by = models.ForeignKey(User,on_delete=models.CASCADE,related_name='created_assessments')
     created_at = models.DateTimeField(auto_now_add=True)
     nest = models.ForeignKey(Nest, on_delete=models.CASCADE, related_name='assessments', null=True, blank=True)
