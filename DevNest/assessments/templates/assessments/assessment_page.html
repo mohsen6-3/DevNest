@@ -8,7 +8,7 @@
 {% block feature_content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h5 class="mb-0"><i class="bi bi-card-checklist me-2"></i>Assessments</h5>
-    {% if request.user.is_authenticated and request.user.is_staff %}
+    {% if can_manage %}
     <a class="nest-btn-main" href="{% url 'assessments:assessment_create_view' nest_id=nest.id %}">
         <i class="bi bi-plus-lg me-1"></i> New Assessment
     </a>
@@ -22,29 +22,38 @@
             <div class="nest-surface p-4 h-100 d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <h6 class="mb-0">
-                        <a href="{% url 'assessments:assessment_detail_view' nest_id=nest.id pk=assessment.pk %}" class="text-decoration-none">
+                        <a href="{% url 'assessments:assessment_detail_view' nest_id=nest.id pk=assessment.pk %}"
+                            class="text-decoration-none">
                             {{ assessment.title }}
                         </a>
                     </h6>
                     <!-- <span class="nest-chip nest-chip-pending" style="font-size:.72rem">{{ assessment.assessment_type }}</span> -->
-                    {% if request.user.is_authenticated and not request.user.is_staff and assessment.student_score is not None %}
-                    <span class="nest-chip nest-chip-pending">Score: {{ assessment.student_score }}/{{ assessment.points }}</span>
+                    {% if request.user.is_authenticated and not can_manage and assessment.student_score is not None %}
+                    <span class="nest-chip nest-chip-pending">Score: {{ assessment.student_score }}/{{ assessment.points
+                        }}</span>
                     {% endif %}
                 </div>
                 <p class="text-muted small mb-2">{{ assessment.description }}</p>
                 <dl class="mb-3 small">
-                    <dt class="text-muted">Type</dt><dd>{{ assessment.assessment_type }}</dd>
-                    <dt class="text-muted">Points</dt><dd>{{ assessment.points }}</dd>
-                    <dt class="text-muted">Created At</dt><dd>{{ assessment.created_at }}</dd>
-                    <dt class="text-muted">Due</dt><dd>{{ assessment.due_date|default:"No due date" }}</dd>
-                    <dt class="text-muted">Created by</dt><dd>{{ assessment.created_by.username }}</dd>
+                    <dt class="text-muted">Type</dt>
+                    <dd>{{ assessment.assessment_type }}</dd>
+                    <dt class="text-muted">Points</dt>
+                    <dd>{{ assessment.points }}</dd>
+                    <dt class="text-muted">Created At</dt>
+                    <dd>{{ assessment.created_at }}</dd>
+                    <dt class="text-muted">Due</dt>
+                    <dd>{{ assessment.due_date|default:"No due date" }}</dd>
+                    <dt class="text-muted">Created by</dt>
+                    <dd>{{ assessment.created_by.username }}</dd>
                 </dl>
-                {% if request.user.is_authenticated and request.user.is_staff %}
+                {% if can_manage %}
                 <div class="d-flex gap-2 mt-auto">
-                    <a class="nest-btn-soft" href="{% url 'assessments:assessment_update_view' nest_id=nest.id pk=assessment.pk %}">
+                    <a class="nest-btn-soft"
+                        href="{% url 'assessments:assessment_update_view' nest_id=nest.id pk=assessment.pk %}">
                         <i class="bi bi-pencil me-1"></i> Edit
                     </a>
-                    <a class="nest-btn-soft" style="color:#dc3545;" href="{% url 'assessments:assessment_delete_view' nest_id=nest.id pk=assessment.pk %}">
+                    <a class="nest-btn-soft" style="color:#dc3545;"
+                        href="{% url 'assessments:assessment_delete_view' nest_id=nest.id pk=assessment.pk %}">
                         <i class="bi bi-trash me-1"></i> Delete
                     </a>
                 </div>
