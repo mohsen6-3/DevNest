@@ -1,11 +1,23 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.http import HttpResponse, HttpRequest
+from django.contrib import messages
+from django.contrib.auth.views import redirect_to_login
 from .models import Assessment, Question, Choice, Submission, Answer
 from .forms import AssessmentForm, QuestionForm, ChoiceForm
 from nests.models import Nest, NestMembership
 from django.db.models import Sum
 
 # Create your views here.
+
+
+def _require_auth(request: HttpRequest, message: str):
+    messages.warning(request, message, 'alert-warning')
+    return redirect_to_login(request.get_full_path())
+
+
+def _deny_access(request: HttpRequest, message: str, redirect_to: str, **kwargs):
+    messages.warning(request, message, 'alert-warning')
+    return redirect(redirect_to, **kwargs)
 
 
 def _nest_context(nest: Nest, user):
@@ -37,7 +49,16 @@ def _nest_context(nest: Nest, user):
 #         'total_score': total_score
 #     })
 def assessment_page_view(request: HttpRequest, nest_id):
-    nest = get_object_or_404(Nest, id=nest_id)
+    if not request.user.is_authenticated:
+        return _require_auth(request, 'You must be signed in to access assessments.')
+
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
+    context = _nest_context(nest, request.user)
+
+    has_access = context['is_nest_staff'] or (context['membership'] is not None)
+    if not has_access:
+        return _deny_access(request, 'You must be an active nest member to access assessments.', 'nests:nest_detail', nest_id=nest.pk)
+
     assessments = Assessment.objects.filter(nest=nest)
 
     if request.user.is_authenticated and not request.user.is_staff:
@@ -56,18 +77,18 @@ def assessment_page_view(request: HttpRequest, nest_id):
         .aggregate(total=Sum('score'))['total'] or 0
     )
 
-    context = {
+    context.update({
         'assessments': assessments,
         'nest': nest,
         'total_score': total_score,
-    }
-    context.update(_nest_context(nest, request.user))
+    })
+
     return render(request, 'assessments/assessment_page.html', context)
 
 def assessment_create_view(request: HttpRequest, nest_id):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
 
     if request.method == 'POST':
         form = AssessmentForm(request.POST)
@@ -84,7 +105,7 @@ def assessment_create_view(request: HttpRequest, nest_id):
 def assessment_update_view(request: HttpRequest, nest_id, pk):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
 
     if request.method == 'POST':
@@ -102,7 +123,7 @@ def assessment_update_view(request: HttpRequest, nest_id, pk):
 def assessment_delete_view(request: HttpRequest, nest_id, pk):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
 
     if request.method == 'POST':
@@ -113,7 +134,7 @@ def assessment_delete_view(request: HttpRequest, nest_id, pk):
 def question_create_view(request: HttpRequest, nest_id, pk):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     assessment = get_object_or_404(Assessment, pk=pk, nest=nest, created_by=request.user)
 
     if request.method == 'POST':
@@ -130,7 +151,7 @@ def question_create_view(request: HttpRequest, nest_id, pk):
 def question_update_view(request: HttpRequest, nest_id, pk):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     question = get_object_or_404(Question, pk=pk, assessment__nest=nest, assessment__created_by=request.user)
 
     if request.method == 'POST':
@@ -146,7 +167,7 @@ def question_update_view(request: HttpRequest, nest_id, pk):
 def question_delete_view(request: HttpRequest, nest_id, pk):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     question = get_object_or_404(Question, pk=pk, assessment__nest=nest, assessment__created_by=request.user)
 
     if request.method == 'POST':
@@ -164,9 +185,19 @@ def question_delete_view(request: HttpRequest, nest_id, pk):
 #         'nest': nest
 #     })
 def assessment_detail_view(request: HttpRequest, nest_id, pk):
-    nest = get_object_or_404(Nest, id=nest_id)
+    if not request.user.is_authenticated:
+        return _require_auth(request, 'You must be signed in to view assessments.')
+
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
+    context = _nest_context(nest, request.user)
+
+    has_access = context['is_nest_staff'] or (context['membership'] is not None)
+    if not has_access:
+        return _deny_access(request, 'You must be an active nest member to access assessments.', 'nests:nest_detail', nest_id=nest.pk)
+
     assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
 
+    # إذا الطالب سبق وسلّم، امنعه من دخول الاختبار مرة ثانية
     if request.user.is_authenticated and not request.user.is_staff:
         already_submitted = Submission.objects.filter(
             student=request.user,
@@ -176,16 +207,16 @@ def assessment_detail_view(request: HttpRequest, nest_id, pk):
             return redirect("assessments:assessment_page_view", nest_id=nest.id)
 
     questions = assessment.questions.all()
-    return render(request, 'assessments/assessment_detail.html', {
+    context.update({
         'assessment': assessment,
         'questions': questions,
-        'nest': nest
     })
+    return render(request, 'assessments/assessment_detail.html', context)
 
 def choice_create_view(request, nest_id, question_id):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     question = get_object_or_404(Question, pk=question_id, assessment__nest=nest, assessment__created_by=request.user)
 
     if request.method == "POST":
@@ -204,7 +235,7 @@ def choice_create_view(request, nest_id, question_id):
 def choice_update_view(request, nest_id, choice_id):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     choice = get_object_or_404(Choice, pk=choice_id, question__assessment__nest=nest, question__assessment__created_by=request.user)
 
     if request.method == "POST":
@@ -222,7 +253,7 @@ def choice_update_view(request, nest_id, choice_id):
 def choice_delete_view(request, nest_id, choice_id):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     choice = get_object_or_404(Choice, pk=choice_id, question__assessment__nest=nest, question__assessment__created_by=request.user)
 
     if request.method == "POST":
@@ -271,66 +302,75 @@ def choice_delete_view(request, nest_id, choice_id):
 
     # return render(request, "assessments/take_assessment.html", {"assessment": assessment, "nest": nest})
 def take_assessment_view(request: HttpRequest, nest_id, pk):
-        nest = get_object_or_404(Nest, id=nest_id)
-        assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
+    if not request.user.is_authenticated:
+        return _require_auth(request, 'You must be signed in to take assessments.')
 
-        # منع إعادة الاختبار
-        if request.user.is_authenticated and not request.user.is_staff:
-            if Submission.objects.filter(student=request.user, assessment=assessment).exists():
-                submission = Submission.objects.filter(
-                    student=request.user,
-                    assessment=assessment
-                ).latest("id")
-                return redirect(
-                    "assessments:submission_result_view",
-                    nest_id=nest.id,
-                    submission_id=submission.id
-                )
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
+    context = _nest_context(nest, request.user)
 
-        if request.method == "POST":
-            submission = Submission.objects.create(
-                assessment=assessment,
-                student=request.user
-            )
+    has_access = context['is_nest_staff'] or (context['membership'] is not None)
+    if not has_access:
+        return _deny_access(request, 'You must be an active nest member to access assessments.', 'nests:nest_detail', nest_id=nest.pk)
 
-            score = 0
-            for question in assessment.questions.all():
-                if question.question_type == "mcq":
-                    choice_id = request.POST.get(f"question_{question.id}")
-                    if choice_id:
-                        choice = Choice.objects.get(id=choice_id)
-                        is_correct = choice.is_correct
-                        if is_correct:
-                            score += question.points
+    assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
 
-                        Answer.objects.create(
-                            submission=submission,
-                            question=question,
-                            selected_choice=choice,
-                            is_correct=is_correct
-                        )
-
-                elif question.question_type == "text":
-                    text_answer = request.POST.get(f"question_{question.id}", "")
-                    Answer.objects.create(
-                        submission=submission,
-                        question=question,
-                        text_answer=text_answer
-                    )
-
-            submission.score = score
-            submission.save()
-
+    # منع إعادة الاختبار
+    if request.user.is_authenticated and not request.user.is_staff:
+        if Submission.objects.filter(student=request.user, assessment=assessment).exists():
+            submission = Submission.objects.filter(
+                student=request.user,
+                assessment=assessment
+            ).latest("id")
             return redirect(
                 "assessments:submission_result_view",
                 nest_id=nest.id,
                 submission_id=submission.id
             )
 
-        return render(request, "assessments/take_assessment.html", {
-            "assessment": assessment,
-            "nest": nest
+    if request.method == "POST":
+        submission = Submission.objects.create(
+            assessment=assessment,
+            student=request.user
+        )
+
+        score = 0
+        for question in assessment.questions.all():
+            if question.question_type == "mcq":
+                choice_id = request.POST.get(f"question_{question.id}")
+                if choice_id:
+                    choice = Choice.objects.get(id=choice_id)
+                    is_correct = choice.is_correct
+                    if is_correct:
+                        score += question.points
+
+                    Answer.objects.create(
+                        submission=submission,
+                        question=question,
+                        selected_choice=choice,
+                        is_correct=is_correct
+                    )
+
+            elif question.question_type == "text":
+                text_answer = request.POST.get(f"question_{question.id}", "")
+                Answer.objects.create(
+                    submission=submission,
+                    question=question,
+                    text_answer=text_answer
+                )
+
+        submission.score = score
+        submission.save()
+
+        return redirect(
+            "assessments:submission_result_view",
+            nest_id=nest.id,
+            submission_id=submission.id
+        )
+
+    context.update({
+        "assessment": assessment,
     })
+    return render(request, "assessments/take_assessment.html", context)
 
 # def submission_result_view(request, nest_id, submission_id):
 #     nest = get_object_or_404(Nest, id=nest_id)
@@ -366,7 +406,15 @@ def take_assessment_view(request: HttpRequest, nest_id, pk):
 #     })
 
 def submission_result_view(request, nest_id, submission_id):
-    nest = get_object_or_404(Nest, id=nest_id)
+    if not request.user.is_authenticated:
+        return _require_auth(request, 'You must be signed in to view results.')
+
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
+    context = _nest_context(nest, request.user)
+
+    has_access = context['is_nest_staff'] or (context['membership'] is not None)
+    if not has_access:
+        return _deny_access(request, 'You must be an active nest member to access assessments.', 'nests:nest_detail', nest_id=nest.pk)
 
     # الطالب يشوف نتيجته، المعلم يشوف أي Submission داخل Nest
     if request.user.is_staff:
@@ -392,15 +440,15 @@ def submission_result_view(request, nest_id, submission_id):
         submission.save()
         return redirect("assessments:submission_result_view", nest_id=nest_id, submission_id=submission.id)
 
-    return render(request, "assessments/submission_result.html", {
+    context.update({
         "submission": submission,
-        "nest": nest
     })
+    return render(request, "assessments/submission_result.html", context)
 
 def assessment_submissions_view(request, nest_id, pk):
     if not request.user.is_authenticated or not request.user.is_staff:
         return HttpResponse("Unauthorized", status=401)
-    nest = get_object_or_404(Nest, id=nest_id)
+    nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
     assessment = get_object_or_404(Assessment, pk=pk, nest=nest)
     submissions = assessment.submissions.all()
     return render(request, 'assessments/assessment_submissions.html', {
