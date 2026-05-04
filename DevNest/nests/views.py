@@ -237,6 +237,10 @@ def join_nest_view(request: HttpRequest, nest_id: int):
 
     nest = get_object_or_404(Nest, pk=nest_id, status=Nest.Status.APPROVED)
 
+    if nest.creator == request.user or nest.is_nest_staff(request.user) or nest.is_site_staff(request.user):
+        messages.info(request, 'You already manage this nest.', 'alert-info')
+        return redirect('nests:nest_detail', nest_id=nest.pk)
+
     # Already a member or already requested — ignore
     if nest.memberships.filter(user=request.user).exists():
         messages.info(request, 'You already have a membership or pending request for this nest.', 'alert-info')

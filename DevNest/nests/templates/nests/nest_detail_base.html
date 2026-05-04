@@ -25,6 +25,10 @@
             <span class="nest-chip nest-chip-pending align-self-center">
                 <i class="bi bi-hourglass-split me-1"></i> Request Pending
             </span>
+        {% elif nest.creator == request.user or can_manage %}
+            <span class="nest-chip nest-chip-approved align-self-center">
+                <i class="bi bi-shield-check me-1"></i> Instructor
+            </span>
         {% elif request.user.is_authenticated %}
             <form method="post" action="{% url 'nests:join_nest' nest_id=nest.pk %}">
                 {% csrf_token %}

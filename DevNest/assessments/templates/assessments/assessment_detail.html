@@ -1,47 +1,123 @@
-{% extends "nests/base.html" %}
+{% extends "nests/nest_detail_base.html" %}
 {% load static %}
 {% block extra_css %}<link rel="stylesheet" href="{% static 'css/assessments-design.css' %}">{% endblock %}
 
-{% block title %}Assessment Detail{% endblock %}
-{% block content %}
-<h2>{{ assessment.title }}</h2>
-<a href="{% url 'assessments:take_assessment_view' nest_id=nest.id pk=assessment.id %}" class="btn btn-primary">Start
-    Assessment</a>
-{% if request.user.is_authenticated and request.user.is_staff %}
-<a class="btn btn-success" href="{% url 'assessments:question_create_view' nest_id=nest.id pk=assessment.id %}"> + Add
-    Question</a>
+{% block title %}{{ assessment.title }} — {{ nest.name }}{% endblock %}
 
-<a class="btn btn-secondary" href="{% url 'assessments:assessment_submissions_view' nest_id=nest.id pk=assessment.id %}">
-    View Submissions
-</a>
-{% endif %}
-<hr>
-{% if request.user.is_authenticated and request.user.is_staff %}
-{% for q in assessment.questions.all %}
-<div class="d-flex align-items-center gap-3">
-    <h4>{{ q.text }}</h4>
-    <a class="btn btn-primary" href="{% url 'assessments:choice_create_view' nest_id=nest.id question_id=q.id %}">+ Add
-        Choice</a>
-    <a href="{% url 'assessments:question_update_view' nest_id=nest.id pk=q.id %}" class="btn btn-secondary">Update</a>
-    <a href="{% url 'assessments:question_delete_view' nest_id=nest.id pk=q.id %}" class="btn btn-danger">Delete</a>
+{% block tab_assessments %}active{% endblock %}
 
+{% block feature_content %}
+<div class="nest-surface p-4 mb-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <h3 class="mb-1">{{ assessment.title }}</h3>
+            <p class="text-muted small mb-2">{{ assessment.description }}</p>
+            <div class="d-flex gap-3 small text-muted">
+                <div><strong>Type:</strong> {{ assessment.assessment_type }}</div>
+                <div><strong>Points:</strong> {{ assessment.points }}</div>
+                <div><strong>Created by:</strong> {{ assessment.created_by.username }}</div>
+                {% if assessment.due_date %}
+                <div><strong>Due:</strong> {{ assessment.due_date|date:"M j, Y" }}</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'assessments:take_assessment_view' nest_id=nest.id pk=assessment.id %}"
+                class="nest-btn-main">
+                <i class="bi bi-play-fill me-1"></i> Start Assessment
+            </a>
+            {% if can_manage %}
+            <a class="nest-btn-soft"
+                href="{% url 'assessments:assessment_submissions_view' nest_id=nest.id pk=assessment.id %}">
+                <i class="bi bi-bar-chart me-1"></i> Submissions
+            </a>
+            {% endif %}
+        </div>
+    </div>
 </div>
 
-<ul>
-    {% for c in q.choices.all %}
-    <li>
-        {{ c.text }} {% if c.is_correct %}(Correct){% endif %}
-        {% if request.user.is_authenticated and request.user.is_staff %}
-        <a class="btn btn-warning btn-sm gap-2"
-            href="{% url 'assessments:choice_update_view' nest_id=nest.id choice_id=c.id %}">Update</a>
-        <a class="btn btn-danger btn-sm gap-2"
-            href="{% url 'assessments:choice_delete_view' nest_id=nest.id choice_id=c.id %}">Delete</a>
-        {% endif %}
-    </li>
-    {% endfor %}
-</ul>
+{% if can_manage %}
+<div class="nest-surface p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0"><i class="bi bi-question-circle me-2"></i>Questions</h5>
+        <a href="{% url 'assessments:question_create_view' nest_id=nest.id pk=assessment.id %}" class="nest-btn-main">
+            <i class="bi bi-plus-lg me-1"></i> Add Question
+        </a>
+    </div>
 
-<hr>
-{% endfor %}
+    {% if assessment.questions.all %}
+    <div class="questions-list">
+        {% for q in assessment.questions.all %}
+        <div class="question-item p-3 mb-3 border-start-5"
+            style="border-color: var(--nest-accent); background: #f9fafb;">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-2">
+                <div>
+                    <h6 class="mb-1">{{ q.text }}</h6>
+                    <small class="text-muted">{{ q.question_type }} • {{ q.points }} points</small>
+                </div>
+                <div class="d-flex gap-1">
+                    <a href="{% url 'assessments:question_update_view' nest_id=nest.id pk=q.id %}"
+                        class="btn btn-sm btn-outline-secondary" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'assessments:question_delete_view' nest_id=nest.id pk=q.id %}"
+                        class="btn btn-sm btn-outline-danger" title="Delete">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+            </div>
+
+            {% if q.choices.all %}
+            <div class="choices mt-3 ms-3 ps-2 border-start border-secondary">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <small class="fw-semibold text-muted">Choices</small>
+                    <a href="{% url 'assessments:choice_create_view' nest_id=nest.id question_id=q.id %}"
+                        class="btn btn-xs btn-outline-primary">
+                        <i class="bi bi-plus"></i>
+                    </a>
+                </div>
+                {% for c in q.choices.all %}
+                <div class="choice-item p-2 mb-2 rounded" style="background: #fff; border: 1px solid #e5e7eb;">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="flex-grow-1">
+                            <small>{{ c.text }}</small>
+                            {% if c.is_correct %}
+                            <span class="nest-chip nest-chip-approved ms-2" style="font-size: 0.65rem;">Correct</span>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'assessments:choice_update_view' nest_id=nest.id choice_id=c.id %}"
+                                class="btn btn-xs btn-outline-secondary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'assessments:choice_delete_view' nest_id=nest.id choice_id=c.id %}"
+                                class="btn btn-xs btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <small class="text-muted d-block mt-2">
+                <a href="{% url 'assessments:choice_create_view' nest_id=nest.id question_id=q.id %}"
+                    class="text-decoration-none">
+                    Add choices...
+                </a>
+            </small>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info mb-0">
+        <i class="bi bi-info-circle me-2"></i>
+        No questions yet. <a href="{% url 'assessments:question_create_view' nest_id=nest.id pk=assessment.id %}"
+            class="alert-link">Add one now</a>.
+    </div>
+    {% endif %}
+</div>
 {% endif %}
+
 {% endblock %}

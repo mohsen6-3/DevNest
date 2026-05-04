@@ -11,8 +11,8 @@ class AssessmentForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control'}),
             'assessment_type': forms.Select(attrs={'class': 'form-control'}),
             'points': forms.NumberInput(attrs={'class': 'form-control'}),
-            'due_date': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
-
+            'due_date': forms.DateTimeInput(attrs={'type': 'datetime-local', 'class': 'form-control'}),
+            'duration': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Duration in minutes (0 = no limit)'}),
         }
 class QuestionForm(forms.ModelForm):
     class Meta:
