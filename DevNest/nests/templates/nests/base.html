@@ -16,7 +16,7 @@
 	<div class="nest-layout">
 		<aside class="nest-sidebar">
 			<a class="nest-sidebar__brand" href="/">
-				<span class="nest-sidebar__logo">D</span>
+				<img src="{% static 'images/logo.svg' %}" alt="DevNest" width="28" height="28" style="border-radius:6px;">
 				<span class="nest-sidebar__name">DevNest</span>
 			</a>
 			<nav class="nest-sidebar__nav" aria-label="Primary">
@@ -56,7 +56,7 @@
 
 		<div class="nest-main-wrap">
 			<header class="nest-topbar-v2">
-				<div class="nest-topbar-v2__crumb">DevNest / Nests</div>
+				<div class="nest-topbar-v2__crumb">{% block topbar_crumb %}DevNest / Nests{% endblock %}</div>
 				<div class="d-flex align-items-center gap-2">
 					{% if request.user.is_authenticated %}
 						<div class="dropdown">

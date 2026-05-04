@@ -384,7 +384,7 @@
     color: var(--content-primary);
 }
 
-.add-unit i {
+.add-unit > i {
     font-size: 32px;
     margin-bottom: 12px;
     display: block;

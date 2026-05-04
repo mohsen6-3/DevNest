@@ -276,11 +276,11 @@ h1, h2, h3, h4, h5, h6 {
 .auth-card {
     max-width: 520px;
     width: 100%;
-    border: 1px solid var(--main-line);
+    border: 0.5px solid rgba(0,0,0,0.08);
     border-radius: 12px;
     background: var(--main-paper);
     padding: 2.2rem;
-    box-shadow: var(--main-shadow-sm);
+    box-shadow: none;
 }
 
 .auth-card .form-control,

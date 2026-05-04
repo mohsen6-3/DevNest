@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
 :root {
   --c-primary: #534AB7;
   --c-primary-hover: #7F77DD;
@@ -24,7 +26,7 @@
 
 html,
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'Manrope', system-ui, -apple-system, sans-serif;
   color: var(--c-text);
   background: var(--c-bg-soft);
   font-size: 13px;
@@ -289,9 +291,10 @@ footer {
 }
 
 .nest-sidebar__name {
-  color: var(--c-text);
-  font-size: 16px;
-  font-weight: 500;
+  color: #0A284D;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .nest-sidebar__nav {

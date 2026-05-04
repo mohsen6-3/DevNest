@@ -27,6 +27,20 @@ def _deny_access(request, message, redirect_to='nests:nest_dashboard', **redirec
     return redirect(redirect_to, **redirect_kwargs)
 
 
+def _activity_status_for_counts(post_count: int, comment_count: int):
+    if post_count >= 40 and comment_count >= 40:
+        return ('Community Leader', 'chief', 'bi-stars')
+    if post_count >= 20 and comment_count >= 20:
+        return ('Highly Engaged', 'fire', 'bi-lightning-charge-fill')
+    if post_count >= 10 and comment_count >= 10:
+        return ('Engaged', 'engaged', 'bi-fire')
+    if post_count >= 5 and comment_count >= 5:
+        return ('Active', 'active', 'bi-activity')
+    if post_count > 0 or comment_count > 0:
+        return ('Getting Started', 'new', 'bi-person-check')
+    return ('New Member', 'new', 'bi-person')
+
+
 def nest_dashboard(request):
     if not request.user.is_authenticated:
         return _require_auth(request, 'You must be signed in to view your dashboard.')
@@ -98,6 +112,16 @@ def nest_dashboard(request):
     is_site_staff = request.user.is_staff or request.user.is_superuser
     is_nest_staff = len(managed_nest_ids) > 0
     managed_nests = my_nests.filter(pk__in=managed_nest_ids)
+
+    my_post_count = Post.objects.filter(user=request.user).count()
+    my_comment_count = Comment.objects.filter(user=request.user).count()
+    activity_status, activity_tone, activity_icon = _activity_status_for_counts(my_post_count, my_comment_count)
+    if request.user.is_superuser or request.user.is_staff:
+        role_label = 'Site Staff'
+    elif is_nest_staff:
+        role_label = 'Nest Staff'
+    else:
+        role_label = 'Member'
     # ───────────────────────────────────────────────────────────────────────
 
     return render(request, 'nests/dashboard.html', {
@@ -113,6 +137,12 @@ def nest_dashboard(request):
         'is_site_staff': is_site_staff,
         'is_nest_staff': is_nest_staff,
         'managed_nests': managed_nests,
+        'my_post_count': my_post_count,
+        'my_comment_count': my_comment_count,
+        'activity_status': activity_status,
+        'activity_tone': activity_tone,
+        'activity_icon': activity_icon,
+        'role_label': role_label,
     })
 
 

@@ -8,7 +8,6 @@
 <p>Are you sure you want to delete this question?</p>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
     <button class="btn btn-danger" type="submit">Delete Question</button>
 </form>
 <!-- Modal -->

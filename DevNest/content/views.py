@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest
+from django.http import HttpRequest, Http404
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.urls import reverse
@@ -142,7 +142,7 @@ def title_detail_view(request: HttpRequest, title_id):
         units = Unit.objects.filter(title=title)
     except Exception as e:
         print(e)
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_view_permission(request, title.nest)
     if permission_response:
@@ -235,7 +235,7 @@ def update_title_view(request: HttpRequest, title_id):
     try:
         title = Title.objects.get(pk=title_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, title.nest)
     if permission_response:
@@ -290,7 +290,7 @@ def create_unit_view(request: HttpRequest, title_id):
     try:
         title = Title.objects.get(pk=title_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, title.nest)
     if permission_response:
@@ -328,7 +328,7 @@ def unit_detail_view(request: HttpRequest, unit_id):
         topics = Topic.objects.filter(unit=unit)
     except Exception as e:
         print(e)
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_view_permission(request, unit.title.nest)
     if permission_response:
@@ -384,7 +384,7 @@ def update_unit_view(request: HttpRequest, unit_id):
     try:
         unit = Unit.objects.get(pk=unit_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, unit.title.nest)
     if permission_response:
@@ -442,7 +442,7 @@ def create_topic_view(request: HttpRequest, unit_id):
     try:
         unit = Unit.objects.get(pk=unit_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, unit.title.nest)
     if permission_response:
@@ -485,7 +485,7 @@ def topic_detail_view(request: HttpRequest, topic_id):
         links = LinkContent.objects.filter(topic=topic)
     except Exception as e:
         print(e)
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_view_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -521,7 +521,7 @@ def update_topic_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -579,7 +579,7 @@ def add_video_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -630,7 +630,7 @@ def add_file_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -701,7 +701,7 @@ def add_image_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -750,7 +750,7 @@ def add_text_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -799,7 +799,7 @@ def add_link_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:

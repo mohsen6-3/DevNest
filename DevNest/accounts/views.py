@@ -13,6 +13,7 @@ from email.mime.image import MIMEImage
 from .models import Profile
 from django.db import transaction
 from posts.models import Post
+from posts.models import Comment
 from nests.models import NestMembership
 from recognition.models import NestRecognition
 from main.models import ContactMessage, Report
@@ -88,7 +89,8 @@ def sign_up(request: HttpRequest):
                 messages.warning(request, "Account created, but welcome email could not be sent.", "alert-warning")
 
             messages.success(request, "Registered User Successfuly", "alert-success")
-            return redirect("accounts:sign_in")
+            login(request, new_user)
+            return redirect("nests:nest_dashboard")
     
     return render(request, "accounts/signup.html", {})
 
@@ -105,7 +107,7 @@ def sign_in(request:HttpRequest):
             #login the user
             login(request, user)
             messages.success(request, "Logged in successfully", "alert-success")
-            return redirect("accounts:user_profile_view", user_name=user.username)
+            return redirect("nests:nest_dashboard")
         else:
             print("user not found")
             messages.error(request, "Please try again. You credentials are wrong", "alert-danger")
@@ -149,6 +151,21 @@ def user_profile_view(request: HttpRequest, user_name):
 
     # Posts authored by the user
     posts = Post.objects.filter(user=user).order_by('-created_at')
+    profile_comment_count = Comment.objects.filter(user=user).count()
+
+    post_count_value = posts.count()
+    if post_count_value >= 40 and profile_comment_count >= 40:
+        profile_activity_status, profile_activity_tone, profile_activity_icon = ('Community Leader', 'chief', 'bi-stars')
+    elif post_count_value >= 20 and profile_comment_count >= 20:
+        profile_activity_status, profile_activity_tone, profile_activity_icon = ('Highly Engaged', 'fire', 'bi-lightning-charge-fill')
+    elif post_count_value >= 10 and profile_comment_count >= 10:
+        profile_activity_status, profile_activity_tone, profile_activity_icon = ('Engaged', 'engaged', 'bi-fire')
+    elif post_count_value >= 5 and profile_comment_count >= 5:
+        profile_activity_status, profile_activity_tone, profile_activity_icon = ('Active', 'active', 'bi-activity')
+    elif post_count_value > 0 or profile_comment_count > 0:
+        profile_activity_status, profile_activity_tone, profile_activity_icon = ('Getting Started', 'new', 'bi-person-check')
+    else:
+        profile_activity_status, profile_activity_tone, profile_activity_icon = ('New Member', 'new', 'bi-person')
 
     # Announcements (posts whose type name is 'Announcement')
     announcements = posts.filter(post_type__name__iexact='Announcement')[:5]
@@ -165,6 +182,13 @@ def user_profile_view(request: HttpRequest, user_name):
     ).select_related('nest')
     managed_nests = [m.nest for m in managed_memberships]
     is_nest_staff_anywhere = bool(managed_nests)
+
+    if user.is_superuser or user.is_staff:
+        profile_role_label = 'Site Staff'
+    elif is_nest_staff_anywhere:
+        profile_role_label = 'Nest Staff'
+    else:
+        profile_role_label = 'Member'
 
     # Pending nest requests created by this user (site-staff panel)
     from nests.models import Nest as NestModel
@@ -202,7 +226,7 @@ def user_profile_view(request: HttpRequest, user_name):
         "nests_with_recognition": nests_with_recognition,
         "posts": posts[:5],
         "announcements": announcements,
-        "post_count": posts.count(),
+        "post_count": post_count_value,
         "nest_count": len(nests),
         "is_owner": is_owner,
         "is_site_staff": is_site_staff,
@@ -213,6 +237,11 @@ def user_profile_view(request: HttpRequest, user_name):
         "common_nests": common_nests,
         "contact_unresolved": contact_unresolved,
         "open_reports_count": open_reports_count,
+        "profile_comment_count": profile_comment_count,
+        "profile_activity_status": profile_activity_status,
+        "profile_activity_tone": profile_activity_tone,
+        "profile_activity_icon": profile_activity_icon,
+        "profile_role_label": profile_role_label,
     })
 
 def update_user_profile(request:HttpRequest):

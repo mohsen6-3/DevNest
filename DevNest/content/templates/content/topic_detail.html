@@ -360,38 +360,6 @@
         {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;"><i class="bi bi-link-45deg"></i></div><div style="font-size:13px;color:#475569;">No links yet</div></div>{% endif %}
     </div>
 
-    <section class="c-discussion" aria-label="Discussion">
-        <div class="c-discussion__head">
-            <h5 class="mb-0">Discussion</h5>
-            <button type="button" class="c-btn c-btn--primary">Ask question</button>
-        </div>
-
-        <article class="c-discussion__item">
-            <div class="c-discussion__meta">
-                <span class="c-avatar">{{ request.user.username|slice:":1"|upper }}</span>
-                <strong>{{ request.user.username }}</strong>
-                <span class="c-badge c-badge--staff">Staff</span>
-                <small>just now</small>
-            </div>
-            <p class="mb-2">Use this area to ask and answer topic-related questions.</p>
-            <div class="d-flex gap-2">
-                <button type="button" class="c-btn">Upvote</button>
-                <button type="button" class="c-btn">Reply</button>
-                <button type="button" class="c-btn">Bookmark</button>
-            </div>
-
-            <div class="c-discussion__reply">
-                <div class="c-discussion__meta">
-                    <span class="c-avatar">A</span>
-                    <strong>Anonymous</strong>
-                    <span class="c-badge c-badge--info">Anonymous</span>
-                    <small>1m ago</small>
-                </div>
-                <p class="mb-1">Thank you. This reply is shown in the nested discussion style.</p>
-                <span class="c-endorsed">Endorsed by instructor</span>
-            </div>
-        </article>
-    </section>
 
 </div>
 

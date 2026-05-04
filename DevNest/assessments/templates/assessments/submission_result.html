@@ -6,36 +6,22 @@
 
 {% block tab_assessments %}active{% endblock %}
 
-            {% if ans.question.question_type == "mcq" %}
-            Your answer: {{ ans.selected_choice }}<br>
-            {% if ans.is_correct %}<i class="bi bi-check-circle"></i> Correct{% else %}<i class="bi bi-x-circle"></i> Wrong{% endif %}
-            {% elif ans.question.question_type == "text" %}
-            Your answer: {{ ans.text_answer }}<br>
+{% block feature_content %}
+<div class="nest-surface p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+            <h3 class="mb-1">{{ submission.assessment.title }}</h3>
+            <p class="text-muted small mb-0">{{ submission.student.username }}</p>
+        </div>
+        <div class="text-end">
+            <div class="display-6 fw-bold" style="color: var(--nest-accent);">{{ submission.score }}</div>
+            <small class="text-muted">/ {{ submission.assessment.points }} points</small>
+        </div>
+    </div>
+</div>
 
-            {% if request.user.is_staff %}
-            <label>
-                <input type="radio" name="answer_{{ ans.id }}" value="correct">
-                Correct
-            </label>
-            <label>
-                <input type="radio" name="answer_{{ ans.id }}" value="wrong">
-                Wrong
-            </label>
-            {% else %}
-            {% if ans.is_correct == None %}
-            <i class="bi bi-hourglass-split"></i> Waiting for grading
-            {% elif ans.is_correct %}
-            <i class="bi bi-check-circle"></i> Correct
-            {% else %}
-            <i class="bi bi-x-circle"></i> Wrong
-            {% endif %}
-            {% endif %}
-            {% endif %}
-        </li>
-        <hr>
-        {% endfor %}
-    </ul>
-
+<form method="post">
+{% csrf_token %}
         {% if submission.answers.all %}
         <div class="answers-list">
             {% for ans in submission.answers.all %}
