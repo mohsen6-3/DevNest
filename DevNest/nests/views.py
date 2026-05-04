@@ -94,6 +94,7 @@ def nest_list_view(request: HttpRequest):
         'nests': nests,
         'active_nest_ids': active_nest_ids,
         'pending_nest_ids': pending_nest_ids,
+        'is_site_staff': request.user.is_staff or request.user.is_superuser,
     })
 
 
@@ -106,6 +107,21 @@ def nest_detail_view(request: HttpRequest, nest_id: int):
     pending_membership = nest.memberships.filter(
         user=request.user, status=NestMembership.Status.PENDING
     ).first()
+    can_manage = nest.is_nest_staff(request.user) or nest.is_site_staff(request.user)
+    has_access = can_manage or (membership is not None)
+    if not has_access:
+        if pending_membership:
+            return _deny_access(
+                request,
+                'Your join request is still pending. You can view this nest after approval.',
+                'nests:nest_list_view',
+            )
+        return _deny_access(
+            request,
+            'You must be an active nest member to view this nest.',
+            'nests:nest_list_view',
+        )
+
     total_score = (
         Submission.objects
         .filter(student=request.user, assessment__nest=nest)
@@ -117,19 +133,27 @@ def nest_detail_view(request: HttpRequest, nest_id: int):
         Post.objects.filter(nest=nest, post_type=ann_type).order_by('-created_at')[:5]
         if ann_type else []
     )
-    recent_posts = (
-        Post.objects.filter(nest=nest)
+    pinned_posts = (
+        Post.objects.filter(nest=nest, is_pinned=True)
         .exclude(post_type=ann_type)
         .order_by('-created_at')[:5]
-        if ann_type else Post.objects.filter(nest=nest).order_by('-created_at')[:5]
+        if ann_type else Post.objects.filter(nest=nest, is_pinned=True).order_by('-created_at')[:5]
+    )
+    recent_posts = (
+        Post.objects.filter(nest=nest)
+        .exclude(is_pinned=True)
+        .exclude(post_type=ann_type)
+        .order_by('-created_at')[:5]
+        if ann_type else Post.objects.filter(nest=nest).exclude(is_pinned=True).order_by('-created_at')[:5]
     )
 
     return render(request, 'nests/nest_detail.html', {
         'nest': nest,
         'membership': membership,
         'pending_membership': pending_membership,
-        'can_manage': nest.is_nest_staff(request.user) or nest.is_site_staff(request.user),
+        'can_manage': can_manage,
         'announcements': announcements,
+        'pinned_posts': pinned_posts,
         'recent_posts': recent_posts,
         'total_score': total_score,
     })
@@ -147,7 +171,7 @@ def join_nest_view(request: HttpRequest, nest_id: int):
     # Already a member or already requested — ignore
     if nest.memberships.filter(user=request.user).exists():
         messages.info(request, 'You already have a membership or pending request for this nest.', 'alert-info')
-        return redirect('nests:nest_detail', nest_id=nest.pk)
+        return redirect('nests:nest_list_view')
 
     NestMembership.objects.create(
         nest=nest,
@@ -156,7 +180,7 @@ def join_nest_view(request: HttpRequest, nest_id: int):
         status=NestMembership.Status.PENDING,
     )
     messages.success(request, f'Your request to join "{nest.name}" has been sent to the instructor.', 'alert-success')
-    return redirect('nests:nest_detail', nest_id=nest.pk)
+    return redirect('nests:nest_list_view')
 
 
 def manage_nest_view(request: HttpRequest, nest_id: int):
