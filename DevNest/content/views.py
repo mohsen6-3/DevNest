@@ -84,7 +84,23 @@ def all_titles_view(request: HttpRequest):
         return permission_response
     titles = Title.objects.filter(nest=nest) if nest else Title.objects.all()
 
-    return render(request, "content/all_titles.html", {"titles": titles, "nest": nest})
+    membership = None
+    pending_membership = None
+    can_manage = False
+    if nest and request.user.is_authenticated:
+        membership = nest.membership_for(request.user)
+        pending_membership = nest.memberships.filter(
+            user=request.user, status="pending"
+        ).first()
+        can_manage = nest.is_nest_staff(request.user) or nest.is_site_staff(request.user)
+
+    return render(request, "content/all_titles.html", {
+        "titles": titles,
+        "nest": nest,
+        "membership": membership,
+        "pending_membership": pending_membership,
+        "can_manage": can_manage,
+    })
 
 
 def title_detail_view(request: HttpRequest, title_id):
@@ -100,7 +116,25 @@ def title_detail_view(request: HttpRequest, title_id):
     if permission_response:
         return permission_response
 
-    return render(request, "content/title_detail.html", {"title": title, "units": units, "nest": title.nest})
+    nest = title.nest
+    membership = None
+    pending_membership = None
+    can_manage = False
+    if nest and request.user.is_authenticated:
+        membership = nest.membership_for(request.user)
+        pending_membership = nest.memberships.filter(
+            user=request.user, status="pending"
+        ).first()
+        can_manage = nest.is_nest_staff(request.user) or nest.is_site_staff(request.user)
+
+    return render(request, "content/title_detail.html", {
+        "title": title,
+        "units": units,
+        "nest": nest,
+        "membership": membership,
+        "pending_membership": pending_membership,
+        "can_manage": can_manage,
+    })
 
 
 def create_title_view(request: HttpRequest):

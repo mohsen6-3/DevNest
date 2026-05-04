@@ -157,7 +157,10 @@
                                 {{ post.title }}
                             </h4>
                             <div class="d-flex align-items-center flex-wrap gap-1 mt-1">
-                                <small class="text-muted">By <strong><a href="{% url 'accounts:user_profile_view' user_name=post.user.username %}" class="text-decoration-none text-reset">{{ post.user.username }}</a></strong></small>
+                                    <a href="{% url 'accounts:user_profile_view' user_name=post.user.username %}" class="text-decoration-none d-flex align-items-center gap-2">
+                                        <img src="{{ post.user.profile.avatar.url }}" alt="{{ post.user.username }}" class="rounded-circle" style="width:28px;height:28px;object-fit:cover;">
+                                        <strong class="text-reset">{{ post.user.username }}</strong>
+                                    </a>
                                 {% if post.recognition %}
                                 <span class="recog-title-pill">{{ post.recognition.title }}</span>
                                 {% if post.recognition.badge %}
@@ -229,6 +232,11 @@
                         </form>
                     </div>
                     <hr>
+                    {% if post.image %}
+                    <a href="{{ post.image.url }}" target="_blank" rel="noopener noreferrer" class="d-block mb-3">
+                        <img src="{{ post.image.url }}" alt="Post image" class="img-fluid rounded border" style="max-height:420px;object-fit:cover;">
+                    </a>
+                    {% endif %}
                     <div class="post-body">{{ post.content|linebreaksbr }}</div>
                 </div>
 
@@ -243,7 +251,10 @@
                     <div class="post-comment {% if comment.user.pk in nest_staff_ids %}post-comment--staff{% elif comment.is_verified %}post-comment--verified{% endif %} mb-3">
                         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
                             <div>
-                                <strong><a href="{% url 'accounts:user_profile_view' user_name=comment.user.username %}" class="text-decoration-none text-reset">{{ comment.user.username }}</a></strong>
+                                <a href="{% url 'accounts:user_profile_view' user_name=comment.user.username %}" class="text-decoration-none text-reset d-inline-flex align-items-center gap-2">
+                                    <img src="{{ comment.user.profile.avatar.url }}" alt="{{ comment.user.username }}" class="rounded-circle" style="width:24px;height:24px;object-fit:cover;">
+                                    <strong>{{ comment.user.username }}</strong>
+                                </a>
                                 {% if comment.recognition %}
                                 <span class="recog-title-pill">{{ comment.recognition.title }}</span>
                                 {% if comment.recognition.badge %}<span class="recog-badge-pill"><i class="bi {{ comment.recognition.badge_icon }}"></i> {{ comment.recognition.badge }}</span>{% endif %}
@@ -298,7 +309,10 @@
                         <div class="post-comment post-comment--reply">
                             <div class="d-flex justify-content-between align-items-start gap-2">
                                 <div>
-                                    <strong><a href="{% url 'accounts:user_profile_view' user_name=reply.user.username %}" class="text-decoration-none text-reset">{{ reply.user.username }}</a></strong>
+                                    <a href="{% url 'accounts:user_profile_view' user_name=reply.user.username %}" class="text-decoration-none text-reset d-inline-flex align-items-center gap-2">
+                                        <img src="{{ reply.user.profile.avatar.url }}" alt="{{ reply.user.username }}" class="rounded-circle" style="width:22px;height:22px;object-fit:cover;">
+                                        <strong>{{ reply.user.username }}</strong>
+                                    </a>
                                     {% if reply.recognition %}<span class="recog-title-pill ms-1">{{ reply.recognition.title }}</span>{% if reply.recognition.badge %} <span class="recog-badge-pill"><i class="bi {{ reply.recognition.badge_icon }}"></i> {{ reply.recognition.badge }}</span>{% endif %}{% endif %}
                                     <small class="text-muted ms-2">{{ reply.created_at|date:"M j, Y g:i A" }}</small>
                                 </div>

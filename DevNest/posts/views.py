@@ -359,6 +359,7 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
         content = request.POST.get('content', '').strip()
         post_type_id = request.POST.get('post_type_id', '')
         raw_tags = request.POST.get('tags', '').strip()
+        post_image = request.FILES.get('image')
         subscribe_updates = request.POST.get('subscribe_updates') == '1'
 
         selected_post_type = PostType.objects.filter(pk=post_type_id).first()
@@ -375,6 +376,7 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
                     nest=nest,
                     title=title,
                     content=content,
+                    image=post_image,
                     post_type=selected_post_type,
                 )
                 tags = _resolve_post_tags(raw_tags)
@@ -403,8 +405,13 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
         1 for key in ('q', 'type', 'tag') if filter_state[key]
     ) + (1 if filter_state['sort'] != 'newest' else 0)
 
+    pinned_posts = [p for p in posts if p.is_pinned]
+    regular_posts = [p for p in posts if not p.is_pinned]
+
     context.update({
         'posts': posts,
+        'pinned_posts': pinned_posts,
+        'regular_posts': regular_posts,
         'post_types': post_types,
         'grouped_posts': _group_posts_by_date(posts),
         'active_post': None,

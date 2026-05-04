@@ -26,9 +26,13 @@
                 <small class="text-muted">By {{ nest.creator.username }}</small>
             </div>
             <div class="card-footer bg-transparent d-flex justify-content-between align-items-center">
-                <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">View</a>
-                {% if nest.pk in active_nest_ids %}
-                    <span class="nest-chip nest-chip-approved">Joined</span>
+                {% if nest.pk in active_nest_ids or is_site_staff %}
+                    <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">View</a>
+                    {% if nest.pk in active_nest_ids %}
+                        <span class="nest-chip nest-chip-approved">Joined</span>
+                    {% else %}
+                        <span class="nest-chip nest-chip-approved">Staff Access</span>
+                    {% endif %}
                 {% elif nest.pk in pending_nest_ids %}
                     <span class="nest-chip nest-chip-pending">Request Pending</span>
                 {% else %}
