@@ -52,7 +52,7 @@ def send_welcome_email(user):
     )
     email_message.content_subtype = 'html'
     _attach_email_logo(email_message, logo_cid='devnest-logo')
-    email_message.send(fail_silently=False)
+    email_message.send(fail_silently=True)
 
 
 def sign_up(request: HttpRequest):

@@ -382,7 +382,10 @@ def nest_posts_view(request: HttpRequest, nest_id: int):
                     post.tags.set(tags)
                 _upsert_post_subscription(post, request.user, is_enabled=subscribe_updates)
                 if is_announcement and context['is_nest_staff']:
-                    _send_announcement_emails(post, request.user)
+                    try:
+                        _send_announcement_emails(post, request.user)
+                    except Exception as e:
+                        print(f'Announcement email failed: {e}')
                 messages.success(request, 'Post published successfully.', 'alert-success')
                 return redirect('nests:nest_posts', nest_id=nest.pk)
 
@@ -590,7 +593,10 @@ def add_comment_view(request: HttpRequest, nest_id: int, post_id: int):
         content=content,
         parent=parent,
     )
-    _send_post_update_emails(post, request.user, new_comment)
+    try:
+        _send_post_update_emails(post, request.user, new_comment)
+    except Exception as e:
+        print(f'Post update email failed: {e}')
     messages.success(request, 'Comment posted.', 'alert-success')
     return redirect('nests:nest_post_detail', nest_id=nest_id, post_id=post_id)
 
