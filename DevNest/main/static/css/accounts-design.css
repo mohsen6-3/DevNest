@@ -1,0 +1,142 @@
+.profile-shell .card {
+  border: 0.5px solid rgba(0,0,0,0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  background: #fff !important;
+  padding: 16px !important;
+}
+
+.profile-shell .card:hover {
+  background: #f7f8fb !important;
+}
+
+.profile-page,
+.profile-edit-page {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.profile-backlink-wrap {
+  margin-bottom: 14px !important;
+}
+
+.profile-backlink {
+  color: #6b7185 !important;
+}
+
+.profile-backlink:hover {
+  color: #3c3489 !important;
+}
+
+.profile-hero-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fafbff 100%) !important;
+}
+
+.profile-avatar {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border: 0.5px solid rgba(0,0,0,0.08) !important;
+}
+
+.profile-stats-row {
+  flex-wrap: wrap;
+}
+
+.profile-stat-card {
+  min-width: 86px;
+  background: #f8f9fc;
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
+.profile-section-card {
+  background: #fff !important;
+}
+
+.profile-kpi-card {
+  min-width: 200px;
+  padding: 12px 14px !important;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.section-header h6 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.section-header a {
+  color: #3C3489;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.section-header a:hover {
+  color: #534AB7;
+}
+
+.auth-panel {
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.auth-panel .card,
+.auth-panel .nest-surface {
+  border: 0.5px solid rgba(0,0,0,0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.profile-edit-shell {
+  padding-top: 6px !important;
+}
+
+.profile-edit-card {
+  width: 100%;
+  border: 0.5px solid rgba(0,0,0,0.08) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+  background: #fff !important;
+  padding: 18px !important;
+}
+
+.profile-edit-card .form-floating > .form-control,
+.profile-edit-card .form-floating > .form-select {
+  height: calc(3.1rem + 2px);
+}
+
+.profile-edit-card .form-check {
+  padding: 6px 0 6px 1.6rem;
+}
+
+#notif-prefs {
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  background: #f8f9fc;
+  padding: 12px;
+}
+
+@media (max-width: 767.98px) {
+  .profile-shell .card,
+  .profile-edit-card {
+    padding: 12px !important;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profile-kpi-card {
+    min-width: 100%;
+  }
+}

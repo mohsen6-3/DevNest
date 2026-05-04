@@ -1,6 +1,8 @@
 {% extends 'main/base.html' %}
+{% load static %}
 
 {% block title %}Sign In — DevNest{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/accounts-design.css' %}">{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-center align-items-start py-5 auth-shell">

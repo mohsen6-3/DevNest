@@ -4,48 +4,277 @@
 
 {% block content %}
 
-{% if pending_nests %}
-<div class="alert alert-warning nest-surface mb-4">
-    <strong>Pending requests:</strong>
-    {% for nest in pending_nests %}
-        <span class="nest-chip nest-chip-pending me-1">{{ nest.name }}</span>
-    {% endfor %}
-    - waiting for site staff to approve.
-</div>
-{% endif %}
-
-<div class="nest-page-head">
+{# ── Header ─────────────────────────────────────────────────────────── #}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
     <div>
-        <h2 class="nest-page-title">My Nests</h2>
-        <p class="nest-page-subtitle">Your active, approved learning spaces.</p>
+        <h2 class="mb-1">Welcome back, {{ request.user.first_name|default:request.user.username }}</h2>
+        <p class="text-muted mb-0">Track your learning spaces and recent activity.</p>
     </div>
     <div class="d-flex gap-2">
         <a href="{% url 'nests:nest_list_view' %}" class="nest-btn-soft">Browse All Nests</a>
-        <a href="{% url 'nests:request_nest_view' %}" class="nest-btn-main">+ Request a Nest</a>
+        <a href="{% url 'nests:request_nest_view' %}" class="nest-btn-main">Request a Nest</a>
     </div>
 </div>
 
-{% if nests %}
-    <div class="row g-3">
-        {% for nest in nests %}
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="card nest-card">
-                <div class="card-body">
-                    <h5 class="card-title">{{ nest.name }}</h5>
-                    <p class="card-text text-muted">{{ nest.description }}</p>
-                    <span class="nest-chip nest-chip-approved">{{ nest.get_status_display }}</span>
+{# ── #1 Smart Alerts ─────────────────────────────────────────────────── #}
+{% if unread_notifications_count or upcoming_assessments or pending_nests %}
+<div class="mb-4">
+    {% if unread_notifications_count %}
+    <div class="nest-surface d-flex align-items-center gap-3 mb-2" style="border-left:4px solid #534AB7;">
+        <i class="bi bi-bell-fill" style="color:#534AB7;font-size:1.2rem;"></i>
+        <div class="flex-grow-1">
+            <strong>{{ unread_notifications_count }} unread notification{{ unread_notifications_count|pluralize }}</strong>
+            <div class="text-muted" style="font-size:0.82rem;">
+                {% for notif in unread_notifications|slice:":2" %}{{ notif.message }}{% if not forloop.last %} · {% endif %}{% endfor %}
+                {% if unread_notifications_count > 2 %} &amp; {{ unread_notifications_count|add:"-2" }} more{% endif %}
+            </div>
+        </div>
+        <a href="{% url 'accounts:user_profile_view' user_name=request.user.username %}" class="nest-btn-soft btn-sm">View</a>
+    </div>
+    {% endif %}
+    {% for assessment in upcoming_assessments %}
+    <div class="nest-surface d-flex align-items-center gap-3 mb-2" style="border-left:4px solid #D97706;">
+        <i class="bi bi-clock-fill" style="color:#D97706;font-size:1.2rem;"></i>
+        <div class="flex-grow-1">
+            <strong>{{ assessment.title }}</strong> due soon
+            <div class="text-muted" style="font-size:0.82rem;">{{ assessment.nest.name }} · Due {{ assessment.due_date|date:"M j, g:i a" }}</div>
+        </div>
+        <a href="{% url 'assessments:assessment_detail_view' nest_id=assessment.nest_id pk=assessment.pk %}" class="nest-btn-soft btn-sm">Open</a>
+    </div>
+    {% endfor %}
+    {% if pending_nests %}
+    <div class="nest-surface d-flex align-items-center gap-3 mb-2" style="border-left:4px solid #6B7280;">
+        <i class="bi bi-hourglass-split" style="color:#6B7280;font-size:1.2rem;"></i>
+        <div class="flex-grow-1">
+            <strong>{{ pending_nests|length }} nest request{{ pending_nests|length|pluralize }} pending review</strong>
+            <div class="text-muted" style="font-size:0.82rem;">
+                {% for n in pending_nests %}{{ n.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+{# ── #8 Weekly Stats ─────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="nest-surface text-center">
+            <div style="font-size:1.6rem;font-weight:700;color:#534AB7;">{{ nests|length }}</div>
+            <small class="text-muted">Active Nests</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="nest-surface text-center">
+            <div style="font-size:1.6rem;font-weight:700;color:#059669;">{{ posts_this_week }}</div>
+            <small class="text-muted">Posts this week</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="nest-surface text-center">
+            <div style="font-size:1.6rem;font-weight:700;color:#D97706;">{{ comments_this_week }}</div>
+            <small class="text-muted">Comments this week</small>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="nest-surface text-center">
+            <div style="font-size:1.6rem;font-weight:700;color:#DC2626;">{{ upcoming_assessments|length }}</div>
+            <small class="text-muted">Due this week</small>
+        </div>
+    </div>
+</div>
+
+{# ── Main content row ────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+
+    {# My Nests – activity feed #}
+    <div class="col-12 col-xl-7">
+        <div class="nest-surface h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="bi bi-grid-1x2 me-2" style="color:#534AB7;"></i>My Nests</h5>
+            </div>
+            {% if nests %}
+                {% for nest in nests %}
+                <div class="d-flex align-items-center gap-3 py-2 border-bottom" style="border-color:rgba(0,0,0,0.06)!important;">
+                    <div class="d-flex align-items-center justify-content-center rounded-circle"
+                         style="width:36px;height:36px;background:#EEF2FF;color:#534AB7;font-weight:700;flex-shrink:0;">
+                        {{ nest.name|first|upper }}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div style="font-weight:500;">{{ nest.name }}</div>
+                        <small class="text-muted">{{ nest.get_status_display }}</small>
+                    </div>
+                    <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">Open</a>
                 </div>
-                <div class="card-footer bg-transparent d-flex gap-2">
+                {% endfor %}
+            {% else %}
+                <div class="add-unit p-4 text-center">
+                    <i class="bi bi-journal-x" style="font-size:2rem;color:#9ca3af;"></i>
+                    <div class="mt-2">No active nests yet</div>
+                    <small>Join or request a nest to get started.</small>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# #7 Needs Attention #}
+    <div class="col-12 col-xl-5">
+        <div class="nest-surface h-100">
+            <h5 class="mb-3"><i class="bi bi-exclamation-circle me-2" style="color:#DC2626;"></i>Needs Attention</h5>
+
+            {% if unanswered_posts %}
+                <p class="text-muted mb-2" style="font-size:0.82rem;">Unanswered posts</p>
+                {% for post in unanswered_posts %}
+                <div class="d-flex align-items-start gap-2 mb-2 p-2 rounded attention-item" data-key="post-{{ post.pk }}" style="background:#FEF2F2;">
+                    <i class="bi bi-chat-left-text" style="color:#DC2626;margin-top:2px;"></i>
+                    <div class="flex-grow-1" style="min-width:0;">
+                        <div style="font-size:0.88rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ post.title }}</div>
+                        <small class="text-muted">{{ post.nest.name }}</small>
+                    </div>
+                    <a href="{% url 'nests:nest_post_detail' nest_id=post.nest_id post_id=post.pk %}" class="nest-btn-soft btn-sm" style="white-space:nowrap;">Reply</a>
+                    <button type="button" class="btn btn-sm btn-link p-0 ms-1 text-muted dismiss-btn" title="Dismiss" onclick="dismissItem(this)" style="line-height:1;"><i class="bi bi-x-lg" style="font-size:0.75rem;"></i></button>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="add-unit p-3 text-center mb-2">
+                    <small>No unanswered posts — all clear!</small>
+                </div>
+            {% endif %}
+
+            {% if is_nest_staff and pending_memberships %}
+                <p class="text-muted mt-3 mb-2" style="font-size:0.82rem;">Pending join requests</p>
+                {% for mem in pending_memberships %}
+                <div class="d-flex align-items-center gap-2 mb-2 p-2 rounded attention-item" data-key="mem-{{ mem.pk }}" style="background:#F0FDF4;">
+                    <i class="bi bi-person-plus" style="color:#059669;"></i>
+                    <div class="flex-grow-1">
+                        <div style="font-size:0.88rem;font-weight:500;">{{ mem.user.username }}</div>
+                        <small class="text-muted">{{ mem.nest.name }}</small>
+                    </div>
+                    <a href="{% url 'nests:manage_nest' nest_id=mem.nest.pk %}" class="nest-btn-soft btn-sm">Review</a>
+                    <button type="button" class="btn btn-sm btn-link p-0 ms-1 text-muted dismiss-btn" title="Dismiss" onclick="dismissItem(this)" style="line-height:1;"><i class="bi bi-x-lg" style="font-size:0.75rem;"></i></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+    {% if is_site_staff and pending_nest_requests %}
+                <p class="text-muted mt-3 mb-2" style="font-size:0.82rem;">Nest requests awaiting approval</p>
+                {% for nr in pending_nest_requests %}
+                <div class="d-flex align-items-center gap-2 mb-2 p-2 rounded attention-item" data-key="nr-{{ nr.pk }}" style="background:#FFF7ED;">
+                    <i class="bi bi-building" style="color:#D97706;"></i>
+                    <div class="flex-grow-1">
+                        <div style="font-size:0.88rem;font-weight:500;">{{ nr.name }}</div>
+                        <small class="text-muted">by {{ nr.creator.username }}</small>
+                    </div>
+                    <a href="{% url 'nests:staff_nest_review' %}" class="nest-btn-soft btn-sm">Review</a>
+                    <button type="button" class="btn btn-sm btn-link p-0 ms-1 text-muted dismiss-btn" title="Dismiss" onclick="dismissItem(this)" style="line-height:1;"><i class="bi bi-x-lg" style="font-size:0.75rem;"></i></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# ── #10 Role-Based Section ──────────────────────────────────────────── #}
+{% if is_site_staff %}
+<div class="nest-surface mb-4">
+    <h5 class="mb-3"><i class="bi bi-shield-check me-2" style="color:#7C3AED;"></i>Site Staff Panel</h5>
+    <div class="row g-3">
+        <div class="col-12 col-md-4">
+            <a href="{% url 'nests:staff_nest_review' %}" class="nest-surface d-flex align-items-center gap-3 text-decoration-none" style="background:#F5F3FF;">
+                <i class="bi bi-check2-circle" style="font-size:1.4rem;color:#7C3AED;"></i>
+                <div>
+                    <div style="font-weight:500;">Review Nest Requests</div>
+                    <small class="text-muted">{{ pending_nest_requests|length }} pending</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-4">
+            <a href="{% url 'main:staff_messages' %}" class="nest-surface d-flex align-items-center gap-3 text-decoration-none" style="background:#F5F3FF;">
+                <i class="bi bi-envelope" style="font-size:1.4rem;color:#7C3AED;"></i>
+                <div>
+                    <div style="font-weight:500;">Contact Messages</div>
+                    <small class="text-muted">Review incoming messages</small>
+                </div>
+            </a>
+        </div>
+        <div class="col-12 col-md-4">
+            <a href="{% url 'main:staff_reports' %}" class="nest-surface d-flex align-items-center gap-3 text-decoration-none" style="background:#F5F3FF;">
+                <i class="bi bi-flag" style="font-size:1.4rem;color:#7C3AED;"></i>
+                <div>
+                    <div style="font-weight:500;">Reports</div>
+                    <small class="text-muted">Review flagged content</small>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% elif is_nest_staff %}
+<div class="nest-surface mb-4">
+    <h5 class="mb-3"><i class="bi bi-mortarboard me-2" style="color:#059669;"></i>Instructor Panel</h5>
+    <div class="row g-3">
+        {% for nest in managed_nests %}
+        <div class="col-12 col-md-6">
+            <div class="nest-surface" style="background:#F0FDF4;">
+                <div style="font-weight:500;margin-bottom:4px;">{{ nest.name }}</div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'nests:manage_nest' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">Members</a>
+                    <a href="{% url 'assessments:assessment_page_view' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">Assessments</a>
                     <a href="{% url 'nests:nest_detail' nest_id=nest.pk %}" class="nest-btn-soft btn-sm">Open Nest</a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
+</div>
 {% else %}
-    <div class="nest-surface p-4">
-        <p class="text-muted mb-0">You are not a member of any approved nests yet. <a href="{% url 'nests:request_nest_view' %}">Request one now.</a></p>
+{# Student view #}
+{% if upcoming_assessments %}
+<div class="nest-surface mb-4">
+    <h5 class="mb-3"><i class="bi bi-journal-check me-2" style="color:#D97706;"></i>Upcoming Assessments</h5>
+    <div class="row g-3">
+        {% for assessment in upcoming_assessments %}
+        <div class="col-12 col-md-6">
+            <div class="nest-surface d-flex align-items-center gap-3" style="background:#FFFBEB;">
+                <i class="bi bi-file-earmark-text" style="font-size:1.4rem;color:#D97706;"></i>
+                <div class="flex-grow-1">
+                    <div style="font-weight:500;">{{ assessment.title }}</div>
+                    <small class="text-muted">{{ assessment.nest.name }} · Due {{ assessment.due_date|date:"M j" }}</small>
+                </div>
+                <a href="{% url 'assessments:assessment_detail_view' nest_id=assessment.nest_id pk=assessment.pk %}" class="nest-btn-main btn-sm">Start</a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
+</div>
 {% endif %}
+{% endif %}
+
+<script>
+(function () {
+    const STORAGE_KEY = 'dashboard_dismissed_{{ request.user.pk }}';
+    function getDismissed() {
+        try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+    }
+    function saveDismissed(list) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    }
+    // Hide already-dismissed items on load
+    const dismissed = getDismissed();
+    document.querySelectorAll('.attention-item').forEach(function (el) {
+        if (dismissed.includes(el.dataset.key)) el.style.display = 'none';
+    });
+    // Expose dismiss function globally
+    window.dismissItem = function (btn) {
+        const item = btn.closest('.attention-item');
+        if (!item) return;
+        const key = item.dataset.key;
+        item.style.transition = 'opacity .2s';
+        item.style.opacity = '0';
+        setTimeout(function () { item.style.display = 'none'; }, 200);
+        const list = getDismissed();
+        if (!list.includes(key)) { list.push(key); saveDismissed(list); }
+    };
+})();
+</script>
 
 {% endblock %}

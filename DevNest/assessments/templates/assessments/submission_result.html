@@ -1,5 +1,6 @@
 {% extends "nests/base.html" %}
 {% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/assessments-design.css' %}">{% endblock %}
 
 {% block title %}Submission Result{% endblock %}
 {% block content %}
@@ -15,7 +16,7 @@
 
             {% if ans.question.question_type == "mcq" %}
             Your answer: {{ ans.selected_choice }}<br>
-            {% if ans.is_correct %}✅ Correct{% else %}❌ Wrong{% endif %}
+            {% if ans.is_correct %}<i class="bi bi-check-circle"></i> Correct{% else %}<i class="bi bi-x-circle"></i> Wrong{% endif %}
             {% elif ans.question.question_type == "text" %}
             Your answer: {{ ans.text_answer }}<br>
 
@@ -30,11 +31,11 @@
             </label>
             {% else %}
             {% if ans.is_correct == None %}
-            ⏳ Waiting for grading
+            <i class="bi bi-hourglass-split"></i> Waiting for grading
             {% elif ans.is_correct %}
-            ✅ Correct
+            <i class="bi bi-check-circle"></i> Correct
             {% else %}
-            ❌ Wrong
+            <i class="bi bi-x-circle"></i> Wrong
             {% endif %}
             {% endif %}
             {% endif %}

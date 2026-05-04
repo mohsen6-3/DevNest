@@ -1,0 +1,112 @@
+.posts-layout {
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.posts-sidebar {
+  border-right: 0.5px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.sidebar-post-item {
+  border: 0.5px solid transparent;
+}
+
+.sidebar-post-item:hover,
+.sidebar-post-item.active {
+  background: #EEEDFE;
+  color: #3C3489 !important;
+  border-color: rgba(83, 74, 183, 0.16);
+}
+
+.post-is-unread .fw-semibold {
+  color: #1a1a1a;
+  font-weight: 500 !important;
+}
+
+.post-is-read .fw-semibold {
+  color: #6b7185;
+  font-weight: 400 !important;
+}
+
+.posts-main-area {
+  background: #f8f9fc;
+}
+
+.nest-subscription-box {
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+}
+
+.nest-subscription-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: #EEEDFE;
+  color: #3C3489;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hover-shadow:hover {
+  background: #f7f8fb;
+}
+
+.post-card-read {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.post-card-unread {
+  border-color: rgba(83, 74, 183, 0.24) !important;
+}
+
+.post-comment {
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 10px;
+  background: #fff;
+}
+
+.post-comment--reply {
+  margin-top: 8px;
+  margin-left: 32px;
+  background: #f7f8fb;
+}
+
+.post-comment--staff {
+  border-color: rgba(83, 74, 183, 0.24);
+  background: #EEEDFE;
+}
+
+.post-comment--verified {
+  border-color: rgba(39, 80, 10, 0.24);
+  background: #EAF3DE;
+}
+
+.posts-mobile-fab {
+  position: fixed;
+  right: 14px;
+  bottom: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 0;
+  background: #534AB7;
+  color: #fff;
+}
+
+@media (max-width: 1199px) {
+  .posts-sidebar {
+    border-right: 0;
+    border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .post-comment--reply {
+    margin-left: 16px;
+  }
+}

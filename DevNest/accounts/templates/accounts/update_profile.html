@@ -1,15 +1,18 @@
 {% extends 'main/base.html' %}
+{% load static %}
 
 {% block title %}Edit Profile — DevNest{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/accounts-design.css' %}">{% endblock %}
 
 {% block content %}
-<div class="mb-3">
-    <a href="{% url 'nests:nest_dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
+<div class="profile-edit-page">
+<div class="mb-3 profile-backlink-wrap">
+    <a href="{% url 'nests:nest_dashboard' %}" class="text-decoration-none text-muted small fw-semibold profile-backlink">
         <i class="bi bi-arrow-left me-1"></i>Back to Nests
     </a>
 </div>
-<div class="d-flex justify-content-center align-items-start py-4">
-    <div class="auth-card" style="max-width:560px;">
+<div class="d-flex justify-content-center align-items-start py-4 profile-edit-shell">
+    <div class="auth-card profile-edit-card" style="max-width:560px;">
         <h4 class="fw-bold mb-1">Edit Profile</h4>
         <p class="text-muted small mb-4">Update your account details</p>
 
@@ -61,7 +64,7 @@
                     <input type="file" name="avatar" accept="image/*" class="form-control">
                 </div>
 
-                <div id="notif-prefs" class="border rounded-3 p-3" style="background:#f8f9fc;">
+                <div id="notif-prefs" class="border rounded-3 p-3">
                     <h6 class="fw-bold mb-2">Notification Preferences</h6>
                     <div class="text-muted small mb-3">Choose how you receive updates.</div>
 
@@ -95,5 +98,6 @@
             </a>
         </div>
     </div>
+</div>
 </div>
 {% endblock %}
