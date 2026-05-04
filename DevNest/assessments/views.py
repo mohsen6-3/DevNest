@@ -210,6 +210,7 @@ def assessment_detail_view(request: HttpRequest, nest_id, pk):
     context.update({
         'assessment': assessment,
         'questions': questions,
+        'nest': nest,
     })
     return render(request, 'assessments/assessment_detail.html', context)
 
@@ -361,6 +362,12 @@ def take_assessment_view(request: HttpRequest, nest_id, pk):
         submission.score = score
         submission.save()
 
+        if request.POST.get("auto_submit") == "1":
+            return redirect(
+                "assessments:assessment_page_view",
+                nest_id=nest.id,
+            )
+
         return redirect(
             "assessments:submission_result_view",
             nest_id=nest.id,
@@ -369,6 +376,7 @@ def take_assessment_view(request: HttpRequest, nest_id, pk):
 
     context.update({
         "assessment": assessment,
+        "nest": nest,
     })
     return render(request, "assessments/take_assessment.html", context)
 
@@ -442,6 +450,7 @@ def submission_result_view(request, nest_id, submission_id):
 
     context.update({
         "submission": submission,
+        "nest": nest,
     })
     return render(request, "assessments/submission_result.html", context)
 

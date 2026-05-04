@@ -5,24 +5,32 @@
    =================================================== */
 
 :root {
-    --nest-bg:           #f5f4ef;   /* warm linen */
-    --nest-paper:        #ffffff;
-    --nest-ink:          #1a1a2e;   /* near-black navy */
-    --nest-muted:        #6b7280;
-    --nest-line:         #dddbd3;   /* warm gray */
-    --nest-accent:       #1d3461;   /* deep navy */
+    --nest-bg: #f5f4ef;
+    /* warm linen */
+    --nest-paper: #ffffff;
+    --nest-ink: #1a1a2e;
+    /* near-black navy */
+    --nest-muted: #6b7280;
+    --nest-line: #dddbd3;
+    /* warm gray */
+    --nest-accent: #1d3461;
+    /* deep navy */
     --nest-accent-hover: #16294f;
-    --nest-amber:        #c57c0e;   /* warm amber for interactive */
-    --nest-amber-soft:   #fef3c7;
-    --nest-soft:         #eaecf4;   /* light navy tint */
-    --nest-danger-soft:  #fde9ef;
-    --nest-shadow-sm:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-    --nest-shadow:       0 2px 8px rgba(0,0,0,.09);
-    --nest-radius:       8px;
-    --nest-radius-sm:    5px;
+    --nest-amber: #c57c0e;
+    /* warm amber for interactive */
+    --nest-amber-soft: #fef3c7;
+    --nest-soft: #eaecf4;
+    /* light navy tint */
+    --nest-danger-soft: #fde9ef;
+    --nest-shadow-sm: 0 1px 3px rgba(0, 0, 0, .08), 0 1px 2px rgba(0, 0, 0, .06);
+    --nest-shadow: 0 2px 8px rgba(0, 0, 0, .09);
+    --nest-radius: 8px;
+    --nest-radius-sm: 5px;
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 /* ── Shell ──────────────────────────────────────────── */
 .nest-shell {
@@ -80,7 +88,7 @@
 }
 
 .nest-user-link {
-    color: rgba(255,255,255,.8);
+    color: rgba(255, 255, 255, .8);
     text-decoration: none;
     font-weight: 600;
     font-size: .875rem;
@@ -94,7 +102,7 @@
 /* ── Mobile nav toggle & panel ──────────────────────── */
 .nest-mobile-toggle {
     background: transparent;
-    border: 1px solid rgba(255,255,255,.3);
+    border: 1px solid rgba(255, 255, 255, .3);
     border-radius: var(--nest-radius-sm);
     width: 36px;
     height: 36px;
@@ -105,12 +113,12 @@
 
 .nest-mobile-toggle:focus {
     outline: none;
-    border-color: rgba(255,255,255,.6);
+    border-color: rgba(255, 255, 255, .6);
 }
 
 .nest-mobile-panel {
     background: var(--nest-accent-hover);
-    border-top: 1px solid rgba(255,255,255,.12);
+    border-top: 1px solid rgba(255, 255, 255, .12);
     padding: .5rem 1.25rem .75rem;
     display: flex;
     flex-direction: column;
@@ -122,7 +130,7 @@
     flex-direction: column;
     gap: .15rem;
     padding: .5rem 0;
-    border-bottom: 1px solid rgba(255,255,255,.1);
+    border-bottom: 1px solid rgba(255, 255, 255, .1);
 }
 
 .nest-mobile-section:last-child {
@@ -130,7 +138,7 @@
 }
 
 .nest-mobile-label {
-    color: rgba(255,255,255,.5);
+    color: rgba(255, 255, 255, .5);
     font-size: .7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -143,7 +151,7 @@
 .nest-mobile-link {
     display: flex;
     align-items: center;
-    color: rgba(255,255,255,.85);
+    color: rgba(255, 255, 255, .85);
     text-decoration: none;
     font-size: .875rem;
     font-weight: 600;
@@ -154,7 +162,7 @@
 
 .nest-mobile-link:hover {
     color: #fff;
-    background: rgba(255,255,255,.08);
+    background: rgba(255, 255, 255, .08);
 }
 
 .nest-subscription-box {
@@ -250,7 +258,8 @@
     margin: 0;
     font-family: 'DM Serif Display', serif;
     font-size: 1.75rem;
-    font-weight: 400;   /* Serif Display looks best at regular weight */
+    font-weight: 400;
+    /* Serif Display looks best at regular weight */
     color: var(--nest-ink);
     letter-spacing: .2px;
 }
@@ -421,7 +430,8 @@
     font-size: .9rem;
     white-space: nowrap;
     transition: color .15s, border-color .15s;
-    margin-bottom: -1px;  /* overlap the container border */
+    margin-bottom: -1px;
+    /* overlap the container border */
 }
 
 .nest-subnav-link:hover {
@@ -616,7 +626,9 @@
 }
 
 /* ── Misc ────────────────────────────────────────────── */
-.hover-shadow:hover { box-shadow: var(--nest-shadow); }
+.hover-shadow:hover {
+    box-shadow: var(--nest-shadow);
+}
 
 .post-card-unread {
     border-left: 3px solid var(--nest-accent) !important;
@@ -683,6 +695,7 @@
 .card {
     position: relative;
 }
+
 /* end score  */
 
 /* ── Unread dot on post cards ────────────────────────── */
@@ -765,4 +778,42 @@
         color: #fff;
         transform: scale(1.08);
     }
+}
+
+/* ── Extra small buttons ────────────────────────────── */
+.btn-xs {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ── Assessment questions styling ──────────────────── */
+.question-item {
+    border-left: 4px solid var(--nest-accent);
+    border-radius: var(--nest-radius-sm);
+    background: #f9fafb;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.question-item:hover {
+    background: #f5f6fa;
+    border-left-color: var(--nest-accent-hover);
+}
+
+.choice-item {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: var(--nest-radius-sm);
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.choice-item:hover {
+    border-color: var(--nest-accent);
+    background: #f9fafb;
+}
+
+.questions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }

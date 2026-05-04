@@ -1,31 +1,120 @@
-{% extends "nests/base.html" %}
+{% extends "nests/nest_detail_base.html" %}
 {% load static %}
 
-{% block title %}Take Assessment{% endblock %}
-{% block content %}
-<h2>{{ assessment.title }}</h2>
+{% block title %}{{ assessment.title }} — {{ nest.name }}{% endblock %}
 
-<form method="post">
-    {% csrf_token %}
+{% block tab_assessments %}active{% endblock %}
 
-    {% for q in assessment.questions.all %}
-    <div>
-        <h4>{{ q.text }}</h4>
-
-        {% if q.question_type == "mcq" %}
-        {% for c in q.choices.all %}
-        <label>
-            <input type="radio" name="question_{{ q.id }}" value="{{ c.id }}">
-            {{ c.text }}
-        </label><br>
-        {% endfor %}
-        {% elif q.question_type == "text" %}
-        <textarea name="question_{{ q.id }}" class="form-control" rows="3"></textarea>
+{% block feature_content %}
+<div class="nest-surface p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-start gap-3">
+        <div>
+            <h3 class="mb-3">{{ assessment.title }}</h3>
+            <p class="text-muted mb-1">{{ assessment.description }}</p>
+            <div class="small text-muted">
+                <span><strong>{{ assessment.points }}</strong> points • </span>
+                <span>{{ assessment.assessment_type }}</span>
+                {% if assessment.due_date %}
+                • <strong>Due:</strong> {{ assessment.due_date|date:"M j, Y g:i A" }}
+                {% endif %}
+            </div>
+        </div>
+        {% if assessment.duration %}
+        <div class="text-center" style="min-width: 120px;">
+            <div class="timer-display" id="timerDisplay"
+                style="font-size: 2.5rem; font-weight: bold; color: var(--nest-accent);">
+                {{ assessment.duration }}:00
+            </div>
+            <small class="text-muted">Time Remaining</small>
+        </div>
         {% endif %}
     </div>
-    <hr>
+</div>
+
+<form method="post" class="nest-surface p-4" id="assessmentForm">
+    {% csrf_token %}
+    <input type="hidden" name="auto_submit" id="autoSubmitFlag" value="0">
+
+    {% for q in assessment.questions.all %}
+    <div class="question-item p-3 mb-4">
+        <div class="mb-3">
+            <h6 class="mb-1">{{ forloop.counter }}. {{ q.text }}</h6>
+            <small class="text-muted">{{ q.points }} points</small>
+        </div>
+
+        {% if q.question_type == "mcq" %}
+        <div class="choice-options">
+            {% for c in q.choices.all %}
+            <div class="form-check mb-2">
+                <input class="form-check-input" type="radio" name="question_{{ q.id }}" value="{{ c.id }}"
+                    id="choice_{{ c.id }}">
+                <label class="form-check-label" for="choice_{{ c.id }}">
+                    {{ c.text }}
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+        {% elif q.question_type == "text" %}
+        <textarea name="question_{{ q.id }}" class="form-control" rows="4"
+            placeholder="Enter your answer..."></textarea>
+        {% endif %}
+    </div>
     {% endfor %}
 
-    <button class="btn btn-primary" type="submit">Submit Assessment</button>
+    <div class="d-flex gap-2 justify-content-between align-items-center mt-4 pt-3 border-top">
+        <a href="{% url 'assessments:assessment_page_view' nest_id=nest.id %}" class="btn btn-outline-secondary">
+            <i class="bi bi-x-lg me-1"></i> Cancel
+        </a>
+        <button class="nest-btn-main" type="submit" id="submitBtn">
+            <i class="bi bi-check-lg me-1"></i> Submit Assessment
+        </button>
+    </div>
 </form>
+
+{% if assessment.duration %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const durationMinutes = Number("{{ assessment.duration|default:'0' }}");
+        let totalSeconds = durationMinutes * 60;
+        const timerDisplay = document.getElementById('timerDisplay');
+        const assessmentForm = document.getElementById('assessmentForm');
+        const submitBtn = document.getElementById('submitBtn');
+        let timerInterval = null;
+
+        function updateTimer() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const timeString = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            timerDisplay.textContent = timeString;
+
+            if (totalSeconds <= 60) {
+                timerDisplay.style.color = '#dc3545';
+            } else if (totalSeconds <= 300) {
+                timerDisplay.style.color = '#ff9800';
+            }
+
+            if (totalSeconds <= 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = '0:00';
+                timerDisplay.style.color = '#dc3545';
+                submitBtn.disabled = true;
+                document.getElementById('autoSubmitFlag').value = '1';
+                assessmentForm.submit();
+                return;
+            }
+
+            totalSeconds--;
+        }
+
+        updateTimer();
+        timerInterval = setInterval(updateTimer, 1000);
+
+        assessmentForm.addEventListener('submit', function (e) {
+            if (totalSeconds > 0) {
+                return true;
+            }
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}
