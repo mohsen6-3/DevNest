@@ -33,6 +33,7 @@ class Post(models.Model):
     nest = models.ForeignKey(Nest, on_delete=models.CASCADE, related_name='posts', null=True, blank=True)
     title = models.CharField(max_length=200)
     content = models.TextField()
+    image = models.ImageField(upload_to='images/posts/', null=True, blank=True)
     is_pinned = models.BooleanField(default=False)
     post_type = models.ForeignKey(PostType, on_delete=models.CASCADE, default=None, null=True, blank=True)
     tags = models.ManyToManyField(PostTag, blank=True, related_name='posts')
