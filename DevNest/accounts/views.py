@@ -60,20 +60,36 @@ def sign_up(request: HttpRequest):
     if request.method == "POST":
 
         try:
-            new_user = User.objects.create_user(username=request.POST["username"],password=request.POST["password"],email=request.POST["email"], first_name=request.POST["first_name"], last_name=request.POST["last_name"])
-            new_user.save()
+            with transaction.atomic():
+                new_user = User.objects.create_user(
+                    username=request.POST["username"],
+                    password=request.POST["password"],
+                    email=request.POST["email"],
+                    first_name=request.POST["first_name"],
+                    last_name=request.POST["last_name"],
+                )
 
-            profile = new_user.profile
-            profile.about = request.POST["about"]
-            profile.social_link = request.POST["social_link"]
-            profile.avatar = request.FILES.get("avatar", Profile.avatar.field.get_default())
-            profile.save()
-            send_welcome_email(new_user)
-            messages.success(request, "Registered User Successfuly", "alert-success")
-            return redirect("accounts:sign_in")
+                profile = new_user.profile
+                profile.about = request.POST.get("about", "")
+                profile.social_link = request.POST.get("social_link", "")
+                uploaded_avatar = request.FILES.get("avatar")
+                if uploaded_avatar:
+                    profile.avatar = uploaded_avatar
+                profile.save()
         except Exception as e:
             messages.error(request, "Couldn't register user. Try again", "alert-danger")
             print(e)
+
+        else:
+            try:
+                send_welcome_email(new_user)
+            except Exception as e:
+                # Do not fail signup if email service is temporarily unavailable.
+                print(e)
+                messages.warning(request, "Account created, but welcome email could not be sent.", "alert-warning")
+
+            messages.success(request, "Registered User Successfuly", "alert-success")
+            return redirect("accounts:sign_in")
     
     return render(request, "accounts/signup.html", {})
 

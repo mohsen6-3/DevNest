@@ -698,6 +698,41 @@
     box-shadow: 0 0 0 2px #fff;
 }
 
+.posts-layout {
+    min-height: 70vh;
+}
+
+.posts-sidebar {
+    max-height: 75vh;
+    overflow-y: auto;
+    position: sticky;
+    top: 72px;
+    background: var(--nest-paper);
+    border: 1px solid var(--nest-line);
+    border-radius: var(--nest-radius);
+    box-shadow: var(--nest-shadow-sm);
+}
+
+@media (max-width: 1199px) {
+    .posts-sidebar {
+        position: static;
+        top: auto;
+        max-height: none;
+        overflow-y: visible;
+        margin-bottom: 1rem;
+    }
+
+    .posts-main-area {
+        padding: 1rem !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .posts-main-area {
+        padding: .75rem !important;
+    }
+}
+
 /* ── Sticky mobile FAB (Create Post) ─────────────────── */
 .posts-mobile-fab {
     display: none;
