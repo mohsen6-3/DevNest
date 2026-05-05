@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.views import redirect_to_login
 from django.conf import settings
 from django.core.mail import EmailMessage
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, IntegerField, OuterRef, Q, Subquery, Sum, Value
 from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -145,9 +145,24 @@ def _apply_post_filters(posts, filter_state):
     if tag_slug:
         posts = posts.filter(tags__slug=tag_slug)
 
+    vote_totals = (
+        PostVote.objects
+        .filter(post=OuterRef('pk'))
+        .values('post')
+        .annotate(total=Coalesce(Sum('value'), Value(0)))
+        .values('total')[:1]
+    )
+    comment_totals = (
+        Comment.objects
+        .filter(post=OuterRef('pk'))
+        .values('post')
+        .annotate(total=Count('id'))
+        .values('total')[:1]
+    )
+
     posts = posts.distinct().annotate(
-        vote_score=Coalesce(Sum('votes__value'), 0),
-        comment_count=Count('comments', distinct=True),
+        vote_score=Coalesce(Subquery(vote_totals, output_field=IntegerField()), Value(0)),
+        comment_count=Coalesce(Subquery(comment_totals, output_field=IntegerField()), Value(0)),
     )
 
     if sort == 'oldest':
@@ -245,6 +260,13 @@ def _attach_email_logo(email_message, logo_cid='devnest-logo'):
         pass
 
 
+def _get_profile_or_none(user):
+    try:
+        return user.profile
+    except Exception:
+        return None
+
+
 def _send_post_update_emails(post: Post, actor, comment: Comment):
     post_path = reverse('nests:nest_post_detail', kwargs={'nest_id': post.nest_id, 'post_id': post.pk})
     post_url = f"{settings.SITE_URL.rstrip('/')}{post_path}"
@@ -258,13 +280,19 @@ def _send_post_update_emails(post: Post, actor, comment: Comment):
         if recipient.pk == actor.pk:
             continue
 
-        Notification.objects.create(
-            user=recipient,
-            message=f'{actor_name} added a new {event_label} on "{post.title}".',
-            link=post_path,
-        )
+        profile = _get_profile_or_none(recipient)
 
-        if not recipient.email:
+        in_app_enabled = True if profile is None else profile.notify_in_app_post_updates
+        email_enabled = True if profile is None else profile.notify_email_post_updates
+
+        if in_app_enabled:
+            Notification.objects.create(
+                user=recipient,
+                message=f'{actor_name} added a new {event_label} on "{post.title}".',
+                link=post_path,
+            )
+
+        if not email_enabled or not recipient.email:
             continue
 
         context = {
@@ -307,13 +335,19 @@ def _send_announcement_emails(post: Post, actor):
         if recipient.pk == actor.pk:
             continue
 
-        Notification.objects.create(
-            user=recipient,
-            message=f'New announcement in {post.nest.name}: "{post.title}"',
-            link=post_path,
-        )
+        profile = _get_profile_or_none(recipient)
 
-        if not recipient.email:
+        in_app_enabled = True if profile is None else profile.notify_in_app_announcements
+        email_enabled = True if profile is None else profile.notify_email_announcements
+
+        if in_app_enabled:
+            Notification.objects.create(
+                user=recipient,
+                message=f'New announcement in {post.nest.name}: "{post.title}"',
+                link=post_path,
+            )
+
+        if not email_enabled or not recipient.email:
             continue
         context = {
             'recipient_name': recipient.get_full_name() or recipient.username,

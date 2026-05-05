@@ -1,5 +1,6 @@
 {% extends "nests/base.html" %}
 {% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/assessments-design.css' %}">{% endblock %}
 
 {% block title %}Delete Question{% endblock %}
 {% block content %}
@@ -7,7 +8,6 @@
 <p>Are you sure you want to delete this question?</p>
 <form method="post">
     {% csrf_token %}
-    {{ form.as_p }}
     <button class="btn btn-danger" type="submit">Delete Question</button>
 </form>
 <!-- Modal -->

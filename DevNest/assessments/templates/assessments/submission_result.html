@@ -1,5 +1,6 @@
 {% extends "nests/nest_detail_base.html" %}
 {% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/assessments-design.css' %}">{% endblock %}
 
 {% block title %}Results — {{ submission.assessment.title }} — {{ nest.name }}{% endblock %}
 
@@ -7,23 +8,20 @@
 
 {% block feature_content %}
 <div class="nest-surface p-4 mb-4">
-    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+    <div class="d-flex justify-content-between align-items-start gap-3">
         <div>
             <h3 class="mb-1">{{ submission.assessment.title }}</h3>
-            <!-- <p class="text-muted small">Submitted by <strong>{{ submission.student.username }}</strong> on {{
-                submission.submitted_at|date:"M j, Y g:i A" }}</p>
+            <p class="text-muted small mb-0">{{ submission.student.username }}</p>
         </div>
         <div class="text-end">
-            <div class="display-6 fw-bold" style="color: var(--nest-accent);">{{ submission.score }}/{{
-                submission.assessment.points }}</div>
-            <small class="text-muted">points</small>
-        </div> -->
+            <div class="display-6 fw-bold" style="color: var(--nest-accent);">{{ submission.score }}</div>
+            <small class="text-muted">/ {{ submission.assessment.points }} points</small>
         </div>
     </div>
+</div>
 
-    <form method="post" class="nest-surface p-4">
-        {% csrf_token %}
-
+<form method="post">
+{% csrf_token %}
         {% if submission.answers.all %}
         <div class="answers-list">
             {% for ans in submission.answers.all %}

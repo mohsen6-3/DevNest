@@ -6,7 +6,9 @@ from django.db.models import Count, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404, redirect, render
-from assessments.models import Submission
+from django.utils import timezone
+import datetime
+from assessments.models import Assessment, Submission
 
 from posts.models import Post, PostType, PostVote, Comment
 
@@ -25,6 +27,20 @@ def _deny_access(request, message, redirect_to='nests:nest_dashboard', **redirec
     return redirect(redirect_to, **redirect_kwargs)
 
 
+def _activity_status_for_counts(post_count: int, comment_count: int):
+    if post_count >= 40 and comment_count >= 40:
+        return ('Community Leader', 'chief', 'bi-stars')
+    if post_count >= 20 and comment_count >= 20:
+        return ('Highly Engaged', 'fire', 'bi-lightning-charge-fill')
+    if post_count >= 10 and comment_count >= 10:
+        return ('Engaged', 'engaged', 'bi-fire')
+    if post_count >= 5 and comment_count >= 5:
+        return ('Active', 'active', 'bi-activity')
+    if post_count > 0 or comment_count > 0:
+        return ('Getting Started', 'new', 'bi-person-check')
+    return ('New Member', 'new', 'bi-person')
+
+
 def nest_dashboard(request):
     if not request.user.is_authenticated:
         return _require_auth(request, 'You must be signed in to view your dashboard.')
@@ -41,9 +57,92 @@ def nest_dashboard(request):
         status=Nest.Status.PENDING,
     )
 
+    # ── Extra context for dashboard enhancements ───────────────────────────
+    now = timezone.now()
+    week_ago = now - datetime.timedelta(days=7)
+    my_nest_ids = list(my_nests.values_list('pk', flat=True))
+
+    # #8 Weekly stats
+    if my_nest_ids:
+        posts_this_week = Post.objects.filter(
+            nest_id__in=my_nest_ids, created_at__gte=week_ago
+        ).count()
+        comments_this_week = Comment.objects.filter(
+            post__nest_id__in=my_nest_ids, created_at__gte=week_ago
+        ).count()
+
+        # #7 Needs Attention – unanswered posts (posts with 0 comments) in user's nests
+        unanswered_posts = Post.objects.filter(
+            nest_id__in=my_nest_ids
+        ).annotate(num_comments=Count('comments')).filter(num_comments=0).order_by('-created_at')[:5]
+
+        # #1 Smart alerts – upcoming assessments due in the next 7 days not yet submitted
+        upcoming_assessments = Assessment.objects.filter(
+            nest_id__in=my_nest_ids,
+            due_date__isnull=False,
+            due_date__gte=now,
+            due_date__lte=now + datetime.timedelta(days=7),
+        ).exclude(
+            submissions__student=request.user
+        ).distinct().order_by('due_date')[:5]
+    else:
+        posts_this_week = 0
+        comments_this_week = 0
+        unanswered_posts = Post.objects.none()
+        upcoming_assessments = Assessment.objects.none()
+
+    # #10 Role-based – nest staff: pending membership requests in nests I manage
+    managed_nest_ids = list(
+        NestMembership.objects.filter(
+            user=request.user,
+            status=NestMembership.Status.ACTIVE,
+            role__in=[NestMembership.Role.INSTRUCTOR, NestMembership.Role.ASSISTANT],
+        ).values_list('nest_id', flat=True)
+    )
+    pending_memberships = NestMembership.objects.filter(
+        nest_id__in=managed_nest_ids,
+        status=NestMembership.Status.PENDING,
+    ).select_related('user', 'nest')[:10]
+
+    # #10 Role-based – site staff: pending nest requests
+    pending_nest_requests = Nest.objects.filter(status=Nest.Status.PENDING) if (
+        request.user.is_staff or request.user.is_superuser
+    ) else Nest.objects.none()
+
+    is_site_staff = request.user.is_staff or request.user.is_superuser
+    is_nest_staff = len(managed_nest_ids) > 0
+    managed_nests = my_nests.filter(pk__in=managed_nest_ids)
+
+    my_post_count = Post.objects.filter(user=request.user).count()
+    my_comment_count = Comment.objects.filter(user=request.user).count()
+    activity_status, activity_tone, activity_icon = _activity_status_for_counts(my_post_count, my_comment_count)
+    if request.user.is_superuser or request.user.is_staff:
+        role_label = 'Site Staff'
+    elif is_nest_staff:
+        role_label = 'Nest Staff'
+    else:
+        role_label = 'Member'
+    # ───────────────────────────────────────────────────────────────────────
+
     return render(request, 'nests/dashboard.html', {
         'nests': my_nests,
         'pending_nests': pending_nests,
+        # extras
+        'posts_this_week': posts_this_week,
+        'comments_this_week': comments_this_week,
+        'unanswered_posts': unanswered_posts,
+        'upcoming_assessments': upcoming_assessments,
+        'pending_memberships': pending_memberships,
+        'pending_nest_requests': pending_nest_requests,
+        'is_site_staff': is_site_staff,
+        'is_nest_staff': is_nest_staff,
+        'managed_nests': managed_nests,
+        'my_post_count': my_post_count,
+        'my_comment_count': my_comment_count,
+        'activity_status': activity_status,
+        'activity_tone': activity_tone,
+        'activity_icon': activity_icon,
+        'role_label': role_label,
     })
 
 

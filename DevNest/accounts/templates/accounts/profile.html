@@ -1,18 +1,17 @@
-{% extends 'main/base.html' %}
+{% extends 'nests/base.html' %}
+{% load static %}
 
 {% block title %}{{ user.username }} — DevNest{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/accounts-design.css' %}">{% endblock %}
+{% block topbar_crumb %}DevNest / Profile{% endblock %}
 
 {% block content %}
-<div class="mb-3">
-    <a href="{% url 'nests:nest_dashboard' %}" class="text-decoration-none text-muted small fw-semibold">
-        <i class="bi bi-arrow-left me-1"></i>Back to Nests
-    </a>
-</div>
+<div class="profile-page">
 <div class="row g-4 profile-shell">
 
     <!-- Profile card -->
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="card profile-hero-card">
             <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-4">
                 <img src="{{ user.profile.avatar.url }}" alt="avatar"
                     class="profile-avatar rounded-circle border shadow-sm">
@@ -23,6 +22,15 @@
                         </h4>
                         <span class="text-muted fw-normal">@{{ user.username }}</span>
                     </div>
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2 profile-identity-meta">
+                        <span class="badge rounded-pill" style="background:#eaf2ff;color:#234e7d;font-weight:600;">
+                            <i class="bi bi-person-badge me-1"></i>{{ profile_role_label }}
+                        </span>
+                        <span class="badge rounded-pill" style="background:{% if profile_activity_tone == 'chief' %}#fde68a;color:#92400e;{% elif profile_activity_tone == 'fire' %}#fee2e2;color:#b91c1c;{% elif profile_activity_tone == 'engaged' %}#ede9fe;color:#5b21b6;{% elif profile_activity_tone == 'active' %}#dcfce7;color:#166534;{% else %}#e2e8f0;color:#334155;{% endif %}font-weight:600;">
+                            <i class="bi {{ profile_activity_icon }} me-1"></i>{{ profile_activity_status }}
+                        </span>
+                        <small class="text-muted">{{ post_count }} posts • {{ profile_comment_count }} comments</small>
+                    </div>
                     {% if user.profile.about %}
                     <p class="text-secondary mb-2">{{ user.profile.about }}</p>
                     {% endif %}
@@ -32,12 +40,12 @@
                         <i class="bi bi-link-45deg me-1"></i>{{ user.profile.social_link }}
                     </a>
                     {% endif %}
-                    <div class="d-flex gap-4 mt-3">
-                        <div class="text-center">
+                    <div class="d-flex gap-3 mt-3 profile-stats-row">
+                        <div class="text-center profile-stat-card">
                             <div class="fw-bold">{{ nest_count }}</div>
                             <div class="text-muted small">Nests</div>
                         </div>
-                        <div class="text-center">
+                        <div class="text-center profile-stat-card">
                             <div class="fw-bold">{{ post_count }}</div>
                             <div class="text-muted small">Posts</div>
                         </div>
@@ -54,7 +62,7 @@
 
     <!-- Nests -->
     <div class="col-12 {% if is_owner %}col-md-6{% endif %}">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card profile-section-card h-100">
             <div class="section-header">
                 <h6><i class="bi bi-layers me-1"></i>Nests</h6>
                 <a href="{% url 'nests:nest_dashboard' %}">View all</a>
@@ -96,7 +104,7 @@
     <!-- Latest Posts (owner only) -->
     {% if is_owner %}
     <div class="col-12 col-md-6">
-        <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+        <div class="card profile-section-card h-100">
             <div class="section-header">
                 <h6><i class="bi bi-chat-left-text me-1"></i>Latest Posts</h6>
             </div>
@@ -135,7 +143,7 @@
     <div class="col-12">
         <div class="d-flex flex-wrap gap-3 mb-4">
             <a href="{% url 'main:staff_messages' %}" class="text-decoration-none">
-                <div class="card border-0 shadow-sm rounded-4 px-4 py-3 d-flex flex-row align-items-center gap-3" style="min-width:180px">
+                <div class="card profile-kpi-card d-flex flex-row align-items-center gap-3">
                     <div class="fs-3 text-primary"><i class="bi bi-envelope"></i></div>
                     <div>
                         <div class="fw-bold fs-5">{{ contact_unresolved }}</div>
@@ -144,7 +152,7 @@
                 </div>
             </a>
             <a href="{% url 'main:staff_reports' %}" class="text-decoration-none">
-                <div class="card border-0 shadow-sm rounded-4 px-4 py-3 d-flex flex-row align-items-center gap-3" style="min-width:180px">
+                <div class="card profile-kpi-card d-flex flex-row align-items-center gap-3">
                     <div class="fs-3 text-danger"><i class="bi bi-flag"></i></div>
                     <div>
                         <div class="fw-bold fs-5">{{ open_reports_count }}</div>
@@ -153,7 +161,7 @@
                 </div>
             </a>
             <a href="{% url 'nests:create_nest' %}" class="text-decoration-none">
-                <div class="card border-0 shadow-sm rounded-4 px-4 py-3 d-flex flex-row align-items-center gap-3" style="min-width:180px">
+                <div class="card profile-kpi-card d-flex flex-row align-items-center gap-3">
                     <div class="fs-3 text-success"><i class="bi bi-plus-circle"></i></div>
                     <div>
                         <div class="fw-semibold">Create Nest</div>
@@ -164,7 +172,7 @@
         </div>
     </div>
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="card profile-section-card">
             <div class="section-header">
                 <h6><i class="bi bi-bar-chart me-1"></i>Nest Overview</h6>
             </div>
@@ -201,7 +209,7 @@
 
     <!-- Pending Nest Requests -->
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="card profile-section-card">
             <div class="section-header">
                 <h6><i class="bi bi-shield-check me-1"></i>Pending Nest Requests</h6>
                 <a href="{% url 'nests:staff_nest_review' %}">Review all</a>
@@ -228,7 +236,7 @@
     <!-- Nest-staff panel (instructor/assistant, not site-staff) -->
     {% if is_owner and is_nest_staff_anywhere and not is_site_staff %}
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="card profile-section-card">
             <div class="section-header">
                 <h6><i class="bi bi-gear me-1"></i>Nests You Manage</h6>
             </div>
@@ -246,7 +254,7 @@
 
     <!-- Announcements (owner only) -->
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="card profile-section-card">
             <div class="section-header">
                 <h6><i class="bi bi-megaphone me-1"></i>Latest Announcements</h6>
             </div>
@@ -272,7 +280,7 @@
     <!-- Common nests (when viewing someone else) -->
     {% if not is_owner and common_nests %}
     <div class="col-12">
-        <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="card profile-section-card">
             <div class="section-header">
                 <h6><i class="bi bi-diagram-3 me-1"></i>{{ common_nests|length }} Nest{{ common_nests|length|pluralize }} in Common</h6>
             </div>
@@ -285,5 +293,6 @@
     </div>
     {% endif %}
 
+</div>
 </div>
 {% endblock %}

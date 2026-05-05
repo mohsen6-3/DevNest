@@ -1,8 +1,9 @@
 {% extends "nests/base.html" %}
 {% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/assessments-design.css' %}">{% endblock %}
 {% block title %}Update Question{% endblock %}
 {% block content %}
-<h2>Update Question for: {{ assessment.title }}</h2>
+<h2>Update Question for: {{ question.assessment.title }}</h2>
 <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

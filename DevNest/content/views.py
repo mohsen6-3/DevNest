@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
-from django.http import HttpRequest
+from django.http import HttpRequest, Http404
 from django.contrib import messages
 from django.contrib.auth.views import redirect_to_login
 from django.urls import reverse
+from django.db.models import Q
 
 from nests.models import Nest
 
@@ -82,7 +83,35 @@ def all_titles_view(request: HttpRequest):
     permission_response = _enforce_view_permission(request, nest)
     if permission_response:
         return permission_response
+    
+    # Base queryset
     titles = Title.objects.filter(nest=nest) if nest else Title.objects.all()
+    
+    # Search functionality
+    search_query = request.GET.get("search", "").strip()
+    if search_query:
+        titles = titles.filter(
+            Q(name__icontains=search_query) | 
+            Q(description__icontains=search_query)
+        )
+    
+    # Filter by publication status
+    status_filter = request.GET.get("status", "").strip()
+    if status_filter == "published":
+        titles = titles.filter(is_published=True)
+    elif status_filter == "draft":
+        titles = titles.filter(is_published=False)
+    
+    # Sorting
+    sort_by = request.GET.get("sort", "sort_order")
+    if sort_by == "newest":
+        titles = titles.order_by("-created_at")
+    elif sort_by == "oldest":
+        titles = titles.order_by("created_at")
+    elif sort_by == "name":
+        titles = titles.order_by("name")
+    else:
+        titles = titles.order_by("sort_order")
 
     membership = None
     pending_membership = None
@@ -100,6 +129,9 @@ def all_titles_view(request: HttpRequest):
         "membership": membership,
         "pending_membership": pending_membership,
         "can_manage": can_manage,
+        "search_query": search_query,
+        "status_filter": status_filter,
+        "sort_by": sort_by,
     })
 
 
@@ -110,11 +142,37 @@ def title_detail_view(request: HttpRequest, title_id):
         units = Unit.objects.filter(title=title)
     except Exception as e:
         print(e)
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_view_permission(request, title.nest)
     if permission_response:
         return permission_response
+
+    # Search functionality
+    search_query = request.GET.get("search", "").strip()
+    if search_query:
+        units = units.filter(
+            Q(name__icontains=search_query) | 
+            Q(description__icontains=search_query)
+        )
+    
+    # Filter by publication status
+    status_filter = request.GET.get("status", "").strip()
+    if status_filter == "published":
+        units = units.filter(is_published=True)
+    elif status_filter == "draft":
+        units = units.filter(is_published=False)
+    
+    # Sorting
+    sort_by = request.GET.get("sort", "sort_order")
+    if sort_by == "newest":
+        units = units.order_by("-created_at")
+    elif sort_by == "oldest":
+        units = units.order_by("created_at")
+    elif sort_by == "name":
+        units = units.order_by("name")
+    else:
+        units = units.order_by("sort_order")
 
     nest = title.nest
     membership = None
@@ -134,6 +192,9 @@ def title_detail_view(request: HttpRequest, title_id):
         "membership": membership,
         "pending_membership": pending_membership,
         "can_manage": can_manage,
+        "search_query": search_query,
+        "status_filter": status_filter,
+        "sort_by": sort_by,
     })
 
 
@@ -161,7 +222,12 @@ def create_title_view(request: HttpRequest):
             print(e)
             messages.error(request, "Couldn't create title", "alert-danger")
 
-    return render(request, "content/create_title.html", {"nest": nest})
+    return render(request, "content/create_title.html", {
+        "nest": nest,
+        "membership": nest.membership_for(request.user) if nest and request.user.is_authenticated else None,
+        "pending_membership": nest.memberships.filter(user=request.user, status="pending").first() if nest and request.user.is_authenticated else None,
+        "can_manage": (nest.is_nest_staff(request.user) or nest.is_site_staff(request.user)) if nest and request.user.is_authenticated else False,
+    })
 
 
 def update_title_view(request: HttpRequest, title_id):
@@ -169,7 +235,7 @@ def update_title_view(request: HttpRequest, title_id):
     try:
         title = Title.objects.get(pk=title_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, title.nest)
     if permission_response:
@@ -188,7 +254,13 @@ def update_title_view(request: HttpRequest, title_id):
             print(e)
             messages.error(request, "Couldn't update title", "alert-danger")
 
-    return render(request, "content/update_title.html", {"title": title, "nest": title.nest})
+    return render(request, "content/update_title.html", {
+        "title": title,
+        "nest": title.nest,
+        "membership": title.nest.membership_for(request.user) if title.nest and request.user.is_authenticated else None,
+        "pending_membership": title.nest.memberships.filter(user=request.user, status="pending").first() if title.nest and request.user.is_authenticated else None,
+        "can_manage": (title.nest.is_nest_staff(request.user) or title.nest.is_site_staff(request.user)) if title.nest and request.user.is_authenticated else False,
+    })
 
 
 def delete_title_view(request: HttpRequest, title_id):
@@ -218,7 +290,7 @@ def create_unit_view(request: HttpRequest, title_id):
     try:
         title = Title.objects.get(pk=title_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, title.nest)
     if permission_response:
@@ -240,7 +312,13 @@ def create_unit_view(request: HttpRequest, title_id):
             print(e)
             messages.error(request, "Couldn't create unit", "alert-danger")
 
-    return render(request, "content/create_unit.html", {"title": title, "nest": title.nest})
+    return render(request, "content/create_unit.html", {
+        "title": title,
+        "nest": title.nest,
+        "membership": title.nest.membership_for(request.user) if title.nest and request.user.is_authenticated else None,
+        "pending_membership": title.nest.memberships.filter(user=request.user, status="pending").first() if title.nest and request.user.is_authenticated else None,
+        "can_manage": (title.nest.is_nest_staff(request.user) or title.nest.is_site_staff(request.user)) if title.nest and request.user.is_authenticated else False,
+    })
 
 
 def unit_detail_view(request: HttpRequest, unit_id):
@@ -250,13 +328,55 @@ def unit_detail_view(request: HttpRequest, unit_id):
         topics = Topic.objects.filter(unit=unit)
     except Exception as e:
         print(e)
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_view_permission(request, unit.title.nest)
     if permission_response:
         return permission_response
 
-    return render(request, "content/unit_detail.html", {"unit": unit, "topics": topics, "nest": unit.title.nest})
+    # Search functionality
+    search_query = request.GET.get("search", "").strip()
+    if search_query:
+        topics = topics.filter(name__icontains=search_query)
+    
+    # Filter by status
+    status_filter = request.GET.get("status", "").strip()
+    if status_filter:
+        topics = topics.filter(status=status_filter)
+    
+    # Sorting
+    sort_by = request.GET.get("sort", "sort_order")
+    if sort_by == "newest":
+        topics = topics.order_by("-created_at")
+    elif sort_by == "oldest":
+        topics = topics.order_by("created_at")
+    elif sort_by == "name":
+        topics = topics.order_by("name")
+    else:
+        topics = topics.order_by("sort_order")
+
+    nest = unit.title.nest
+    membership = None
+    pending_membership = None
+    can_manage = False
+    if nest and request.user.is_authenticated:
+        membership = nest.membership_for(request.user)
+        pending_membership = nest.memberships.filter(
+            user=request.user, status="pending"
+        ).first()
+        can_manage = nest.is_nest_staff(request.user) or nest.is_site_staff(request.user)
+
+    return render(request, "content/unit_detail.html", {
+        "unit": unit, 
+        "topics": topics, 
+        "nest": nest,
+        "membership": membership,
+        "pending_membership": pending_membership,
+        "can_manage": can_manage,
+        "search_query": search_query,
+        "status_filter": status_filter,
+        "sort_by": sort_by,
+    })
 
 
 def update_unit_view(request: HttpRequest, unit_id):
@@ -264,7 +384,7 @@ def update_unit_view(request: HttpRequest, unit_id):
     try:
         unit = Unit.objects.get(pk=unit_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, unit.title.nest)
     if permission_response:
@@ -283,7 +403,13 @@ def update_unit_view(request: HttpRequest, unit_id):
             print(e)
             messages.error(request, "Couldn't update unit", "alert-danger")
 
-    return render(request, "content/update_unit.html", {"unit": unit, "nest": unit.title.nest})
+    return render(request, "content/update_unit.html", {
+        "unit": unit,
+        "nest": unit.title.nest,
+        "membership": unit.title.nest.membership_for(request.user) if unit.title.nest and request.user.is_authenticated else None,
+        "pending_membership": unit.title.nest.memberships.filter(user=request.user, status="pending").first() if unit.title.nest and request.user.is_authenticated else None,
+        "can_manage": (unit.title.nest.is_nest_staff(request.user) or unit.title.nest.is_site_staff(request.user)) if unit.title.nest and request.user.is_authenticated else False,
+    })
 
 
 def delete_unit_view(request: HttpRequest, unit_id):
@@ -316,7 +442,7 @@ def create_topic_view(request: HttpRequest, unit_id):
     try:
         unit = Unit.objects.get(pk=unit_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, unit.title.nest)
     if permission_response:
@@ -338,7 +464,14 @@ def create_topic_view(request: HttpRequest, unit_id):
             print(e)
             messages.error(request, "Couldn't create topic", "alert-danger")
 
-    return render(request, "content/create_topic.html", {"unit": unit, "status_choices": Topic.StatusChoices.choices, "nest": unit.title.nest})
+    return render(request, "content/create_topic.html", {
+        "unit": unit,
+        "status_choices": Topic.StatusChoices.choices,
+        "nest": unit.title.nest,
+        "membership": unit.title.nest.membership_for(request.user) if unit.title.nest and request.user.is_authenticated else None,
+        "pending_membership": unit.title.nest.memberships.filter(user=request.user, status="pending").first() if unit.title.nest and request.user.is_authenticated else None,
+        "can_manage": (unit.title.nest.is_nest_staff(request.user) or unit.title.nest.is_site_staff(request.user)) if unit.title.nest and request.user.is_authenticated else False,
+    })
 
 
 def topic_detail_view(request: HttpRequest, topic_id):
@@ -352,11 +485,22 @@ def topic_detail_view(request: HttpRequest, topic_id):
         links = LinkContent.objects.filter(topic=topic)
     except Exception as e:
         print(e)
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_view_permission(request, topic.unit.title.nest)
     if permission_response:
         return permission_response
+
+    nest = topic.unit.title.nest
+    membership = None
+    pending_membership = None
+    can_manage = False
+    if nest and request.user.is_authenticated:
+        membership = nest.membership_for(request.user)
+        pending_membership = nest.memberships.filter(
+            user=request.user, status="pending"
+        ).first()
+        can_manage = nest.is_nest_staff(request.user) or nest.is_site_staff(request.user)
 
     return render(request, "content/topic_detail.html", {
         "topic": topic,
@@ -365,7 +509,10 @@ def topic_detail_view(request: HttpRequest, topic_id):
         "images": images,
         "texts": texts,
         "links": links,
-        "nest": topic.unit.title.nest,
+        "nest": nest,
+        "membership": membership,
+        "pending_membership": pending_membership,
+        "can_manage": can_manage,
     })
 
 
@@ -374,7 +521,7 @@ def update_topic_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -393,7 +540,14 @@ def update_topic_view(request: HttpRequest, topic_id):
             print(e)
             messages.error(request, "Couldn't update topic", "alert-danger")
 
-    return render(request, "content/update_topic.html", {"topic": topic, "status_choices": Topic.StatusChoices.choices, "nest": topic.unit.title.nest})
+    return render(request, "content/update_topic.html", {
+        "topic": topic,
+        "status_choices": Topic.StatusChoices.choices,
+        "nest": topic.unit.title.nest,
+        "membership": topic.unit.title.nest.membership_for(request.user) if topic.unit.title.nest and request.user.is_authenticated else None,
+        "pending_membership": topic.unit.title.nest.memberships.filter(user=request.user, status="pending").first() if topic.unit.title.nest and request.user.is_authenticated else None,
+        "can_manage": (topic.unit.title.nest.is_nest_staff(request.user) or topic.unit.title.nest.is_site_staff(request.user)) if topic.unit.title.nest and request.user.is_authenticated else False,
+    })
 
 
 def delete_topic_view(request: HttpRequest, topic_id):
@@ -425,7 +579,7 @@ def add_video_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -476,7 +630,7 @@ def add_file_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -547,7 +701,7 @@ def add_image_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -596,7 +750,7 @@ def add_text_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:
@@ -645,7 +799,7 @@ def add_link_view(request: HttpRequest, topic_id):
     try:
         topic = Topic.objects.get(pk=topic_id)
     except:
-        return render(request, "404.html")
+        raise Http404
 
     permission_response = _enforce_manage_permission(request, topic.unit.title.nest)
     if permission_response:

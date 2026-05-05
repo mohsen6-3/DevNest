@@ -5,156 +5,109 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>{% block title %}DevNest{% endblock %}</title>
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 	<link rel="stylesheet" href="{% static 'css/nests.css' %}">
+	<link rel="stylesheet" href="{% static 'css/design-system.css' %}">
 	{% block extra_css %}{% endblock %}
 </head>
 
 <body class="nest-shell">
-
-	<header class="nest-topbar">
-		<div class="container-fluid nest-topbar-inner">
-			<a class="nest-brand" href="/">
-				<img src="{% static 'images/logo.svg' %}" alt="DevNest logo">
-				<span>DevNest</span>
+	<div class="nest-layout">
+		<aside class="nest-sidebar">
+			<a class="nest-sidebar__brand" href="/">
+				<img src="{% static 'images/logo.svg' %}" alt="DevNest" width="28" height="28" style="border-radius:6px;">
+				<span class="nest-sidebar__name">DevNest</span>
 			</a>
-
-			<!-- Desktop user area -->
-			<div class="nest-user d-none d-lg-flex">
-				{% if request.user.is_authenticated %}
-					<div class="dropdown">
-						<button class="btn btn-sm btn-light position-relative" type="button" id="nestNotifDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
-							<i class="bi bi-bell"></i>
-							{% if unread_notifications_count %}
-							<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ unread_notifications_count }}</span>
-							{% endif %}
-						</button>
-						<div class="dropdown-menu dropdown-menu-end shadow-sm p-0" aria-labelledby="nestNotifDropdown" style="min-width:320px;">
-							<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-								<strong class="small">Notifications</strong>
-								{% if unread_notifications_count %}
-								<a class="small text-decoration-none" href="{% url 'main:read_all_notifications' %}?next={{ request.path }}">Mark all read</a>
-								{% endif %}
-							</div>
-							{% if unread_notifications %}
-								{% for notif in unread_notifications %}
-								<a class="dropdown-item small py-2" href="{% url 'main:read_notification' notification_id=notif.pk %}">
-									<div class="fw-semibold">{{ notif.message }}</div>
-									<div class="text-muted" style="font-size:.75rem;">{{ notif.created_at|timesince }} ago</div>
-								</a>
-								{% endfor %}
-							{% else %}
-								<div class="px-3 py-3 small text-muted">No unread notifications.</div>
-							{% endif %}
-							<div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
-								<a class="small text-decoration-none text-muted" href="{% url 'accounts:update_user_profile' %}#notif-prefs">
-									<i class="bi bi-sliders me-1"></i>Notification settings
-								</a>
-							</div>
-						</div>
-					</div>
-					<a class="nest-user-link" href="{% url 'accounts:user_profile_view' request.user.username %}">
-						@{{ request.user.username }}
-					</a>
-					<a class="nest-user-link" href="{% url 'accounts:log_out' %}?next={{request.path}}">Log out</a>
-				{% else %}
-					<a class="nest-user-link" href="{% url 'accounts:sign_in' %}?next={{request.path}}">Sign in</a>
-				{% endif %}
-			</div>
-
-			<!-- Mobile toggle button -->
-			<button class="d-flex d-lg-none align-items-center justify-content-center nest-mobile-toggle position-relative"
-				type="button" data-bs-toggle="collapse" data-bs-target="#nestMobileMenu"
-				aria-controls="nestMobileMenu" aria-expanded="false" aria-label="Toggle menu">
-				{% if unread_notifications_count %}
-				<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.55rem;">{{ unread_notifications_count }}</span>
-				{% endif %}
-				<i class="bi bi-list" style="font-size:1.4rem;color:#fff;"></i>
-			</button>
-		</div>
-
-		<!-- Mobile collapsible panel -->
-		<div class="collapse d-lg-none" id="nestMobileMenu">
-			<div class="nest-mobile-panel">
-				{% if request.user.is_authenticated %}
-					<div class="nest-mobile-section">
-						<span class="nest-mobile-label">Account</span>
-						<a class="nest-mobile-link" href="{% url 'accounts:user_profile_view' request.user.username %}">
-							<i class="bi bi-person me-2"></i>@{{ request.user.username }}
-						</a>
-						<a class="nest-mobile-link" href="{% url 'accounts:update_user_profile' %}">
-							<i class="bi bi-pencil me-2"></i>Edit Profile
-						</a>
-						<a class="nest-mobile-link" href="{% url 'accounts:log_out' %}?next={{request.path}}">
-							<i class="bi bi-box-arrow-right me-2"></i>Log out
-						</a>
-					</div>
-					<div class="nest-mobile-section">
-						<span class="nest-mobile-label">
-							Notifications
-							{% if unread_notifications_count %}
-							<span class="badge bg-danger ms-1">{{ unread_notifications_count }}</span>
-							{% endif %}
-						</span>
-						{% if unread_notifications %}
-							{% for notif in unread_notifications %}
-							<a class="nest-mobile-link small" href="{% url 'main:read_notification' notification_id=notif.pk %}">
-								<i class="bi bi-dot me-1" style="font-size:1.2rem;"></i>{{ notif.message }}
-							</a>
-							{% endfor %}
-							{% if unread_notifications_count %}
-							<a class="nest-mobile-link small text-muted" href="{% url 'main:read_all_notifications' %}?next={{ request.path }}">
-								<i class="bi bi-check2-all me-2"></i>Mark all read
-							</a>
-							{% endif %}
-						{% else %}
-							<span class="nest-mobile-link small text-muted">No unread notifications</span>
-						{% endif %}
-					</div>
-				{% else %}
-					<div class="nest-mobile-section">
-						<a class="nest-mobile-link" href="{% url 'accounts:sign_in' %}?next={{request.path}}">
-							<i class="bi bi-box-arrow-in-right me-2"></i>Sign in
-						</a>
-					</div>
-				{% endif %}
-			</div>
-		</div>
-	</header>
-
-	<div class="nest-layout container-fluid">
-		<main class="nest-main">
-			{% if messages %}
-				{% for message in messages %}
-					<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
-						{{ message }}
-						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-					</div>
-				{% endfor %}
-			{% endif %}
-			{% block content %}{% endblock %}
-
-			<footer class="nest-footer-links" aria-label="Nest legacy links">
-				<a href="{% url 'nests:nest_dashboard' %}" class="nest-footer-link {% if request.path == '/nests/' %}active{% endif %}">
-					Dashboard
+			<nav class="nest-sidebar__nav" aria-label="Primary">
+				<a class="nest-sidebar__link {% if request.path == '/nests/' %}is-active{% endif %}" href="{% url 'nests:nest_dashboard' %}">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 13h8V3H3v10Zm0 8h8v-6H3v6Zm10 0h8V11h-8v10Zm0-18v6h8V3h-8Z" stroke="currentColor"/></svg>
+					<span>Dashboard</span>
 				</a>
-				<a href="{% url 'nests:nest_list_view' %}" class="nest-footer-link {% if '/nests/browse/' in request.path %}active{% endif %}">
-					Browse Nests
+				<a class="nest-sidebar__link {% if '/nests/browse/' in request.path %}is-active{% endif %}" href="{% url 'nests:nest_list_view' %}">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M11 3H4v7h7V3Zm9 0h-7v7h7V3ZM11 14H4v7h7v-7Zm9 0h-7v7h7v-7Z" stroke="currentColor"/></svg>
+					<span>Browse Nests</span>
 				</a>
-				<a href="{% url 'nests:request_nest_view' %}" class="nest-footer-link {% if '/nests/request/' in request.path %}active{% endif %}">
-					Request a Nest
+				<a class="nest-sidebar__link {% if '/nests/request/' in request.path %}is-active{% endif %}" href="{% url 'nests:request_nest_view' %}">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor"/></svg>
+					<span>Request Nest</span>
 				</a>
 				{% if request.user.is_staff or request.user.is_superuser %}
-					<a href="{% url 'nests:staff_nest_review' %}" class="nest-footer-link {% if '/nests/staff/review/' in request.path %}active{% endif %}">
-						Staff Review
+					<a class="nest-sidebar__link {% if '/nests/staff/review/' in request.path %}is-active{% endif %}" href="{% url 'nests:staff_nest_review' %}">
+						<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 7 3v6c0 5-3.5 8.7-7 10-3.5-1.3-7-5-7-10V6l7-3Z" stroke="currentColor"/></svg>
+						<span>Staff Review</span>
 					</a>
 				{% endif %}
-			</footer>
-		</main>
+			</nav>
+
+			{% if request.user.is_authenticated %}
+			<div class="nest-sidebar__footer">
+				<a class="nest-sidebar__link {% if '/accounts/profile/' in request.path %}is-active{% endif %}" href="{% url 'accounts:user_profile_view' request.user.username %}">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0" stroke="currentColor"/></svg>
+					<span>{{ request.user.username }}</span>
+				</a>
+				<a class="nest-sidebar__link" href="{% url 'accounts:log_out' %}?next={{request.path}}">
+					<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 7H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h3M16 17l5-5-5-5M21 12H9" stroke="currentColor"/></svg>
+					<span>Log Out</span>
+				</a>
+			</div>
+			{% endif %}
+		</aside>
+
+		<div class="nest-main-wrap">
+			<header class="nest-topbar-v2">
+				<div class="nest-topbar-v2__crumb">{% block topbar_crumb %}DevNest / Nests{% endblock %}</div>
+				<div class="d-flex align-items-center gap-2">
+					{% if request.user.is_authenticated %}
+						<div class="dropdown">
+							<button class="btn btn-sm btn-light position-relative" type="button" id="nestNotifDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+								<i class="bi bi-bell"></i>
+								{% if unread_notifications_count %}
+								<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ unread_notifications_count }}</span>
+								{% endif %}
+							</button>
+							<div class="dropdown-menu dropdown-menu-end shadow-sm p-0" aria-labelledby="nestNotifDropdown" style="min-width:320px;">
+								<div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+									<strong class="small">Notifications</strong>
+									{% if unread_notifications_count %}
+									<a class="small text-decoration-none" href="{% url 'main:read_all_notifications' %}?next={{ request.path }}">Mark all read</a>
+									{% endif %}
+								</div>
+								{% if unread_notifications %}
+									{% for notif in unread_notifications %}
+									<a class="dropdown-item small py-2" href="{% url 'main:read_notification' notification_id=notif.pk %}">
+										<div>{{ notif.message }}</div>
+										<div class="text-muted" style="font-size:.75rem;">{{ notif.created_at|timesince }} ago</div>
+									</a>
+									{% endfor %}
+								{% else %}
+									<div class="px-3 py-3 small text-muted">No unread notifications.</div>
+								{% endif %}
+								<div class="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+									<a class="small text-decoration-none text-muted" href="{% url 'accounts:update_user_profile' %}#notif-prefs">
+										<i class="bi bi-sliders me-1"></i>Notification settings
+									</a>
+								</div>
+							</div>
+						</div>
+					{% else %}
+						<a class="btn btn-sm btn-light" href="{% url 'accounts:sign_in' %}?next={{request.path}}">Sign in</a>
+					{% endif %}
+				</div>
+			</header>
+
+			<main class="nest-content">
+				{% if messages %}
+					{% for message in messages %}
+						<div class="alert {{ message.tags }} alert-dismissible fade show" role="alert">
+							{{ message }}
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+					{% endfor %}
+				{% endif %}
+				{% block content %}{% endblock %}
+			</main>
+		</div>
 	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

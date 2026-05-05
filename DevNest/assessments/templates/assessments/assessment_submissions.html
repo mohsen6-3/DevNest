@@ -1,11 +1,12 @@
 {% extends "nests/nest_detail_base.html" %}
 {% load static %}
 
-{% block title %}{{ assessment.title }} - Submissions — {{ nest.name }}{% endblock %}
-
+{% block extra_css %}<link rel="stylesheet" href="{% static 'css/assessments-design.css' %}">{% endblock %}
+{% block title %}Submissions{% endblock %}
 {% block tab_assessments %}active{% endblock %}
 
 {% block feature_content %}
+<h2 class="mb-4">{{ assessment.title }} — Submissions</h2>
 <div class="nest-surface p-4 mb-4">
     <div class="d-flex justify-content-between align-items-start gap-3">
         <div>

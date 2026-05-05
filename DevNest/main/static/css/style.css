@@ -276,11 +276,11 @@ h1, h2, h3, h4, h5, h6 {
 .auth-card {
     max-width: 520px;
     width: 100%;
-    border: 1px solid var(--main-line);
+    border: 0.5px solid rgba(0,0,0,0.08);
     border-radius: 12px;
     background: var(--main-paper);
     padding: 2.2rem;
-    box-shadow: var(--main-shadow-sm);
+    box-shadow: none;
 }
 
 .auth-card .form-control,
@@ -294,6 +294,78 @@ h1, h2, h3, h4, h5, h6 {
 .auth-card textarea:focus {
     border-color: #9ea8c6;
     box-shadow: 0 0 0 .25rem rgba(29, 52, 97, .12);
+}
+
+.auth-shell--signin {
+    min-height: calc(100vh - 180px);
+}
+
+.auth-card--signin {
+    max-width: 540px;
+    padding: 2rem;
+}
+
+.auth-card--signin .form-floating > .form-control {
+    min-height: 56px;
+    padding-top: 1.15rem;
+    padding-bottom: .45rem;
+}
+
+.auth-card--signin .form-floating > label {
+    padding-top: .85rem;
+}
+
+.auth-brand__logo {
+    border-radius: 8px;
+}
+
+.auth-brand__name {
+    font-size: 17px;
+    font-weight: 700;
+    color: #0A284D;
+    letter-spacing: -0.01em;
+}
+
+.auth-title {
+    letter-spacing: -0.01em;
+}
+
+.auth-subtitle {
+    color: var(--main-muted) !important;
+}
+
+.auth-note {
+    border: 1px solid #d6dfef;
+    background: #f4f7ff;
+    color: #1d3461;
+    border-radius: 8px;
+    padding: .55rem .7rem;
+    font-size: .76rem;
+    font-weight: 600;
+}
+
+.auth-submit-btn {
+    font-weight: 700;
+    letter-spacing: .02em;
+}
+
+.auth-switch-link {
+    text-decoration: none;
+}
+
+.auth-switch-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 575.98px) {
+    .auth-card--signin {
+        padding: 1.1rem;
+        max-width: 100%;
+    }
+
+    .auth-brand__name {
+        font-size: 16px;
+    }
 }
 
 /* ── Profile ────────────────────────────────── */

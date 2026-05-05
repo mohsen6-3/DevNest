@@ -3,7 +3,7 @@
 
 {% block title %}DevNest | {{ topic.name }}{% endblock %}
 
-{% block extra_css %}<link rel="stylesheet" href="{% static 'content/css/style.css' %}">{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'content/css/style.css' %}"><link rel="stylesheet" href="{% static 'css/design-system.css' %}">{% endblock %}
 
 {% block feature_content %}
 
@@ -15,7 +15,9 @@
         <span>{{ topic.name|truncatechars:40 }}</span>
     </div>
     <div class="c-topbar__actions">
-        <a href="{% url 'content:update_topic_view' topic_id=topic.id %}" class="c-btn">✎ Edit Topic</a>
+        {% if can_manage %}
+        <a href="{% url 'content:update_topic_view' topic_id=topic.id %}" class="c-btn"><i class="bi bi-pencil"></i> Edit Topic</a>
+        {% endif %}
     </div>
 </div>
 
@@ -35,7 +37,7 @@
     <!-- TOPIC HEADER -->
     <div class="c-topic-header">
         <div class="c-topic-header__left">
-            <div class="c-topic-header__icon" style="background:#ede9fe;color:#5b21b6;">📝</div>
+            <div class="c-topic-header__icon" style="background:#ede9fe;color:#5b21b6;"><i class="bi bi-journal-text"></i></div>
             <div>
                 <h1 class="c-topic-header__title">{{ topic.name }}</h1>
                 <div class="c-topic-header__meta">
@@ -66,20 +68,20 @@
         {% if videos %}
         <div class="c-detail-item">
             <div class="c-detail-item__header">
-                <div class="c-detail-item__type-icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                <div class="c-detail-item__type-icon" style="background:#fee2e2;color:#ef4444;"><i class="bi bi-play-fill"></i></div>
                 <div class="c-detail-item__info"><div class="c-detail-item__name">Videos ({{ videos|length }})</div></div>
             </div>
             <div class="content-list">
                 {% for video in videos %}
                 <div class="content-item">
-                    <div class="content-item__icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                    <div class="content-item__icon" style="background:#fee2e2;color:#ef4444;"><i class="bi bi-play-fill"></i></div>
                     <div class="content-item__info">
                         <div class="content-item__name">{{ video.video_title }}</div>
                         <div class="content-item__meta">{% if video.duration %}<span>{{ video.duration }}s</span>{% endif %}</div>
                     </div>
                     <div class="content-item__right">
                         {% if video.video_file %}<a href="{{ video.video_file.url }}" class="c-btn c-btn--sm" target="_blank">Play</a>{% endif %}
-                        <form method="POST" action="{% url 'content:delete_video_view' video_id=video.id %}" style="display:inline;" onsubmit="return confirm('Delete this video?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                        <form method="POST" action="{% url 'content:delete_video_view' video_id=video.id %}" style="display:inline;" onsubmit="return confirm('Delete this video?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;"><i class="bi bi-trash"></i></button></form>
                     </div>
                 </div>
                 {% endfor %}
@@ -90,20 +92,20 @@
         {% if files %}
         <div class="c-detail-item">
             <div class="c-detail-item__header">
-                <div class="c-detail-item__type-icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                <div class="c-detail-item__type-icon" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-file-earmark-text"></i></div>
                 <div class="c-detail-item__info"><div class="c-detail-item__name">Files ({{ files|length }})</div></div>
             </div>
             <div class="content-list">
                 {% for file in files %}
                 <div class="content-item">
-                    <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                    <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-file-earmark-text"></i></div>
                     <div class="content-item__info">
                         <div class="content-item__name">{{ file.file_name }}</div>
                         <div class="content-item__meta"><span>{{ file.file_type|upper }}</span><span>Downloaded {{ file.download_count }}×</span></div>
                     </div>
                     <div class="content-item__right">
                         <a href="{% url 'content:download_file_view' file_id=file.id %}" class="c-btn c-btn--sm">Download</a>
-                        <form method="POST" action="{% url 'content:delete_file_view' file_id=file.id %}" style="display:inline;" onsubmit="return confirm('Delete this file?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                        <form method="POST" action="{% url 'content:delete_file_view' file_id=file.id %}" style="display:inline;" onsubmit="return confirm('Delete this file?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;"><i class="bi bi-trash"></i></button></form>
                     </div>
                 </div>
                 {% endfor %}
@@ -114,7 +116,7 @@
         {% if images %}
         <div class="c-detail-item">
             <div class="c-detail-item__header">
-                <div class="c-detail-item__type-icon" style="background:#fce7f3;color:#db2777;">🖼</div>
+                <div class="c-detail-item__type-icon" style="background:#fce7f3;color:#db2777;"><i class="bi bi-image"></i></div>
                 <div class="c-detail-item__info"><div class="c-detail-item__name">Images ({{ images|length }})</div></div>
             </div>
             <div class="image-grid">
@@ -122,7 +124,7 @@
                 <div class="image-thumb" style="position:relative;">
                     <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;">
                     <span class="image-thumb__label">{{ image.image_title|default:image.alt_text }}</span>
-                    <form method="POST" action="{% url 'content:delete_image_view' image_id=image.id %}" style="position:absolute;top:4px;right:4px;" onsubmit="return confirm('Delete image?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="background:rgba(255,255,255,.9);color:#ef4444;width:20px;height:20px;font-size:9px;">🗑</button></form>
+                    <form method="POST" action="{% url 'content:delete_image_view' image_id=image.id %}" style="position:absolute;top:4px;right:4px;" onsubmit="return confirm('Delete image?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="background:rgba(255,255,255,.9);color:#ef4444;width:20px;height:20px;font-size:9px;"><i class="bi bi-trash"></i></button></form>
                 </div>
                 {% endfor %}
             </div>
@@ -132,13 +134,13 @@
         {% for text in texts %}
         <div class="c-detail-item">
             <div class="c-detail-item__header">
-                <div class="c-detail-item__type-icon" style="background:#fef3c7;color:#d97706;">📝</div>
+                <div class="c-detail-item__type-icon" style="background:#fef3c7;color:#d97706;"><i class="bi bi-journal-text"></i></div>
                 <div class="c-detail-item__info">
                     <div class="c-detail-item__name">{{ text.text_title|default:"Text Block" }}</div>
                     <div class="c-detail-item__meta"><span>{{ text.get_format_display }}</span></div>
                 </div>
                 <div class="c-detail-item__actions">
-                    <form method="POST" action="{% url 'content:delete_text_view' text_id=text.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    <form method="POST" action="{% url 'content:delete_text_view' text_id=text.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;"><i class="bi bi-trash"></i></button></form>
                 </div>
             </div>
             <div class="text-preview">{{ text.body|linebreaksbr }}</div>
@@ -148,20 +150,20 @@
         {% if links %}
         <div class="c-detail-item">
             <div class="c-detail-item__header">
-                <div class="c-detail-item__type-icon" style="background:#ede9fe;color:#5b21b6;">🔗</div>
+                <div class="c-detail-item__type-icon" style="background:#ede9fe;color:#5b21b6;"><i class="bi bi-link-45deg"></i></div>
                 <div class="c-detail-item__info"><div class="c-detail-item__name">Links ({{ links|length }})</div></div>
             </div>
             <div class="content-list">
                 {% for link in links %}
                 <div class="content-item">
-                    <div class="content-item__icon" style="background:#ede9fe;color:#5b21b6;">🔗</div>
+                    <div class="content-item__icon" style="background:#ede9fe;color:#5b21b6;"><i class="bi bi-link-45deg"></i></div>
                     <div class="content-item__info">
                         <div class="content-item__name">{{ link.display_text }}</div>
                         <div class="content-item__meta"><span>{{ link.url|truncatechars:60 }}</span></div>
                     </div>
                     <div class="content-item__right">
                         <a href="{{ link.url }}" class="c-btn c-btn--sm" target="_blank" rel="noopener noreferrer">Visit</a>
-                        <form method="POST" action="{% url 'content:delete_link_view' link_id=link.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                        <form method="POST" action="{% url 'content:delete_link_view' link_id=link.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;"><i class="bi bi-trash"></i></button></form>
                     </div>
                 </div>
                 {% endfor %}
@@ -171,18 +173,19 @@
 
         {% if not videos and not files and not images and not texts and not links %}
         <div class="add-unit" style="padding:40px;flex-direction:column;gap:10px;">
-            <div style="font-size:24px;">📂</div>
+            <div style="font-size:24px;"><i class="bi bi-folder2-open"></i></div>
             <div style="font-size:14px;font-weight:600;color:#475569;">No content yet</div>
             <p style="font-size:12px;color:#94a3b8;margin:0;">Use the forms below to add videos, files, images, text or links.</p>
         </div>
         {% endif %}
 
         <!-- ADD CONTENT FORMS -->
+        {% if can_manage %}
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px;">
 
             <details class="c-settings-section" style="padding:14px 16px;">
                 <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
-                    <span style="background:#fee2e2;color:#ef4444;padding:3px 8px;border-radius:5px;font-size:11px;">▶ Add Video</span>
+                    <span style="background:#fee2e2;color:#ef4444;padding:3px 8px;border-radius:5px;font-size:11px;"><i class="bi bi-play-fill"></i> Add Video</span>
                 </summary>
                 <form method="POST" action="{% url 'content:add_video_view' topic_id=topic.id %}" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                     {% csrf_token %}
@@ -198,7 +201,7 @@
 
             <details class="c-settings-section" style="padding:14px 16px;">
                 <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
-                    <span style="background:#e0f2fe;color:#0284c7;padding:3px 8px;border-radius:5px;font-size:11px;">📄 Add File</span>
+                    <span style="background:#e0f2fe;color:#0284c7;padding:3px 8px;border-radius:5px;font-size:11px;"><i class="bi bi-file-earmark-text"></i> Add File</span>
                 </summary>
                 <form method="POST" action="{% url 'content:add_file_view' topic_id=topic.id %}" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                     {% csrf_token %}
@@ -212,7 +215,7 @@
 
             <details class="c-settings-section" style="padding:14px 16px;">
                 <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
-                    <span style="background:#fce7f3;color:#db2777;padding:3px 8px;border-radius:5px;font-size:11px;">🖼 Add Image</span>
+                    <span style="background:#fce7f3;color:#db2777;padding:3px 8px;border-radius:5px;font-size:11px;"><i class="bi bi-image"></i> Add Image</span>
                 </summary>
                 <form method="POST" action="{% url 'content:add_image_view' topic_id=topic.id %}" enctype="multipart/form-data" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                     {% csrf_token %}
@@ -227,7 +230,7 @@
 
             <details class="c-settings-section" style="padding:14px 16px;">
                 <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
-                    <span style="background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:5px;font-size:11px;">📝 Add Text</span>
+                    <span style="background:#fef3c7;color:#d97706;padding:3px 8px;border-radius:5px;font-size:11px;"><i class="bi bi-journal-text"></i> Add Text</span>
                 </summary>
                 <form method="POST" action="{% url 'content:add_text_view' topic_id=topic.id %}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                     {% csrf_token %}
@@ -242,12 +245,12 @@
 
             <details class="c-settings-section" style="padding:14px 16px;">
                 <summary style="cursor:pointer;font-size:13px;font-weight:600;color:#1e293b;list-style:none;display:flex;align-items:center;gap:8px;">
-                    <span style="background:#ede9fe;color:#5b21b6;padding:3px 8px;border-radius:5px;font-size:11px;">🔗 Add Link</span>
+                    <span style="background:#ede9fe;color:#5b21b6;padding:3px 8px;border-radius:5px;font-size:11px;"><i class="bi bi-link-45deg"></i> Add Link</span>
                 </summary>
                 <form method="POST" action="{% url 'content:add_link_view' topic_id=topic.id %}" style="margin-top:12px;display:flex;flex-direction:column;gap:10px;">
                     {% csrf_token %}
                     <div class="c-form-row">
-                        <div class="c-form-group"><label class="c-form-label">Display Text *</label><input class="c-form-input" type="text" name="display_text" required placeholder="e.g. GeeksForGeeks — Arrays"></div>
+                <div class="c-form-group"><label class="c-form-label">Display Text *</label><input class="c-form-input" type="text" name="display_text" required placeholder="e.g. GeeksForGeeks — Arrays"></div>
                         <div class="c-form-group"><label class="c-form-label">URL *</label><input class="c-form-input" type="url" name="url" required placeholder="https://…"></div>
                     </div>
                     <div><button type="submit" class="c-btn c-btn--primary c-btn--sm">Add Link</button></div>
@@ -255,6 +258,7 @@
             </details>
 
         </div>
+        {% endif %}
     </div>
 
     <!-- TAB: VIDEO -->
@@ -263,19 +267,19 @@
         <div class="content-list">
             {% for video in videos %}
             <div class="content-item">
-                <div class="content-item__icon" style="background:#fee2e2;color:#ef4444;">▶</div>
+                <div class="content-item__icon" style="background:#fee2e2;color:#ef4444;"><i class="bi bi-play-fill"></i></div>
                 <div class="content-item__info">
                     <div class="content-item__name">{{ video.video_title }}</div>
                     <div class="content-item__meta">{% if video.duration %}<span>{{ video.duration }}s</span>{% endif %}</div>
                 </div>
                 <div class="content-item__right">
                     {% if video.video_file %}<a href="{{ video.video_file.url }}" class="c-btn c-btn--sm" target="_blank">Play</a>{% endif %}
-                    <form method="POST" action="{% url 'content:delete_video_view' video_id=video.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    {% if can_manage %}<form method="POST" action="{% url 'content:delete_video_view' video_id=video.id %}" style="display:inline;">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#DC2626;" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></button></form>{% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
-        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">▶</div><div style="font-size:13px;color:#475569;">No videos yet</div></div>{% endif %}
+        {% else %}<div class="add-unit"><div style="font-size:20px;margin-bottom:8px;"><i class="bi bi-play-fill"></i></div><div style="font-size:13px;color:#9ca3af;">No videos yet</div></div>{% endif %}
     </div>
 
     <!-- TAB: FILES -->
@@ -284,19 +288,19 @@
         <div class="content-list">
             {% for file in files %}
             <div class="content-item">
-                <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;">📄</div>
+                <div class="content-item__icon" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-file-earmark-text"></i></div>
                 <div class="content-item__info">
                     <div class="content-item__name">{{ file.file_name }}</div>
                     <div class="content-item__meta"><span>{{ file.file_type|upper }}</span><span>Downloaded {{ file.download_count }}×</span></div>
                 </div>
                 <div class="content-item__right">
                     <a href="{% url 'content:download_file_view' file_id=file.id %}" class="c-btn c-btn--sm">Download</a>
-                    <form method="POST" action="{% url 'content:delete_file_view' file_id=file.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    {% if can_manage %}<form method="POST" action="{% url 'content:delete_file_view' file_id=file.id %}" style="display:inline;">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#DC2626;" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></button></form>{% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
-        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">📄</div><div style="font-size:13px;color:#475569;">No files yet</div></div>{% endif %}
+        {% else %}<div class="add-unit"><div style="font-size:20px;margin-bottom:8px;"><i class="bi bi-file-earmark-text"></i></div><div style="font-size:13px;color:#9ca3af;">No files yet</div></div>{% endif %}
     </div>
 
     <!-- TAB: IMAGES -->
@@ -307,11 +311,11 @@
             <div class="image-thumb" style="position:relative;">
                 <img src="{{ image.image.url }}" alt="{{ image.alt_text }}" style="width:100%;height:100%;object-fit:cover;border-radius:7px;">
                 <span class="image-thumb__label">{{ image.image_title|default:image.alt_text }}</span>
-                <form method="POST" action="{% url 'content:delete_image_view' image_id=image.id %}" style="position:absolute;top:4px;right:4px;" onsubmit="return confirm('Delete image?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="background:rgba(255,255,255,.9);color:#ef4444;width:20px;height:20px;font-size:9px;">🗑</button></form>
+                {% if can_manage %}<form method="POST" action="{% url 'content:delete_image_view' image_id=image.id %}" style="position:absolute;top:4px;right:4px;">{% csrf_token %}<button type="submit" class="c-icon-btn" style="background:rgba(255,255,255,.9);color:#DC2626;width:20px;height:20px;font-size:9px;" onclick="return confirm('Delete image?')"><i class="bi bi-trash"></i></button></form>{% endif %}
             </div>
             {% endfor %}
         </div>
-        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">🖼</div><div style="font-size:13px;color:#475569;">No images yet</div></div>{% endif %}
+        {% else %}<div class="add-unit"><div style="font-size:20px;margin-bottom:8px;"><i class="bi bi-image"></i></div><div style="font-size:13px;color:#9ca3af;">No images yet</div></div>{% endif %}
     </div>
 
     <!-- TAB: TEXT -->
@@ -320,19 +324,19 @@
         {% for text in texts %}
         <div class="c-detail-item">
             <div class="c-detail-item__header">
-                <div class="c-detail-item__type-icon" style="background:#fef3c7;color:#d97706;">📝</div>
+                <div class="c-detail-item__type-icon" style="background:#fef3c7;color:#d97706;"><i class="bi bi-journal-text"></i></div>
                 <div class="c-detail-item__info">
                     <div class="c-detail-item__name">{{ text.text_title|default:"Text Block" }}</div>
                     <div class="c-detail-item__meta"><span>{{ text.get_format_display }}</span></div>
                 </div>
                 <div class="c-detail-item__actions">
-                    <form method="POST" action="{% url 'content:delete_text_view' text_id=text.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    {% if can_manage %}<form method="POST" action="{% url 'content:delete_text_view' text_id=text.id %}" style="display:inline;">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#DC2626;" onclick="return confirm('Delete?')"><i class="bi bi-trash"></i></button></form>{% endif %}
                 </div>
             </div>
             <div class="text-preview">{{ text.body|linebreaksbr }}</div>
         </div>
         {% endfor %}
-        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">📝</div><div style="font-size:13px;color:#475569;">No text blocks yet</div></div>{% endif %}
+        {% else %}<div class="add-unit"><div style="font-size:20px;margin-bottom:8px;"><i class="bi bi-journal-text"></i></div><div style="font-size:13px;color:#9ca3af;">No text blocks yet</div></div>{% endif %}
     </div>
 
     <!-- TAB: LINKS -->
@@ -341,20 +345,21 @@
         <div class="content-list">
             {% for link in links %}
             <div class="content-item">
-                <div class="content-item__icon" style="background:#ede9fe;color:#5b21b6;">🔗</div>
+                <div class="content-item__icon" style="background:#ede9fe;color:#5b21b6;"><i class="bi bi-link-45deg"></i></div>
                 <div class="content-item__info">
                     <div class="content-item__name">{{ link.display_text }}</div>
                     <div class="content-item__meta"><span>{{ link.url|truncatechars:70 }}</span></div>
                 </div>
                 <div class="content-item__right">
                     <a href="{{ link.url }}" class="c-btn c-btn--sm" target="_blank" rel="noopener noreferrer">Visit</a>
-                    <form method="POST" action="{% url 'content:delete_link_view' link_id=link.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;">🗑</button></form>
+                    {% if can_manage %}<form method="POST" action="{% url 'content:delete_link_view' link_id=link.id %}" style="display:inline;" onsubmit="return confirm('Delete?')">{% csrf_token %}<button type="submit" class="c-icon-btn" style="color:#ef4444;"><i class="bi bi-trash"></i></button></form>{% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
-        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;">🔗</div><div style="font-size:13px;color:#475569;">No links yet</div></div>{% endif %}
+        {% else %}<div class="add-unit" style="padding:30px;flex-direction:column;gap:8px;"><div style="font-size:20px;"><i class="bi bi-link-45deg"></i></div><div style="font-size:13px;color:#475569;">No links yet</div></div>{% endif %}
     </div>
+
 
 </div>
 
@@ -367,4 +372,4 @@ function showTab(tabId, btn) {
     btn.classList.add('c-tab--active');
 }
 </script>
-{% endblock %}
+{% endblock feature_content %}
