@@ -28,9 +28,13 @@
                         </a>
                     </h6>
                     <!-- <span class="nest-chip nest-chip-pending" style="font-size:.72rem">{{ assessment.assessment_type }}</span> -->
-                    {% if request.user.is_authenticated and not can_manage and assessment.student_score is not None %}
-                    <span class="nest-chip nest-chip-pending">Score: {{ assessment.student_score }}/{{ assessment.points
-                        }}</span>
+                    {% if request.user.is_authenticated and not can_manage %}
+                    <div class="d-flex flex-column align-items-end gap-1">
+                        {% if assessment.student_score is not None %}
+                        <span class="nest-chip nest-chip-pending">Score: {{ assessment.student_score }}/{{ assessment.points }}</span>
+                        {% endif %}
+                            
+                    </div>
                     {% endif %}
                 </div>
                 <p class="text-muted small mb-2">{{ assessment.description }}</p>

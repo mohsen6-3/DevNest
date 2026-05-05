@@ -24,70 +24,70 @@ DevNest is a comprehensive academic collaboration platform designed to centraliz
 
 # 4. Features List
 
-## ✅ Implemented Features
+## Implemented Features
 
 ### Community System (Nests)
-- ✓ Create and manage course-based communities (Nests)
-- ✓ Role-based access control (Instructor, Assistant, Student)
-- ✓ Join requests with staff approval workflow
-- ✓ Nest status management (PENDING, APPROVED, REJECTED)
-- ✓ Member status tracking (PENDING, ACTIVE, REJECTED)
-- ✓ Nest dashboard with overview of posts, content, assessments
+-  Create and manage course-based communities (Nests)
+-  Role-based access control (Instructor, Assistant, Student)
+-  Join requests with staff approval workflow
+-  Nest status management (PENDING, APPROVED, REJECTED)
+-  Member status tracking (PENDING, ACTIVE, REJECTED)
+-  Nest dashboard with overview of posts, content, assessments
 
 ### Discussion & Engagement System
-- ✓ Post creation with rich content support
-- ✓ Post voting system (Upvote/Downvote)
-- ✓ Comments on posts with nested discussions
-- ✓ Post tagging and categorization
-- ✓ Pinned posts for important announcements
-- ✓ Post visibility tied to active membership
+-  Post creation with rich content support
+-  Post voting system (Upvote/Downvote)
+-  Comments on posts with nested discussions
+-  Post tagging and categorization
+-  Pinned posts for important announcements
+-  Post visibility tied to active membership
 
 ### Organized Content Management
-- ✓ Hierarchical content structure (Titles → Units → Topics)
-- ✓ Multiple content types (Video, Files, Images, Text, Links)
-- ✓ Content status management (Draft/Published)
-- ✓ File upload and download tracking
-- ✓ Content sorting and organization
-- ✓ Restricted access to active members only
+-  Hierarchical content structure (Titles → Units → Topics)
+-  Multiple content types (Video, Files, Images, Text, Links)
+-  Content status management (Draft/Published)
+-  File upload and download tracking
+-  Content sorting and organization
+-  Restricted access to active members only
 
 ### Assessment System
-- ✓ Create and manage assessments (MCQ & Text questions)
-- ✓ Assessment submission tracking
-- ✓ Automatic scoring for MCQ questions
-- ✓ Manual grading interface for text answers
-- ✓ Time-limited assessments with countdown timer
-- ✓ Auto-submission on time expiry
-- ✓ Prevent duplicate submissions
-- ✓ Score and performance tracking
-- ✓ Submission result display with student feedback
-- ✓ Submissions view for instructors
+-  Create and manage assessments (MCQ & Text questions)
+-  Assessment submission tracking
+-  Automatic scoring for MCQ questions
+-  Manual grading interface for text answers
+-  Time-limited assessments with countdown timer
+-  Auto-submission on time expiry
+-  Prevent duplicate submissions
+-  Score and performance tracking
+-  Submission result display with student feedback
+-  Submissions view for instructors
 
 ### Notifications System
-- ✓ Real-time notifications for important events
-- ✓ Notification preferences (user-controlled)
-- ✓ Mark notifications as read individually or all at once
-- ✓ Notification aggregation and history
+-  Real-time notifications for important events
+-  Notification preferences (user-controlled)
+-  Mark notifications as read individually or all at once
+-  Notification aggregation and history
 
 ### Student Recognition & Progress
-- ✓ Dynamic student titles (14 tiers from "New Member" to "Pillar of the Nest")
-- ✓ Badge system for recognition
-- ✓ Activity-based scoring and ranking
-- ✓ User profile with contribution history
-- ✓ Recognition signals
+-  Dynamic student titles (14 tiers from "New Member" to "Pillar of the Nest")
+-  Badge system for recognition
+-  Activity-based scoring and ranking
+-  User profile with contribution history
+-  Recognition signals
 
 ### Moderation & Support
-- ✓ Contact Us system for user support
-- ✓ Content reporting system
-- ✓ Staff review dashboard for reported content
-- ✓ Staff management interface for messages
-- ✓ User and nest monitoring tools
+-  Contact Us system for user support
+-  Content reporting system
+-  Staff review dashboard for reported content
+-  Staff management interface for messages
+-  User and nest monitoring tools
 
 ### Authentication & Authorization
-- ✓ User registration and login
-- ✓ Role-based permission system
-- ✓ Session management
-- ✓ Profile management
-- ✓ Active membership enforcement across all features
+-  User registration and login
+-  Role-based permission system
+-  Session management
+-  Profile management
+-  Active membership enforcement across all features
 
 ---
 
@@ -183,13 +183,3 @@ python manage.py runserver
 - **Contributor 3:** [Mohsen Alfawaz]
 
 ---
-
-# Contributing
-
-Please follow Django best practices and the project's code style when contributing.
-
----
-
-# License
-
-This project is for educational purposes.
